@@ -357,6 +357,16 @@ code {
   box-shadow: none;
 }
 
+.source-block.block-loop {
+  border: 0;
+  clip-path: polygon(10% 0, 90% 0, 100% 22%, 100% 100%, 0 100%, 0 22%);
+}
+
+.source-block.block-output {
+  border: 0;
+  clip-path: polygon(14% 0, 86% 0, 96% 12%, 100% 50%, 96% 88%, 86% 100%, 14% 100%, 4% 88%, 0 50%, 4% 12%);
+}
+
 .build-panel {
   display: flex;
   flex-direction: column;
@@ -512,7 +522,7 @@ code {
   padding: 14px 58px;
   background: var(--amber-100);
   border: 1px solid #d6ad60;
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  clip-path: polygon(10% 0, 90% 0, 100% 24%, 100% 100%, 0 100%, 0 24%);
   text-align: center;
 }
 
@@ -530,9 +540,23 @@ code {
   margin: 11px 20px 10px;
 }
 
+.loop-end-symbol {
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  margin: 0 20px 10px;
+  padding: 8px 24px;
+  color: #7c5513;
+  background: var(--amber-100);
+  border: 1px solid #d6ad60;
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 90% 100%, 10% 100%, 0 76%);
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .placed-block.block-output {
   border: 0;
-  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  clip-path: polygon(10% 0, 90% 0, 98% 12%, 100% 50%, 98% 88%, 90% 100%, 10% 100%, 2% 88%, 0 50%, 2% 12%);
 }
 
 .placed-block.block-input {
@@ -863,14 +887,11 @@ tbody tr:last-child {
   border-color: var(--navy-900);
 }
 
-.flow-node.decision {
-  background: var(--amber-100);
-  border-color: #d6ad60;
-}
-
 .flow-node.output-node {
+  padding: 9px 22px;
   background: var(--green-100);
-  border-color: #9fcbb2;
+  border: 0;
+  clip-path: polygon(14% 0, 86% 0, 96% 12%, 100% 50%, 96% 88%, 86% 100%, 14% 100%, 4% 88%, 0 50%, 4% 12%);
 }
 
 .flow-arrow {
@@ -882,10 +903,33 @@ tbody tr:last-child {
 }
 
 .flow-loop {
+  width: 230px;
   padding: 7px 17px;
   border: 1px dashed #d6ad60;
   border-radius: 7px;
   background: #fffaf0;
+}
+
+.flow-loop .flow-node {
+  width: 100%;
+  min-width: 0;
+}
+
+.flow-node.loop-start-node,
+.flow-node.loop-end-node {
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  background: var(--amber-100);
+  border: 1px solid #d6ad60;
+}
+
+.flow-node.loop-start-node {
+  clip-path: polygon(10% 0, 90% 0, 100% 24%, 100% 100%, 0 100%, 0 24%);
+}
+
+.flow-node.loop-end-node {
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 90% 100%, 10% 100%, 0 76%);
 }
 
 .loop-back {

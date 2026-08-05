@@ -159,10 +159,11 @@
               <div class="flow-node" data-flow-block="initializeSum"><code>sum</code> に 0 を設定</div>
               <span class="flow-arrow" aria-hidden="true">↓</span>
               <div class="flow-loop">
-                <div class="flow-node decision" data-flow-block="loop"><code>i = 1</code> から <code>n</code> まで？</div>
-                <span class="flow-arrow" aria-hidden="true">↓ はい</span>
+                <div class="flow-node loop-start-node" data-flow-block="loop"><code>i = 1</code> から <code>n</code> まで繰り返す</div>
+                <span class="flow-arrow" aria-hidden="true">↓</span>
                 <div class="flow-node" data-flow-block="addCurrent"><code>sum</code> に <code>i</code> を加える</div>
                 <div class="loop-back" aria-hidden="true">次の i へ ↺</div>
+                <div class="flow-node loop-end-node" data-flow-block="loop">繰り返し終了</div>
               </div>
               <span class="flow-arrow" aria-hidden="true">↓ 終了</span>
               <div class="flow-node output-node" data-flow-block="outputSum"><code>sum</code> を出力</div>

@@ -224,6 +224,11 @@ function createPlacedBlock(blockId) {
     `;
     attachDropzoneEvents(loopBody);
     element.append(loopBody);
+
+    const loopEnd = document.createElement("div");
+    loopEnd.className = "loop-end-symbol";
+    loopEnd.textContent = "繰り返し終了";
+    element.append(loopEnd);
   }
 
   element.addEventListener("dragstart", handlePlacedDragStart);
