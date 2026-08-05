@@ -1016,9 +1016,29 @@ body.is-resizing {
   position: relative;
   min-height: 58px;
   padding: 11px 52px 11px 42px;
+  border: 0;
+  background: transparent;
+}
+
+.placed-block.block-input > .placed-copy::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   border: 1px solid #d3c4e8;
   background: #f1ecfa;
-  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%);
+}
+
+.placed-block.block-input > .placed-copy > strong,
+.placed-block.block-input > .placed-copy > span,
+.placed-block.block-input > .placed-copy > .remove-block {
+  position: relative;
+  z-index: 1;
+}
+
+.placed-block.block-input > .placed-copy > .remove-block {
+  position: absolute;
 }
 
 .placed-block.block-input::before {
