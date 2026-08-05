@@ -182,6 +182,7 @@ const resultPanel = document.querySelector(".result-panel");
 const resultDetails = document.querySelector("#result-details");
 const resultToggleIcon = document.querySelector("#result-toggle-icon");
 const resultToggleLabel = document.querySelector("#result-toggle-label");
+const resultDrawerTab = document.querySelector("#result-drawer-tab");
 const workspace = document.querySelector(".workspace");
 const buildPanel = document.querySelector(".build-panel");
 
@@ -759,6 +760,7 @@ function clearFeedback() {
 function clearResults() {
   resultContent.hidden = true;
   resultPanel.hidden = true;
+  resultDrawerTab.hidden = true;
   successModal.hidden = true;
   workspace.classList.remove("is-result-open");
   clearCorrespondence();
@@ -777,14 +779,21 @@ function showSuccessModal(isInstructorPreview = false) {
 
 function openResultPanel() {
   resultPanel.hidden = false;
+  resultDrawerTab.hidden = true;
   workspace.classList.add("is-result-open");
   resultDetails.open = true;
   updateResultToggle();
 }
 
+function collapseResultPanel() {
+  resultPanel.hidden = true;
+  resultDrawerTab.hidden = false;
+  workspace.classList.remove("is-result-open");
+}
+
 function updateResultToggle() {
   const isOpen = resultDetails.open;
-  resultToggleIcon.textContent = isOpen ? "⌃" : "⌄";
+  resultToggleIcon.textContent = isOpen ? "›" : "‹";
   resultToggleLabel.textContent = isOpen ? "折り畳む" : "展開する";
 }
 
@@ -808,6 +817,7 @@ function renderResult(input, result, isInstructorPreview = false) {
   showSuccessModal(isInstructorPreview);
   resultDetails.open = false;
   resultPanel.hidden = true;
+  resultDrawerTab.hidden = true;
   workspace.classList.remove("is-result-open");
   updateResultToggle();
   selectTab("flow");
@@ -981,6 +991,13 @@ successConfirmButton.addEventListener("click", () => {
 });
 resultDetails.addEventListener("toggle", () => {
   updateResultToggle();
+  if (!resultDetails.open && !resultContent.hidden && successModal.hidden) {
+    collapseResultPanel();
+  }
+});
+resultDrawerTab.addEventListener("click", () => {
+  openResultPanel();
+  requestAnimationFrame(() => resultPanel.scrollIntoView({ block: "start", behavior: "smooth" }));
 });
 flowTab.addEventListener("click", () => selectTab("flow"));
 javaTab.addEventListener("click", () => selectTab("java"));
