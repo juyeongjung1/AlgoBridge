@@ -316,15 +316,22 @@ body.is-resizing {
   display: none;
 }
 
-.problem-list summary::before {
-  content: "▾";
-  margin-right: 7px;
-  color: var(--blue-600);
-  font-size: 15px;
+.problem-list-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
-.problem-list:not([open]) summary::before {
-  content: "▸";
+.problem-list-title::before {
+  content: "☷";
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: #fff;
+  background: var(--blue-600);
+  font-size: 13px;
 }
 
 #problem-list-summary {
@@ -332,6 +339,38 @@ body.is-resizing {
   color: var(--muted);
   font-size: 10px;
   font-weight: 600;
+}
+
+.problem-list-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 9px;
+  padding: 4px 7px;
+  border: 1px solid #d1dce4;
+  border-radius: 4px;
+  color: var(--blue-600);
+  background: #fff;
+  font-size: 10px;
+}
+
+.problem-list-toggle::before {
+  content: "⌃";
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.problem-list-toggle::after {
+  content: "閉じる";
+  font-weight: 700;
+}
+
+.problem-list:not([open]) .problem-list-toggle::before {
+  content: "⌄";
+}
+
+.problem-list:not([open]) .problem-list-toggle::after {
+  content: "開く";
 }
 
 .problem-list-items {
