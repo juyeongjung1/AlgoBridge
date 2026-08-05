@@ -731,6 +731,11 @@ body.is-resizing {
   clip-path: polygon(14% 0, 86% 0, 96% 12%, 100% 50%, 96% 88%, 86% 100%, 14% 100%, 4% 88%, 0 50%, 4% 12%);
 }
 
+.source-block.block-input {
+  border: 0;
+  clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%);
+}
+
 .source-block.block-decision {
   overflow: visible;
   border-color: #b9c8e1;
@@ -1727,6 +1732,13 @@ tbody tr:last-child {
   background: var(--green-100);
   border: 0;
   clip-path: polygon(14% 0, 86% 0, 96% 12%, 100% 50%, 96% 88%, 86% 100%, 14% 100%, 4% 88%, 0 50%, 4% 12%);
+}
+
+.flow-node.input-node {
+  padding: 9px 22px;
+  border: 0;
+  background: #f1ecfa;
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
 }
 
 .flow-node.decision-node {
