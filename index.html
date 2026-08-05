@@ -94,6 +94,10 @@
         <button id="reset-button" class="button button-secondary" type="button">
           最初からやり直す
         </button>
+        <button id="result-reopen" class="button button-result" type="button" hidden>
+          <span aria-hidden="true">▸</span>
+          ③ 実行結果を開く
+        </button>
         <button id="run-button" class="button button-primary" type="button">
           <span aria-hidden="true">▶</span>
           実行する
@@ -111,7 +115,7 @@
               <h2 id="result-heading">実行結果・理解支援</h2>
             </div>
           </div>
-          <span class="details-toggle">折り畳む</span>
+          <span class="details-toggle"><span class="toggle-icon" aria-hidden="true">⌃</span>折り畳む</span>
         </summary>
 
         <div id="result-content" class="result-content" hidden>
@@ -162,7 +166,7 @@
               <div class="flow-node" data-flow-block="initializeSum"><code>sum</code> に 0 を設定</div>
               <span class="flow-arrow" aria-hidden="true">↓</span>
               <div class="flow-loop">
-                <div class="flow-node loop-start-node" data-flow-block="loop"><span><code>i = 1</code> から <code>n</code> まで繰り返す</span></div>
+                <div class="flow-node loop-start-node" data-flow-block="loop"><span><code>i</code> を 1 から <code>n</code> まで、1 ずつ増やしながら繰り返す</span></div>
                 <span class="flow-arrow" aria-hidden="true">↓</span>
                 <div class="flow-node" data-flow-block="addCurrent"><code>sum</code> に <code>i</code> を加える</div>
                 <div class="loop-back" aria-hidden="true">次の i へ ↺</div>

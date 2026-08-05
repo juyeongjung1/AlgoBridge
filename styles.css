@@ -795,22 +795,42 @@ code {
 }
 
 .details-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid var(--blue-600);
+  border-radius: 5px;
   color: var(--blue-600);
-  font-size: 11px;
+  background: var(--blue-100);
+  box-shadow: 0 1px 2px rgba(17, 34, 51, 0.08);
+  font-size: 12px;
   font-weight: 700;
 }
 
-.result-details:not([open]) .details-toggle::after {
-  content: "を開く";
+.toggle-icon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--blue-600);
+  font-size: 14px;
+  line-height: 1;
 }
 
-.result-details:not([open]) .details-toggle {
-  font-size: 0;
+.button-result {
+  margin-left: auto;
+  border: 1px solid var(--blue-600);
+  color: var(--blue-600);
+  background: var(--blue-100);
 }
 
-.result-details:not([open]) .details-toggle::before {
-  content: "結果を開く";
-  font-size: 11px;
+.button-result span {
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 15px;
 }
 
 .result-content {

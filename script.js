@@ -23,9 +23,9 @@ const problems = {
       {
         id: "loop",
         type: "loop",
-        label: "1 から n まで、順に繰り返す",
-        shortLabel: "1 から n まで繰り返す",
-        hint: "内側に処理を配置できる",
+        label: "変数 i を 1 から n まで、1 ずつ増やしながら繰り返す",
+        shortLabel: "i を 1 ずつ増やして繰り返す",
+        hint: "i の開始・終了・増分を考える",
         acceptsChildren: true
       },
       {
@@ -52,9 +52,9 @@ const problems = {
       {
         id: "loopToNMinusOne",
         type: "loop",
-        label: "1 から n - 1 まで、順に繰り返す",
-        shortLabel: "1 から n - 1 まで繰り返す",
-        hint: "繰り返しの回数を決める",
+        label: "変数 i を 1 から n - 1 まで、1 ずつ増やしながら繰り返す",
+        shortLabel: "i を n - 1 まで増やして繰り返す",
+        hint: "i の終了条件を考える",
         acceptsChildren: true
       },
       {
@@ -81,9 +81,9 @@ const problems = {
       {
         id: "loopFromZero",
         type: "loop",
-        label: "0 から n まで、順に繰り返す",
-        shortLabel: "0 から n まで繰り返す",
-        hint: "繰り返しの回数を決める",
+        label: "変数 i を 0 から n まで、1 ずつ増やしながら繰り返す",
+        shortLabel: "i を 0 から増やして繰り返す",
+        hint: "i の開始値を考える",
         acceptsChildren: true
       },
       {
@@ -139,6 +139,7 @@ const assemblyList = document.querySelector("#assembly-list");
 const nInput = document.querySelector("#n-input");
 const runButton = document.querySelector("#run-button");
 const resetButton = document.querySelector("#reset-button");
+const resultReopenButton = document.querySelector("#result-reopen");
 const feedback = document.querySelector("#feedback");
 const resultContent = document.querySelector("#result-content");
 const outputValue = document.querySelector("#output-value");
@@ -496,8 +497,16 @@ function clearFeedback() {
 function clearResults() {
   resultContent.hidden = true;
   resultPanel.hidden = true;
+  resultReopenButton.hidden = true;
   workspace.classList.remove("is-result-open");
   clearCorrespondence();
+}
+
+function openResultPanel() {
+  resultPanel.hidden = false;
+  resultReopenButton.hidden = true;
+  workspace.classList.add("is-result-open");
+  resultDetails.open = true;
 }
 
 function renderResult(input, result) {
@@ -515,10 +524,8 @@ function renderResult(input, result) {
     traceBody.append(tableRow);
   });
 
-  resultPanel.hidden = false;
-  workspace.classList.add("is-result-open");
   resultContent.hidden = false;
-  resultDetails.open = true;
+  openResultPanel();
   selectTab("flow");
   requestAnimationFrame(() => {
     resultPanel.scrollTo({ top: 0, behavior: "smooth" });
@@ -603,6 +610,17 @@ updateWorkspaceState();
 
 runButton.addEventListener("click", runProgram);
 resetButton.addEventListener("click", resetWorkspace);
+resultDetails.addEventListener("toggle", () => {
+  if (!resultDetails.open && !resultContent.hidden) {
+    resultPanel.hidden = true;
+    resultReopenButton.hidden = false;
+    workspace.classList.remove("is-result-open");
+  }
+});
+resultReopenButton.addEventListener("click", () => {
+  openResultPanel();
+  requestAnimationFrame(() => resultPanel.scrollIntoView({ block: "start", behavior: "smooth" }));
+});
 flowTab.addEventListener("click", () => selectTab("flow"));
 javaTab.addEventListener("click", () => selectTab("java"));
 
