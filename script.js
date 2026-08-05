@@ -249,7 +249,7 @@ function createPlacedBlock(blockId) {
 
     const loopEnd = document.createElement("div");
     loopEnd.className = "loop-end-symbol";
-    loopEnd.textContent = "繰り返し終了";
+    loopEnd.innerHTML = "<span>繰り返し終了</span>";
     element.append(loopEnd);
   }
 
