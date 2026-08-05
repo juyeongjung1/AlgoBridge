@@ -381,7 +381,7 @@ code {
 
 .flow-canvas {
   min-height: 420px;
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -571,7 +571,8 @@ code {
 }
 
 .feedback {
-  margin-top: 12px;
+  flex: 0 0 auto;
+  margin: 12px 0 4px;
   padding: 11px 13px;
   color: var(--red-700);
   background: var(--red-100);
