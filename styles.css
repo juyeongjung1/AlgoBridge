@@ -1352,8 +1352,8 @@ tbody tr:last-child {
   margin: 0;
   overflow: hidden;
   padding: 8px 0;
-  color: #e6edf3;
-  background: #172634;
+  color: #d0d0d0;
+  background: #1e1f22;
   border-radius: 5px;
   font-family: Consolas, "Courier New", monospace;
   font-size: 11px;
@@ -1382,13 +1382,40 @@ tbody tr:last-child {
   white-space: pre;
 }
 
-.code-line > span {
+.code-line > .line-number {
   width: 30px;
   display: inline-block;
   margin-right: 12px;
   color: #788b9d;
   text-align: right;
   user-select: none;
+}
+
+.syntax-keyword {
+  color: #cc7832;
+}
+
+.syntax-variable,
+.syntax-field,
+.syntax-punctuation,
+.syntax-bracket {
+  color: #d0d0d0;
+}
+
+.syntax-number {
+  color: #6897bb;
+}
+
+.syntax-operator {
+  color: #d0d0d0;
+}
+
+.syntax-class {
+  color: #a9b7c6;
+}
+
+.syntax-method {
+  color: #ffc66d;
 }
 
 .code-line:hover,
