@@ -125,10 +125,6 @@
             直前の配置に戻す
           </button>
         </div>
-        <button id="result-reopen" class="button button-result" type="button" hidden>
-          <span aria-hidden="true">▸</span>
-          ③ 実行結果を開く
-        </button>
         <button id="run-button" class="button button-primary" type="button">
           <span aria-hidden="true">▶</span>
           実行する
@@ -146,7 +142,7 @@
               <h2 id="result-heading">実行結果・理解支援</h2>
             </div>
           </div>
-          <span class="details-toggle"><span class="toggle-icon" aria-hidden="true">⌃</span>折り畳む</span>
+          <span class="details-toggle"><span id="result-toggle-icon" class="toggle-icon" aria-hidden="true">⌃</span><span id="result-toggle-label">折り畳む</span></span>
         </summary>
 
         <div id="result-content" class="result-content" hidden>

@@ -152,7 +152,6 @@ const resetModal = document.querySelector("#reset-modal");
 const resetConfirmButton = document.querySelector("#reset-confirm-button");
 const resetCancelButton = document.querySelector("#reset-cancel-button");
 const undoButton = document.querySelector("#undo-button");
-const resultReopenButton = document.querySelector("#result-reopen");
 const feedback = document.querySelector("#feedback");
 const hintArea = document.querySelector("#hint-area");
 const hintButton = document.querySelector("#hint-button");
@@ -181,6 +180,8 @@ const javaPanel = document.querySelector("#java-panel");
 const codeCorrespondence = document.querySelector("#code-correspondence");
 const resultPanel = document.querySelector(".result-panel");
 const resultDetails = document.querySelector("#result-details");
+const resultToggleIcon = document.querySelector("#result-toggle-icon");
+const resultToggleLabel = document.querySelector("#result-toggle-label");
 const workspace = document.querySelector(".workspace");
 const buildPanel = document.querySelector(".build-panel");
 
@@ -758,7 +759,6 @@ function clearFeedback() {
 function clearResults() {
   resultContent.hidden = true;
   resultPanel.hidden = true;
-  resultReopenButton.hidden = true;
   successModal.hidden = true;
   workspace.classList.remove("is-result-open");
   clearCorrespondence();
@@ -777,9 +777,15 @@ function showSuccessModal(isInstructorPreview = false) {
 
 function openResultPanel() {
   resultPanel.hidden = false;
-  resultReopenButton.hidden = true;
   workspace.classList.add("is-result-open");
   resultDetails.open = true;
+  updateResultToggle();
+}
+
+function updateResultToggle() {
+  const isOpen = resultDetails.open;
+  resultToggleIcon.textContent = isOpen ? "⌃" : "⌄";
+  resultToggleLabel.textContent = isOpen ? "折り畳む" : "展開する";
 }
 
 function renderResult(input, result, isInstructorPreview = false) {
@@ -802,8 +808,8 @@ function renderResult(input, result, isInstructorPreview = false) {
   showSuccessModal(isInstructorPreview);
   resultDetails.open = false;
   resultPanel.hidden = true;
-  resultReopenButton.hidden = true;
   workspace.classList.remove("is-result-open");
+  updateResultToggle();
   selectTab("flow");
 }
 
@@ -924,6 +930,7 @@ renderPalette();
 updateWorkspaceState();
 updateExpectedOutput();
 updateInstructorMode();
+updateResultToggle();
 
 nInput.addEventListener("input", updateExpectedOutput);
 runButton.addEventListener("click", runProgram);
@@ -973,15 +980,7 @@ successConfirmButton.addEventListener("click", () => {
   });
 });
 resultDetails.addEventListener("toggle", () => {
-  if (!resultDetails.open && !resultContent.hidden && successModal.hidden) {
-    resultPanel.hidden = true;
-    resultReopenButton.hidden = false;
-    workspace.classList.remove("is-result-open");
-  }
-});
-resultReopenButton.addEventListener("click", () => {
-  openResultPanel();
-  requestAnimationFrame(() => resultPanel.scrollIntoView({ block: "start", behavior: "smooth" }));
+  updateResultToggle();
 });
 flowTab.addEventListener("click", () => selectTab("flow"));
 javaTab.addEventListener("click", () => selectTab("java"));

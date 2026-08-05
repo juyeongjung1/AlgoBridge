@@ -1129,19 +1129,6 @@ body.is-instructor-mode .instructor-mode-button {
   line-height: 1;
 }
 
-.button-result {
-  margin-left: auto;
-  border: 1px solid var(--blue-600);
-  color: var(--blue-600);
-  background: var(--blue-100);
-}
-
-.button-result span {
-  display: inline-block;
-  margin-right: 4px;
-  font-size: 15px;
-}
-
 .result-content {
   padding-top: 15px;
 }
