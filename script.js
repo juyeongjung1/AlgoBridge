@@ -166,6 +166,7 @@ const codeCorrespondence = document.querySelector("#code-correspondence");
 const resultPanel = document.querySelector(".result-panel");
 const resultDetails = document.querySelector("#result-details");
 const workspace = document.querySelector(".workspace");
+const buildPanel = document.querySelector(".build-panel");
 
 let draggedInstanceId = null;
 let instanceCounter = 0;
@@ -785,6 +786,22 @@ function showCorrespondence(blockId, selectedLine) {
     selectedLine.classList.add("is-selected");
   }
   codeCorrespondence.textContent = `対応する文章ブロック：${block.label}`;
+  focusCorrespondingBlock(blockId);
+}
+
+function focusCorrespondingBlock(blockId) {
+  const correspondingBlock = assemblyList.querySelector(`[data-block-id="${blockId}"]`);
+  if (!correspondingBlock) {
+    return;
+  }
+
+  const panelBox = buildPanel.getBoundingClientRect();
+  const blockBox = correspondingBlock.getBoundingClientRect();
+  const targetTop = buildPanel.scrollTop + blockBox.top - panelBox.top - (buildPanel.clientHeight - blockBox.height) / 2;
+
+  buildPanel.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+  correspondingBlock.tabIndex = -1;
+  correspondingBlock.focus({ preventScroll: true });
 }
 
 function clearCorrespondence() {
