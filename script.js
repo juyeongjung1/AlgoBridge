@@ -140,7 +140,6 @@ const nInput = document.querySelector("#n-input");
 const runButton = document.querySelector("#run-button");
 const resetButton = document.querySelector("#reset-button");
 const feedback = document.querySelector("#feedback");
-const resultPlaceholder = document.querySelector("#result-placeholder");
 const resultContent = document.querySelector("#result-content");
 const outputValue = document.querySelector("#output-value");
 const traceCaption = document.querySelector("#trace-caption");
@@ -151,6 +150,8 @@ const flowPanel = document.querySelector("#flow-panel");
 const javaPanel = document.querySelector("#java-panel");
 const codeCorrespondence = document.querySelector("#code-correspondence");
 const resultPanel = document.querySelector(".result-panel");
+const resultDetails = document.querySelector("#result-details");
+const workspace = document.querySelector(".workspace");
 
 let draggedInstanceId = null;
 let instanceCounter = 0;
@@ -459,7 +460,8 @@ function clearFeedback() {
 
 function clearResults() {
   resultContent.hidden = true;
-  resultPlaceholder.hidden = false;
+  resultPanel.hidden = true;
+  workspace.classList.remove("is-result-open");
   clearCorrespondence();
 }
 
@@ -478,8 +480,10 @@ function renderResult(input, result) {
     traceBody.append(tableRow);
   });
 
-  resultPlaceholder.hidden = true;
+  resultPanel.hidden = false;
+  workspace.classList.add("is-result-open");
   resultContent.hidden = false;
+  resultDetails.open = true;
   selectTab("flow");
   requestAnimationFrame(() => {
     resultPanel.scrollTo({ top: 0, behavior: "smooth" });

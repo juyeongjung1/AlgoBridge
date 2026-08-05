@@ -127,9 +127,13 @@ code {
   height: calc(100vh - 76px);
   min-height: 720px;
   display: grid;
-  grid-template-columns: 29% 36% 35%;
+  grid-template-columns: minmax(300px, 27fr) minmax(0, 73fr);
   padding: 18px;
   gap: 14px;
+}
+
+.workspace.is-result-open {
+  grid-template-columns: minmax(260px, 23fr) minmax(450px, 44fr) minmax(360px, 33fr);
 }
 
 .panel {
@@ -483,6 +487,49 @@ code {
   box-shadow: 0 2px 5px rgba(17, 34, 51, 0.08);
 }
 
+.build-panel .placed-copy strong {
+  font-size: 14px;
+}
+
+.placed-block.block-loop {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.placed-block.block-loop::before {
+  top: 29px;
+  z-index: 1;
+}
+
+.placed-block.block-loop > .placed-copy {
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 58px;
+  background: var(--amber-100);
+  border: 1px solid #d6ad60;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  text-align: center;
+}
+
+.placed-block.block-loop > .placed-copy strong {
+  max-width: 220px;
+}
+
+.placed-block.block-loop > .remove-block {
+  top: 31px;
+  right: 17px;
+  z-index: 2;
+}
+
+.placed-block.block-loop > .loop-body {
+  margin: 11px 20px 10px;
+}
+
 .placed-block.block-output {
   border: 0;
   clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
@@ -641,48 +688,38 @@ code {
   scroll-margin-top: 12px;
 }
 
-.result-placeholder {
-  min-height: calc(100% - 65px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-  color: var(--muted);
-  text-align: center;
-}
-
-.placeholder-visual {
+.result-details-summary {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  cursor: pointer;
+  list-style: none;
 }
 
-.placeholder-visual span {
-  padding: 9px 10px;
-  border: 1px solid #cbd5dd;
-  border-radius: 5px;
-  color: var(--navy-700);
-  background: #f4f7f9;
+.result-details-summary::-webkit-details-marker {
+  display: none;
+}
+
+.result-details-summary .panel-heading {
+  flex: 1;
+}
+
+.details-toggle {
+  color: var(--blue-600);
   font-size: 11px;
   font-weight: 700;
 }
 
-.placeholder-visual i {
-  color: #9aa7b2;
-  font-style: normal;
+.result-details:not([open]) .details-toggle::after {
+  content: "を開く";
 }
 
-.result-placeholder h3 {
-  margin: 0 0 6px;
-  color: var(--navy-950);
-  font-size: 15px;
+.result-details:not([open]) .details-toggle {
+  font-size: 0;
 }
 
-.result-placeholder p {
-  max-width: 360px;
-  margin: 0;
+.result-details:not([open]) .details-toggle::before {
+  content: "結果を開く";
   font-size: 11px;
 }
 

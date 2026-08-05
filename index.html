@@ -98,28 +98,20 @@
       </div>
     </section>
 
-    <section class="panel result-panel" aria-labelledby="result-heading">
-      <div class="panel-heading">
-        <span class="step-number">3</span>
-        <div>
-          <p class="eyebrow">動きを確認する</p>
-          <h2 id="result-heading">実行結果・理解支援</h2>
-        </div>
-      </div>
+    <section class="panel result-panel" aria-labelledby="result-heading" hidden>
+      <details id="result-details" class="result-details" open>
+        <summary class="result-details-summary">
+          <div class="panel-heading">
+            <span class="step-number">3</span>
+            <div>
+              <p class="eyebrow">動きを確認する</p>
+              <h2 id="result-heading">実行結果・理解支援</h2>
+            </div>
+          </div>
+          <span class="details-toggle">折り畳む</span>
+        </summary>
 
-      <div id="result-placeholder" class="result-placeholder">
-        <div class="placeholder-visual" aria-hidden="true">
-          <span>組立て</span>
-          <i>→</i>
-          <span>実行</span>
-          <i>→</i>
-          <span>理解</span>
-        </div>
-        <h3>組み立てた処理を実行してみましょう</h3>
-        <p>正しく組み立てると、出力結果や変数の変化、Javaコードとの対応を確認できます。</p>
-      </div>
-
-      <div id="result-content" class="result-content" hidden>
+        <div id="result-content" class="result-content" hidden>
         <div class="result-summary">
           <div>
             <p class="result-label">実行結果</p>
@@ -194,7 +186,8 @@
             </div>
           </div>
         </section>
-      </div>
+        </div>
+      </details>
     </section>
   </main>
 
