@@ -150,7 +150,7 @@
               <thead>
                 <tr>
                   <th>繰り返し回数</th>
-                  <th>現在の数値</th>
+                  <th>ループカウンタ変数 <code>i</code></th>
                   <th>sum の値</th>
                 </tr>
               </thead>
@@ -179,10 +179,10 @@
               <div class="flow-node" data-flow-block="initializeSum"><code>sum</code> に 0 を設定</div>
               <span class="flow-arrow" aria-hidden="true">↓</span>
               <div class="flow-loop">
-                <div class="flow-node loop-start-node" data-flow-block="loop"><span><code>i</code> を 1 から <code>n</code> まで、1 ずつ増やしながら繰り返す</span></div>
+                <div class="flow-node loop-start-node" data-flow-block="loop"><span>ループカウンタ変数 <code>i</code> を 1 から <code>n</code> まで、1 ずつ増やしながら繰り返す</span></div>
                 <span class="flow-arrow" aria-hidden="true">↓</span>
-                <div class="flow-node" data-flow-block="addCurrent"><code>sum</code> に <code>i</code> を加える</div>
-                <div class="loop-back" aria-hidden="true">次の i へ ↺</div>
+                <div class="flow-node" data-flow-block="addCurrent"><code>sum</code> にループカウンタ変数 <code>i</code> の値を加える</div>
+                <div class="loop-back" aria-hidden="true">次のループカウンタ変数 <code>i</code> へ ↺</div>
                 <div class="flow-node loop-end-node" data-flow-block="loop"><span>繰り返し終了</span></div>
               </div>
               <span class="flow-arrow" aria-hidden="true">↓ 終了</span>

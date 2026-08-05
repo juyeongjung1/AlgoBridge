@@ -23,16 +23,16 @@ const problems = {
       {
         id: "loop",
         type: "loop",
-        label: "変数 i を 1 から n まで、1 ずつ増やしながら繰り返す",
-        shortLabel: "i を 1 ずつ増やして繰り返す",
-        hint: "i の開始・終了・増分を考える",
+        label: "ループカウンタ変数 i を 1 から n まで、1 ずつ増やしながら繰り返す",
+        shortLabel: "ループカウンタ変数 i を 1 ずつ増やして繰り返す",
+        hint: "ループカウンタ変数 i の開始・終了・増分を考える",
         acceptsChildren: true
       },
       {
         id: "addCurrent",
         type: "calculation",
-        label: "変数 sum に、現在の数値を加える",
-        shortLabel: "sum に現在の数値を加える",
+        label: "変数 sum に、ループカウンタ変数 i の値を加える",
+        shortLabel: "sum にループカウンタ変数 i の値を加える",
         hint: "合計を更新する"
       },
       {
@@ -52,38 +52,38 @@ const problems = {
       {
         id: "loopToNMinusOne",
         type: "loop",
-        label: "変数 i を 1 から n - 1 まで、1 ずつ増やしながら繰り返す",
-        shortLabel: "i を n - 1 まで増やして繰り返す",
-        hint: "i の終了条件を考える",
+        label: "ループカウンタ変数 i を 1 から n - 1 まで、1 ずつ増やしながら繰り返す",
+        shortLabel: "ループカウンタ変数 i を n - 1 まで増やして繰り返す",
+        hint: "ループカウンタ変数 i の終了条件を考える",
         acceptsChildren: true
       },
       {
         id: "outputCurrent",
         type: "output",
-        label: "現在の数値を、その都度出力する",
-        shortLabel: "現在の数値を出力",
+        label: "ループカウンタ変数 i を、その都度出力する",
+        shortLabel: "ループカウンタ変数 i を出力",
         hint: "途中経過を表示する"
       },
       {
         id: "addToN",
         type: "calculation",
-        label: "変数 n に、現在の数値を加える",
-        shortLabel: "n に現在の数値を加える",
+        label: "変数 n に、ループカウンタ変数 i の値を加える",
+        shortLabel: "n にループカウンタ変数 i の値を加える",
         hint: "入力値を更新する"
       },
       {
         id: "subtractCurrent",
         type: "calculation",
-        label: "変数 sum から、現在の数値を引く",
-        shortLabel: "sum から現在の数値を引く",
+        label: "変数 sum から、ループカウンタ変数 i の値を引く",
+        shortLabel: "sum からループカウンタ変数 i の値を引く",
         hint: "値を減らす"
       },
       {
         id: "loopFromZero",
         type: "loop",
-        label: "変数 i を 0 から n まで、1 ずつ増やしながら繰り返す",
-        shortLabel: "i を 0 から増やして繰り返す",
-        hint: "i の開始値を考える",
+        label: "ループカウンタ変数 i を 0 から n まで、1 ずつ増やしながら繰り返す",
+        shortLabel: "ループカウンタ変数 i を 0 から増やして繰り返す",
+        hint: "ループカウンタ変数 i の開始値を考える",
         acceptsChildren: true
       },
       {
@@ -110,8 +110,8 @@ const problems = {
       {
         id: "initializeCurrent",
         type: "assignment",
-        label: "現在の数値に、初期値として 0 を設定する",
-        shortLabel: "現在の数値に 0 を設定",
+        label: "ループカウンタ変数 i に、初期値として 0 を設定する",
+        shortLabel: "ループカウンタ変数 i に 0 を設定",
         hint: "別の値を初期化する"
       }
     ],
@@ -181,8 +181,8 @@ function formatBlockLabel(label) {
     "'": "&#39;"
   }[character]));
 
-  return escapedLabel.replace(/sum|average|現在の数値|\bn\b|\bi\b|0|1|宣言する|設定する|繰り返す|加える|出力する|引く|入力する/g, (token) => {
-    if (["sum", "average", "現在の数値", "n", "i"].includes(token)) {
+  return escapedLabel.replace(/sum|average|ループカウンタ変数 i|現在の数値|\bn\b|0|1|宣言する|設定する|繰り返す|加える|出力する|引く|入力する/g, (token) => {
+    if (["sum", "average", "ループカウンタ変数 i", "現在の数値", "n"].includes(token)) {
       return `<span class="token-variable">${token}</span>`;
     }
     if (["0", "1"].includes(token)) {
@@ -549,7 +549,7 @@ function getAttemptHints() {
     hints.push("足し算を始めるsumの最初の値は、いくつがよいでしょうか？");
   }
   if (!loopElement) {
-    hints.push("1からnまでの数を一つずつ扱うには、iをどう変化させるとよいでしょうか？");
+    hints.push("1からnまでの数を一つずつ扱うには、ループカウンタ変数 i をどう変化させるとよいでしょうか？");
   }
   if (!nested.includes("addCurrent")) {
     hints.push("各回の数をsumへ加える処理は、繰り返しの内側と外側のどちらに置くべきでしょうか？");
