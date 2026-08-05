@@ -298,16 +298,16 @@ body.is-resizing {
   top: 88px;
   left: 18px;
   z-index: 4;
-  width: 42px;
-  height: 70px;
+  width: 28px;
+  height: 38px;
   padding: 0;
   border: 1px solid var(--blue-600);
-  border-radius: 0 7px 7px 0;
+  border-radius: 0 5px 5px 0;
   color: var(--blue-600);
   background: var(--blue-100);
   box-shadow: 0 2px 7px rgba(17, 34, 51, 0.12);
   cursor: pointer;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 700;
 }
 
