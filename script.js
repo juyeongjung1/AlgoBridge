@@ -137,6 +137,7 @@ const currentProblem = problems.sumToN;
 const palette = document.querySelector("#block-palette");
 const assemblyList = document.querySelector("#assembly-list");
 const nInput = document.querySelector("#n-input");
+const expectedOutputValue = document.querySelector("#expected-output-value");
 const runButton = document.querySelector("#run-button");
 const resetButton = document.querySelector("#reset-button");
 const resetModal = document.querySelector("#reset-modal");
@@ -564,6 +565,11 @@ function validateInput() {
   return value;
 }
 
+function updateExpectedOutput() {
+  const input = validateInput();
+  expectedOutputValue.textContent = input === null ? "-" : currentProblem.execute(input).output;
+}
+
 function showFeedback(messages) {
   feedback.innerHTML = `
     <strong>組立てをもう一度確認しましょう</strong>
@@ -753,6 +759,7 @@ function resetWorkspace() {
   }
   assemblyList.querySelectorAll(':scope > .placed-block').forEach((block) => block.remove());
   nInput.value = String(currentProblem.initialInput);
+  updateExpectedOutput();
   clearFeedback();
   clearResults();
   renderPalette();
@@ -835,7 +842,9 @@ function clearCorrespondence() {
 attachDropzoneEvents(assemblyList);
 renderPalette();
 updateWorkspaceState();
+updateExpectedOutput();
 
+nInput.addEventListener("input", updateExpectedOutput);
 runButton.addEventListener("click", runProgram);
 resetButton.addEventListener("click", () => {
   resetModal.hidden = false;

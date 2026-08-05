@@ -199,6 +199,29 @@ code {
   margin: 0 0 15px;
 }
 
+.expected-output {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 13px;
+  padding: 9px 10px;
+  border: 1px solid #edc678;
+  border-radius: 5px;
+  background: #fff7e6;
+}
+
+.expected-output span {
+  color: #805512;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.expected-output strong {
+  color: var(--blue-600);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 18px;
+}
+
 .number-input {
   display: flex;
   align-items: center;
