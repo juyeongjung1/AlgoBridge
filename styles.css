@@ -1373,6 +1373,13 @@ body.is-resizing {
   background: #deeffa;
 }
 
+.button.button-undo:disabled {
+  border-color: #c5d9e8;
+  color: #7396b0;
+  background: #f4f9fc;
+  opacity: 0.72;
+}
+
 .button-reset {
   border-color: #dfa7a7;
   color: #9a3e3e;
