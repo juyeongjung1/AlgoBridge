@@ -139,6 +139,7 @@ const assemblyList = document.querySelector("#assembly-list");
 const nInput = document.querySelector("#n-input");
 const runButton = document.querySelector("#run-button");
 const resetButton = document.querySelector("#reset-button");
+const undoButton = document.querySelector("#undo-button");
 const resultReopenButton = document.querySelector("#result-reopen");
 const feedback = document.querySelector("#feedback");
 const hintArea = document.querySelector("#hint-area");
@@ -167,6 +168,7 @@ let draggedInstanceId = null;
 let instanceCounter = 0;
 let availableHints = [];
 let shownHintCount = 0;
+let placementHistory = [];
 
 function getBlockDefinition(blockId) {
   return currentProblem.blocks.find((block) => block.id === blockId);
@@ -283,6 +285,7 @@ function createPlacedBlock(blockId) {
   element.addEventListener("dragend", clearDragState);
   element.querySelector(".remove-block").addEventListener("click", (event) => {
     event.stopPropagation();
+    savePlacementHistory();
     element.remove();
     updateWorkspaceState();
     clearResults();
@@ -375,6 +378,7 @@ function attachDropzoneEvents(zone) {
     }
 
     const reference = getDropReference(zone, event.clientY, draggedElement);
+    savePlacementHistory();
     zone.insertBefore(draggedElement, reference);
     updateWorkspaceState();
     clearResults();
@@ -395,6 +399,7 @@ function getDropReference(zone, pointerY, draggedElement) {
 }
 
 function addBlockToZone(blockId, zone) {
+  savePlacementHistory();
   zone.insertBefore(createPlacedBlock(blockId), zone.querySelector(':scope > .drop-space'));
   updateWorkspaceState();
   clearResults();
@@ -408,6 +413,52 @@ function directBlockIds(zone) {
   return [...zone.children]
     .filter((child) => child.classList.contains("placed-block"))
     .map((child) => child.dataset.blockId);
+}
+
+function getPlacementSnapshot(zone = assemblyList) {
+  return [...zone.children]
+    .filter((child) => child.classList.contains("placed-block"))
+    .map((block) => {
+      const loopBody = block.querySelector(':scope > .loop-body');
+      return {
+        blockId: block.dataset.blockId,
+        children: loopBody ? getPlacementSnapshot(loopBody) : []
+      };
+    });
+}
+
+function restorePlacementSnapshot(snapshot, zone = assemblyList) {
+  snapshot.forEach((item) => {
+    const block = createPlacedBlock(item.blockId);
+    zone.insertBefore(block, zone.querySelector(':scope > .drop-space'));
+    const loopBody = block.querySelector(':scope > .loop-body');
+    if (loopBody) {
+      restorePlacementSnapshot(item.children, loopBody);
+    }
+  });
+}
+
+function updateUndoButton() {
+  undoButton.disabled = placementHistory.length === 0;
+}
+
+function savePlacementHistory() {
+  placementHistory.push(getPlacementSnapshot());
+  updateUndoButton();
+}
+
+function undoLastPlacement() {
+  const snapshot = placementHistory.pop();
+  if (!snapshot) {
+    return;
+  }
+
+  assemblyList.querySelectorAll(':scope > .placed-block').forEach((block) => block.remove());
+  restorePlacementSnapshot(snapshot);
+  clearFeedback();
+  clearResults();
+  updateWorkspaceState();
+  updateUndoButton();
 }
 
 function updateWorkspaceState() {
@@ -663,6 +714,9 @@ function runProgram() {
 }
 
 function resetWorkspace() {
+  if (directBlockIds(assemblyList).length > 0) {
+    savePlacementHistory();
+  }
   assemblyList.querySelectorAll(':scope > .placed-block').forEach((block) => block.remove());
   nInput.value = String(currentProblem.initialInput);
   clearFeedback();
@@ -718,6 +772,7 @@ updateWorkspaceState();
 
 runButton.addEventListener("click", runProgram);
 resetButton.addEventListener("click", resetWorkspace);
+undoButton.addEventListener("click", undoLastPlacement);
 hintButton.addEventListener("click", () => {
   hintModal.hidden = false;
 });
