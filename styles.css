@@ -786,6 +786,11 @@ code {
   background: #fff;
 }
 
+.hint-navigation {
+  display: flex;
+  gap: 8px;
+}
+
 .hint-modal[hidden] {
   display: none;
 }

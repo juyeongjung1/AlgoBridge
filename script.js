@@ -147,6 +147,7 @@ const hintButton = document.querySelector("#hint-button");
 const hintPanel = document.querySelector("#hint-panel");
 const hintCount = document.querySelector("#hint-count");
 const hintText = document.querySelector("#hint-text");
+const previousHintButton = document.querySelector("#previous-hint-button");
 const nextHintButton = document.querySelector("#next-hint-button");
 const hintModal = document.querySelector("#hint-modal");
 const hintConfirmButton = document.querySelector("#hint-confirm-button");
@@ -628,6 +629,7 @@ function prepareHints() {
   hintArea.hidden = false;
   hintButton.hidden = false;
   hintPanel.hidden = true;
+  previousHintButton.hidden = true;
   nextHintButton.hidden = true;
 }
 
@@ -640,16 +642,29 @@ function clearHints() {
 }
 
 function showNextHint() {
-  const hint = availableHints[shownHintCount];
-  if (!hint) {
+  if (shownHintCount >= availableHints.length) {
     return;
   }
 
   shownHintCount += 1;
+  renderCurrentHint();
+}
+
+function showPreviousHint() {
+  if (shownHintCount <= 1) {
+    return;
+  }
+
+  shownHintCount -= 1;
+  renderCurrentHint();
+}
+
+function renderCurrentHint() {
   hintCount.textContent = `ヒント ${shownHintCount} / ${availableHints.length}`;
-  hintText.textContent = hint;
+  hintText.textContent = availableHints[shownHintCount - 1];
   hintPanel.hidden = false;
   hintButton.hidden = true;
+  previousHintButton.hidden = shownHintCount <= 1;
   nextHintButton.hidden = shownHintCount >= availableHints.length;
 }
 
@@ -790,6 +805,7 @@ hintConfirmButton.addEventListener("click", () => {
   hintModal.hidden = true;
   showNextHint();
 });
+previousHintButton.addEventListener("click", showPreviousHint);
 nextHintButton.addEventListener("click", showNextHint);
 resultDetails.addEventListener("toggle", () => {
   if (!resultDetails.open && !resultContent.hidden) {
