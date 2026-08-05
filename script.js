@@ -152,6 +152,8 @@ const nextHintButton = document.querySelector("#next-hint-button");
 const hintModal = document.querySelector("#hint-modal");
 const hintConfirmButton = document.querySelector("#hint-confirm-button");
 const hintCancelButton = document.querySelector("#hint-cancel-button");
+const successModal = document.querySelector("#success-modal");
+const successConfirmButton = document.querySelector("#success-confirm-button");
 const resultContent = document.querySelector("#result-content");
 const outputValue = document.querySelector("#output-value");
 const traceCaption = document.querySelector("#trace-caption");
@@ -678,8 +680,14 @@ function clearResults() {
   resultContent.hidden = true;
   resultPanel.hidden = true;
   resultReopenButton.hidden = true;
+  successModal.hidden = true;
   workspace.classList.remove("is-result-open");
   clearCorrespondence();
+}
+
+function showSuccessModal() {
+  successModal.hidden = false;
+  successConfirmButton.focus();
 }
 
 function openResultPanel() {
@@ -707,6 +715,7 @@ function renderResult(input, result) {
   resultContent.hidden = false;
   openResultPanel();
   selectTab("flow");
+  showSuccessModal();
   requestAnimationFrame(() => {
     resultPanel.scrollTo({ top: 0, behavior: "smooth" });
     resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -807,6 +816,10 @@ hintConfirmButton.addEventListener("click", () => {
 });
 previousHintButton.addEventListener("click", showPreviousHint);
 nextHintButton.addEventListener("click", showNextHint);
+successConfirmButton.addEventListener("click", () => {
+  successModal.hidden = true;
+  resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
+});
 resultDetails.addEventListener("toggle", () => {
   if (!resultDetails.open && !resultContent.hidden) {
     resultPanel.hidden = true;
