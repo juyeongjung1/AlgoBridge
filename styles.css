@@ -716,8 +716,26 @@ body.is-resizing {
 }
 
 .source-block.block-decision {
-  border: 0;
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  overflow: visible;
+  border-color: #b9c8e1;
+  clip-path: none;
+}
+
+.source-block.block-decision .block-copy {
+  position: relative;
+  padding-left: 38px;
+}
+
+.source-block.block-decision .block-copy::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #617895;
+  background: #f5f8ff;
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .build-panel {
