@@ -413,13 +413,17 @@ function validateAssembly() {
   const nested = loopBody ? directBlockIds(loopBody) : [];
   const positions = Object.fromEntries(root.map((id, index) => [id, index]));
   const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
-  const unexpectedBlocks = allPlaced.filter((id) => ![
+  const expectedBlockIds = [
     ...currentProblem.expected.root,
     ...currentProblem.expected.loop
-  ].includes(id));
+  ];
+  const unexpectedBlocks = allPlaced.filter((id) => !expectedBlockIds.includes(id));
+  const missingBlocks = expectedBlockIds.filter((id) => !allPlaced.includes(id));
 
   if (unexpectedBlocks.length > 0) {
     errors.push("この問題の合計計算には使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。");
+  } else if (missingBlocks.length > 0) {
+    errors.push("必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。");
   }
 
   if (!allPlaced.includes("declareSum") ||
