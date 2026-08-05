@@ -138,7 +138,88 @@ function feedbackText() { const all = blocks().map((x) => x.dataset.blockId); re
 function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = currentProblem.correct.flatMap((b) => [`「${b.hint}」という役割の処理が必要か考えてみましょう。`, `文章ブロック「${b.label}」を確認しましょう。`]); shownHints = 0; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
 function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; }
 function clearResults() { resultContent.hidden = true; resultPanel.hidden = true; resultDrawerTab.hidden = true; workspace.classList.remove("is-result-open"); clearCorrespondence(); }
-function renderLearningSupport() { const reasons = $("#reason-list"); reasons.replaceChildren(); currentProblem.explanation.forEach(([title, text]) => { const li = document.createElement("li"); li.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(text)}</p>`; reasons.append(li); }); const flow = $("#flowchart"); flow.replaceChildren(); const flowIds = currentProblem.expected.root; ["開始", ...flowIds, "終了"].forEach((item, index) => { const node = document.createElement("div"); if (item === "開始" || item === "終了") { node.className = "flow-node terminal"; node.textContent = item; } else { const block = definition(item); node.className = `flow-node ${block.type === "input" ? "input-node" : block.type === "output" ? "output-node" : block.type === "decision" ? "decision-node" : block.type === "loop" ? "loop-start-node" : ""}`; node.dataset.flowBlock = item; node.textContent = block.label; } flow.append(node); if (index < flowIds.length + 1) { const arrow = document.createElement("span"); arrow.className = "flow-arrow"; arrow.textContent = "↓"; flow.append(arrow); } }); const code = $("#java-code"); code.replaceChildren(); currentProblem.code.forEach(([id, line, title, description], index) => { const button = document.createElement("button"); button.className = "code-line"; button.type = "button"; button.dataset.codeBlock = id; button.dataset.codeTitle = title; button.dataset.codeDescription = description; button.innerHTML = `<span class="line-number">${index + 1}</span><span class="code-content">${highlight(line)}</span>`; button.addEventListener("click", () => showCorrespondence(id, button)); code.append(button); }); }
+function createFlowNode(id, label, className = "") {
+  const node = document.createElement("div");
+  node.className = `flow-node ${className}`.trim();
+  if (id) node.dataset.flowBlock = id;
+  const text = document.createElement("span");
+  text.textContent = label;
+  node.append(text);
+  return node;
+}
+
+function appendFlowArrow(container) {
+  const arrow = document.createElement("span");
+  arrow.className = "flow-arrow";
+  arrow.textContent = "↓";
+  container.append(arrow);
+}
+
+function flowClass(block) {
+  if (block.type === "input") return "input-node";
+  if (block.type === "output") return "output-node";
+  if (block.type === "decision") return "decision-node";
+  if (block.type === "loop") return "loop-start-node";
+  return "";
+}
+
+function appendFlowBlock(container, id) {
+  const block = definition(id);
+  const nestedIds = currentProblem.expected.nested?.[id] || [];
+  if (!nestedIds.length) {
+    container.append(createFlowNode(id, block.label, flowClass(block)));
+    return;
+  }
+
+  const loop = document.createElement("div");
+  loop.className = "flow-loop";
+  loop.append(createFlowNode(id, block.label, "loop-start-node"));
+  nestedIds.forEach((nestedId) => {
+    appendFlowArrow(loop);
+    const nestedBlock = definition(nestedId);
+    loop.append(createFlowNode(nestedId, nestedBlock.label, flowClass(nestedBlock)));
+  });
+  const back = document.createElement("div");
+  back.className = "loop-back";
+  back.textContent = "条件を確認して繰り返す ↺";
+  loop.append(back);
+  loop.append(createFlowNode(id, "繰り返し終了", "loop-end-node"));
+  container.append(loop);
+}
+
+function renderLearningSupport() {
+  const reasons = $("#reason-list");
+  reasons.replaceChildren();
+  currentProblem.explanation.forEach(([title, text]) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(text)}</p>`;
+    reasons.append(li);
+  });
+
+  const flow = $("#flowchart");
+  flow.replaceChildren();
+  flow.append(createFlowNode("", "開始", "terminal"));
+  currentProblem.expected.root.forEach((id) => {
+    appendFlowArrow(flow);
+    appendFlowBlock(flow, id);
+  });
+  appendFlowArrow(flow);
+  flow.append(createFlowNode("", "終了", "terminal"));
+
+  const code = $("#java-code");
+  code.replaceChildren();
+  currentProblem.code.forEach(([id, line, title, description], index) => {
+    const button = document.createElement("button");
+    button.className = "code-line";
+    button.type = "button";
+    button.dataset.codeBlock = id;
+    button.dataset.codeTitle = title;
+    button.dataset.codeDescription = description;
+    button.innerHTML = `<span class="line-number">${index + 1}</span><span class="code-content">${highlight(line)}</span>`;
+    button.addEventListener("click", () => showCorrespondence(id, button));
+    code.append(button);
+  });
+}
 function highlight(line) { return escapeHtml(line).replace(/\b(int|double|String|if|else|for|switch|case|break)\b/g, '<span class="syntax-keyword">$1</span>').replace(/(\b\d+\b)/g, '<span class="syntax-number">$1</span>').replace(/(System|out|println)/g, '<span class="syntax-method">$1</span>'); }
 function renderResult(v, preview = false) { const result = currentProblem.execute(v); $("#output-value").textContent = `出力結果：${result.output}`; $("#trace-caption").textContent = currentProblem.inputs.map((x) => `${x.label} = ${v[x.id]}`).join(" / "); $("#trace-head").innerHTML = `<tr>${result.traceColumns.map((x) => `<th>${escapeHtml(x)}</th>`).join("")}</tr>`; const tbody = $("#trace-body"); tbody.replaceChildren(); result.trace.forEach((row) => { const tr = document.createElement("tr"); tr.innerHTML = row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join(""); tbody.append(tr); }); $("#success-badge").textContent = preview ? "講師用・正解例" : "実行成功"; resultContent.hidden = false; $("#success-kicker").textContent = preview ? "INSTRUCTOR MODE" : "COMPLETED!"; $("#success-modal-title").textContent = preview ? "正解例を表示します" : "正解です！"; $("#success-modal-message").textContent = preview ? "講師モードのため、正しい処理例の結果と解説を確認できます。" : "処理の順番と配置が、正しく組み立てられています。"; $("#success-confirm-button").textContent = preview ? "正解例を確認する" : "結果を確認する"; $("#success-modal").hidden = false; resultDetails.open = false; }
 function run() { const v = values(); clearFeedback(); if (!isValid(v)) { showFeedback("入力値の範囲や形式を確認してください。"); return; } if (!validateAssembly()) { if (isInstructorMode) renderResult(v, true); else showFeedback(feedbackText()); return; } renderResult(v); }
