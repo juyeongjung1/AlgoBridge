@@ -160,6 +160,26 @@ function getBlockDefinition(blockId) {
   return currentProblem.blocks.find((block) => block.id === blockId);
 }
 
+function formatBlockLabel(label) {
+  const escapedLabel = label.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[character]));
+
+  return escapedLabel.replace(/sum|average|現在の数値|\bn\b|\bi\b|0|1|宣言する|設定する|繰り返す|加える|出力する|引く|入力する/g, (token) => {
+    if (["sum", "average", "現在の数値", "n", "i"].includes(token)) {
+      return `<span class="token-variable">${token}</span>`;
+    }
+    if (["0", "1"].includes(token)) {
+      return `<span class="token-value">${token}</span>`;
+    }
+    return `<span class="token-verb">${token}</span>`;
+  });
+}
+
 function renderPalette() {
   palette.replaceChildren();
 
@@ -172,7 +192,7 @@ function renderPalette() {
     element.innerHTML = `
       <span class="block-handle" aria-hidden="true">⠿</span>
       <span class="block-copy">
-        <strong>${block.label}</strong>
+        <strong>${formatBlockLabel(block.label)}</strong>
         <small>${block.hint}</small>
       </span>
     `;
@@ -208,7 +228,7 @@ function createPlacedBlock(blockId) {
   element.draggable = true;
   element.innerHTML = `
     <div class="placed-copy">
-      <strong>${block.label}</strong>
+      <strong>${formatBlockLabel(block.label)}</strong>
       <span>${block.hint}</span>
     </div>
     <button class="remove-block" type="button" aria-label="「${block.label}」を取り除く">×</button>
@@ -340,14 +360,16 @@ function getDropReference(zone, pointerY, draggedElement) {
     return child.classList.contains("placed-block") && child !== draggedElement;
   });
 
-  return candidates.find((candidate) => {
+  const reference = candidates.find((candidate) => {
     const box = candidate.getBoundingClientRect();
     return pointerY < box.top + box.height / 2;
-  }) || null;
+  });
+
+  return reference || zone.querySelector(':scope > .drop-space') || null;
 }
 
 function addBlockToZone(blockId, zone) {
-  zone.append(createPlacedBlock(blockId));
+  zone.insertBefore(createPlacedBlock(blockId), zone.querySelector(':scope > .drop-space'));
   updateWorkspaceState();
   clearResults();
 }
@@ -365,7 +387,9 @@ function directBlockIds(zone) {
 function updateWorkspaceState() {
   const rootBlocks = directBlockIds(assemblyList);
   const rootEmpty = assemblyList.querySelector(':scope > [data-empty-for="root"]');
+  const rootDropSpace = assemblyList.querySelector(':scope > [data-drop-space-for="root"]');
   rootEmpty.hidden = rootBlocks.length > 0;
+  rootDropSpace.hidden = rootBlocks.length === 0;
 
   document.querySelectorAll(".loop-body").forEach((loopBody) => {
     const nestedEmpty = loopBody.querySelector(':scope > [data-empty-for="loop"]');

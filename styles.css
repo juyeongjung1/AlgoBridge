@@ -314,6 +314,18 @@ code {
   line-height: 1.5;
 }
 
+.token-variable {
+  color: #d96800;
+}
+
+.token-value {
+  color: #c7372f;
+}
+
+.token-verb {
+  color: #1765a6;
+}
+
 .block-copy small {
   display: block;
   margin-top: 2px;
@@ -490,6 +502,23 @@ code {
   font-weight: 300;
 }
 
+.drop-space {
+  min-height: 96px;
+  display: grid;
+  place-items: center;
+  margin-top: 10px;
+  border: 1.5px dashed #d99a48;
+  border-radius: 6px;
+  color: #9a6419;
+  background: #fffaf3;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.drop-space[hidden] {
+  display: none;
+}
+
 .placed-block {
   margin-bottom: 9px;
   padding: 11px 40px 11px 42px;
@@ -589,7 +618,7 @@ code {
   box-shadow: 0 0 0 3px rgba(39, 101, 165, 0.2);
 }
 
-.placed-copy span {
+.placed-copy > span {
   display: block;
   margin-top: 1px;
   color: var(--muted);
@@ -671,9 +700,6 @@ code {
   justify-content: space-between;
   gap: 10px;
   margin-top: 14px;
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
   padding-top: 10px;
   background: #fff;
 }
