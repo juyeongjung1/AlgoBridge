@@ -134,11 +134,19 @@ const problems = {
 };
 
 const currentProblem = problems.sumToN;
+const INSTRUCTOR_MODE_STORAGE_KEY = "algobridge-instructor-mode";
+const INSTRUCTOR_PASSWORD_HASH = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a50192e7";
 const palette = document.querySelector("#block-palette");
 const assemblyList = document.querySelector("#assembly-list");
 const nInput = document.querySelector("#n-input");
 const expectedOutputValue = document.querySelector("#expected-output-value");
 const runButton = document.querySelector("#run-button");
+const instructorModeButton = document.querySelector("#instructor-mode-button");
+const instructorModal = document.querySelector("#instructor-modal");
+const instructorForm = document.querySelector("#instructor-form");
+const instructorPassword = document.querySelector("#instructor-password");
+const instructorCancelButton = document.querySelector("#instructor-cancel-button");
+const instructorLoginError = document.querySelector("#instructor-login-error");
 const resetButton = document.querySelector("#reset-button");
 const resetModal = document.querySelector("#reset-modal");
 const resetConfirmButton = document.querySelector("#reset-confirm-button");
@@ -158,6 +166,10 @@ const hintConfirmButton = document.querySelector("#hint-confirm-button");
 const hintCancelButton = document.querySelector("#hint-cancel-button");
 const successModal = document.querySelector("#success-modal");
 const successConfirmButton = document.querySelector("#success-confirm-button");
+const successKicker = document.querySelector("#success-kicker");
+const successModalTitle = document.querySelector("#success-modal-title");
+const successModalMessage = document.querySelector("#success-modal-message");
+const successBadge = document.querySelector("#success-badge");
 const resultContent = document.querySelector("#result-content");
 const outputValue = document.querySelector("#output-value");
 const traceCaption = document.querySelector("#trace-caption");
@@ -177,9 +189,66 @@ let instanceCounter = 0;
 let availableHints = [];
 let shownHintCount = 0;
 let placementHistory = [];
+let isInstructorMode = loadInstructorMode();
 
 function getBlockDefinition(blockId) {
   return currentProblem.blocks.find((block) => block.id === blockId);
+}
+
+function loadInstructorMode() {
+  try {
+    return localStorage.getItem(INSTRUCTOR_MODE_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function saveInstructorMode() {
+  try {
+    localStorage.setItem(INSTRUCTOR_MODE_STORAGE_KEY, String(isInstructorMode));
+  } catch {
+    // ローカル保存が使えない環境では、その画面を開いている間だけ講師モードを維持する。
+  }
+}
+
+function updateInstructorMode() {
+  document.body.classList.toggle("is-instructor-mode", isInstructorMode);
+  instructorModeButton.textContent = isInstructorMode ? "受講者モードに戻る" : "講師用";
+}
+
+async function hashPassword(value) {
+  const digest = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function openInstructorModal() {
+  instructorPassword.value = "";
+  instructorLoginError.hidden = true;
+  instructorModal.hidden = false;
+  instructorPassword.focus();
+}
+
+async function authenticateInstructor(event) {
+  event.preventDefault();
+
+  if (!window.crypto?.subtle) {
+    instructorLoginError.textContent = "このブラウザではパスワード確認を利用できません。";
+    instructorLoginError.hidden = false;
+    return;
+  }
+
+  const passwordHash = await hashPassword(instructorPassword.value);
+  if (passwordHash !== INSTRUCTOR_PASSWORD_HASH) {
+    instructorLoginError.textContent = "パスワードが正しくありません。";
+    instructorLoginError.hidden = false;
+    instructorPassword.focus();
+    return;
+  }
+
+  isInstructorMode = true;
+  saveInstructorMode();
+  updateInstructorMode();
+  instructorModal.hidden = true;
 }
 
 function formatBlockLabel(label) {
@@ -695,7 +764,13 @@ function clearResults() {
   clearCorrespondence();
 }
 
-function showSuccessModal() {
+function showSuccessModal(isInstructorPreview = false) {
+  successKicker.textContent = isInstructorPreview ? "INSTRUCTOR MODE" : "COMPLETED!";
+  successModalTitle.textContent = isInstructorPreview ? "正解例を表示します" : "正解です！";
+  successModalMessage.textContent = isInstructorPreview
+    ? "講師モードのため、組み立て状況にかかわらず正しい実行結果と解説を確認できます。"
+    : "処理の順番と繰り返しの配置が、正しく組み立てられています。";
+  successConfirmButton.textContent = isInstructorPreview ? "正解例を確認する" : "結果を確認する";
   successModal.hidden = false;
   successConfirmButton.focus();
 }
@@ -707,7 +782,7 @@ function openResultPanel() {
   resultDetails.open = true;
 }
 
-function renderResult(input, result) {
+function renderResult(input, result, isInstructorPreview = false) {
   outputValue.textContent = `出力結果：${result.output}`;
   traceCaption.textContent = `n = ${input}`;
   traceBody.replaceChildren();
@@ -722,8 +797,9 @@ function renderResult(input, result) {
     traceBody.append(tableRow);
   });
 
+  successBadge.textContent = isInstructorPreview ? "講師用・正解例" : "実行成功";
   resultContent.hidden = false;
-  showSuccessModal();
+  showSuccessModal(isInstructorPreview);
   resultDetails.open = false;
   resultPanel.hidden = true;
   resultReopenButton.hidden = true;
@@ -743,6 +819,10 @@ function runProgram() {
 
   const errors = validateAssembly();
   if (errors.length > 0) {
+    if (isInstructorMode) {
+      renderResult(input, currentProblem.execute(input), true);
+      return;
+    }
     showFeedback([getFeedbackSummary()]);
     prepareHints();
     clearResults();
@@ -843,9 +923,23 @@ attachDropzoneEvents(assemblyList);
 renderPalette();
 updateWorkspaceState();
 updateExpectedOutput();
+updateInstructorMode();
 
 nInput.addEventListener("input", updateExpectedOutput);
 runButton.addEventListener("click", runProgram);
+instructorModeButton.addEventListener("click", () => {
+  if (isInstructorMode) {
+    isInstructorMode = false;
+    saveInstructorMode();
+    updateInstructorMode();
+    return;
+  }
+  openInstructorModal();
+});
+instructorCancelButton.addEventListener("click", () => {
+  instructorModal.hidden = true;
+});
+instructorForm.addEventListener("submit", authenticateInstructor);
 resetButton.addEventListener("click", () => {
   resetModal.hidden = false;
   resetCancelButton.focus();

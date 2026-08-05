@@ -18,9 +18,12 @@
         <p>文章からコードへ、考え方をつなぐ</p>
       </div>
     </div>
-    <div class="lesson-progress" aria-label="学習の進行状況">
-      <span>アルゴリズム入門</span>
-      <strong>問題 1 / 1</strong>
+    <div class="header-actions">
+      <div class="lesson-progress" aria-label="学習の進行状況">
+        <span>アルゴリズム入門</span>
+        <strong>問題 1 / 1</strong>
+      </div>
+      <button id="instructor-mode-button" class="instructor-mode-button" type="button">講師用</button>
     </div>
   </header>
 
@@ -152,7 +155,7 @@
             <p class="result-label">実行結果</p>
             <p id="output-value" class="output-value">出力結果：6</p>
           </div>
-          <span class="success-badge">実行成功</span>
+          <span id="success-badge" class="success-badge">実行成功</span>
         </div>
 
         <section class="trace-section" aria-labelledby="trace-heading">
@@ -248,13 +251,30 @@
         <span>✦</span><span>●</span><span>✦</span><span>●</span><span>✦</span><span>●</span><span>✦</span><span>●</span>
       </div>
       <div class="success-icon" aria-hidden="true">🎉</div>
-      <p class="success-kicker">COMPLETED!</p>
+      <p id="success-kicker" class="success-kicker">COMPLETED!</p>
       <h2 id="success-modal-title">正解です！</h2>
-      <p>処理の順番と繰り返しの配置が、正しく組み立てられています。</p>
+      <p id="success-modal-message">処理の順番と繰り返しの配置が、正しく組み立てられています。</p>
       <div class="success-modal-actions">
         <button id="success-confirm-button" class="button button-primary" type="button">結果を確認する</button>
       </div>
     </div>
+  </div>
+
+  <div id="instructor-modal" class="hint-modal" role="dialog" aria-modal="true" aria-labelledby="instructor-modal-title" hidden>
+    <form id="instructor-form" class="hint-modal-dialog" novalidate>
+      <span class="hint-modal-icon" aria-hidden="true">👩‍🏫</span>
+      <h2 id="instructor-modal-title">講師モード</h2>
+      <p>講師用パスワードを入力してください。</p>
+      <label class="instructor-password">
+        <span>パスワード</span>
+        <input id="instructor-password" type="password" inputmode="numeric" autocomplete="current-password" required>
+      </label>
+      <p id="instructor-login-error" class="instructor-login-error" role="alert" hidden></p>
+      <div class="hint-modal-actions">
+        <button id="instructor-cancel-button" class="button button-secondary" type="button">キャンセル</button>
+        <button class="button button-primary" type="submit">講師モードに入る</button>
+      </div>
+    </form>
   </div>
 
   <div id="reset-modal" class="hint-modal reset-modal" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" hidden>
