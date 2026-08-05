@@ -139,6 +139,9 @@ const assemblyList = document.querySelector("#assembly-list");
 const nInput = document.querySelector("#n-input");
 const runButton = document.querySelector("#run-button");
 const resetButton = document.querySelector("#reset-button");
+const resetModal = document.querySelector("#reset-modal");
+const resetConfirmButton = document.querySelector("#reset-confirm-button");
+const resetCancelButton = document.querySelector("#reset-cancel-button");
 const undoButton = document.querySelector("#undo-button");
 const resultReopenButton = document.querySelector("#result-reopen");
 const feedback = document.querySelector("#feedback");
@@ -818,7 +821,17 @@ renderPalette();
 updateWorkspaceState();
 
 runButton.addEventListener("click", runProgram);
-resetButton.addEventListener("click", resetWorkspace);
+resetButton.addEventListener("click", () => {
+  resetModal.hidden = false;
+  resetCancelButton.focus();
+});
+resetCancelButton.addEventListener("click", () => {
+  resetModal.hidden = true;
+});
+resetConfirmButton.addEventListener("click", () => {
+  resetModal.hidden = true;
+  resetWorkspace();
+});
 undoButton.addEventListener("click", undoLastPlacement);
 hintButton.addEventListener("click", () => {
   hintModal.hidden = false;
