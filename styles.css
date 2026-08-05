@@ -295,7 +295,7 @@ body.is-resizing {
 
 .problem-drawer-tab {
   position: absolute;
-  top: 18px;
+  top: 88px;
   left: 18px;
   z-index: 4;
   width: 42px;
@@ -307,7 +307,8 @@ body.is-resizing {
   background: var(--blue-100);
   box-shadow: 0 2px 7px rgba(17, 34, 51, 0.12);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .problem-list-sidebar {
