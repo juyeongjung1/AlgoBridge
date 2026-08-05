@@ -41,6 +41,78 @@ const problems = {
         label: "変数 sum の値を出力する",
         shortLabel: "sum の値を出力",
         hint: "計算結果を表示する"
+      },
+      {
+        id: "initializeSumOne",
+        type: "assignment",
+        label: "変数 sum に、初期値として 1 を設定する",
+        shortLabel: "sum に 1 を設定",
+        hint: "初期値を設定する"
+      },
+      {
+        id: "loopToNMinusOne",
+        type: "loop",
+        label: "1 から n - 1 まで、順に繰り返す",
+        shortLabel: "1 から n - 1 まで繰り返す",
+        hint: "繰り返しの回数を決める",
+        acceptsChildren: true
+      },
+      {
+        id: "outputCurrent",
+        type: "output",
+        label: "現在の数値を、その都度出力する",
+        shortLabel: "現在の数値を出力",
+        hint: "途中経過を表示する"
+      },
+      {
+        id: "addToN",
+        type: "calculation",
+        label: "変数 n に、現在の数値を加える",
+        shortLabel: "n に現在の数値を加える",
+        hint: "入力値を更新する"
+      },
+      {
+        id: "subtractCurrent",
+        type: "calculation",
+        label: "変数 sum から、現在の数値を引く",
+        shortLabel: "sum から現在の数値を引く",
+        hint: "値を減らす"
+      },
+      {
+        id: "loopFromZero",
+        type: "loop",
+        label: "0 から n まで、順に繰り返す",
+        shortLabel: "0 から n まで繰り返す",
+        hint: "繰り返しの回数を決める",
+        acceptsChildren: true
+      },
+      {
+        id: "declareAverage",
+        type: "declaration",
+        label: "平均を格納するための変数 average を宣言する",
+        shortLabel: "変数 average を宣言",
+        hint: "別の変数を用意する"
+      },
+      {
+        id: "inputSum",
+        type: "input",
+        label: "変数 sum の値を入力する",
+        shortLabel: "sum の値を入力",
+        hint: "値を受け取る"
+      },
+      {
+        id: "outputN",
+        type: "output",
+        label: "変数 n の値を出力する",
+        shortLabel: "n の値を出力",
+        hint: "入力値を表示する"
+      },
+      {
+        id: "initializeCurrent",
+        type: "assignment",
+        label: "現在の数値に、初期値として 0 を設定する",
+        shortLabel: "現在の数値に 0 を設定",
+        hint: "別の値を初期化する"
       }
     ],
     expected: {
@@ -78,6 +150,7 @@ const javaTab = document.querySelector("#java-tab");
 const flowPanel = document.querySelector("#flow-panel");
 const javaPanel = document.querySelector("#java-panel");
 const codeCorrespondence = document.querySelector("#code-correspondence");
+const resultPanel = document.querySelector(".result-panel");
 
 let draggedInstanceId = null;
 let instanceCounter = 0;
@@ -89,7 +162,7 @@ function getBlockDefinition(blockId) {
 function renderPalette() {
   palette.replaceChildren();
 
-  currentProblem.blocks.forEach((block) => {
+  shuffleBlocks(currentProblem.blocks).forEach((block) => {
     const element = document.createElement("button");
     element.type = "button";
     element.className = `source-block block-${block.type}`;
@@ -113,6 +186,15 @@ function renderPalette() {
 
     palette.append(element);
   });
+}
+
+function shuffleBlocks(blocks) {
+  const shuffled = [...blocks];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
 function createPlacedBlock(blockId) {
@@ -299,6 +381,14 @@ function validateAssembly() {
   const nested = loopBody ? directBlockIds(loopBody) : [];
   const positions = Object.fromEntries(root.map((id, index) => [id, index]));
   const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
+  const unexpectedBlocks = allPlaced.filter((id) => ![
+    ...currentProblem.expected.root,
+    ...currentProblem.expected.loop
+  ].includes(id));
+
+  if (unexpectedBlocks.length > 0) {
+    errors.push("この問題の合計計算には使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。");
+  }
 
   if (!allPlaced.includes("declareSum") ||
       (positions.declareSum ?? Number.POSITIVE_INFINITY) > Math.min(
@@ -391,6 +481,10 @@ function renderResult(input, result) {
   resultPlaceholder.hidden = true;
   resultContent.hidden = false;
   selectTab("flow");
+  requestAnimationFrame(() => {
+    resultPanel.scrollTo({ top: 0, behavior: "smooth" });
+    resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
+  });
 }
 
 function runProgram() {
@@ -419,6 +513,7 @@ function resetWorkspace() {
   nInput.value = String(currentProblem.initialInput);
   clearFeedback();
   clearResults();
+  renderPalette();
   updateWorkspaceState();
 }
 

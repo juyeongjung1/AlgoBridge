@@ -11,7 +11,8 @@
 <body>
   <header class="app-header">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">AB</span>
+      <img class="trainocate-logo" src="https://www.trainocate.co.jp/top_common/images/trainocate_logo.png" alt="Trainocate">
+      <span class="brand-divider" aria-hidden="true"></span>
       <div>
         <h1>AlgoBridge</h1>
         <p>文章からコードへ、考え方をつなぐ</p>
@@ -46,10 +47,10 @@
 
       <div class="block-list-heading">
         <h3>処理の文章ブロック</h3>
-        <span>全5個</span>
+        <span>全15個（正解は5個）</span>
       </div>
       <p class="operation-guide">
-        ブロックを中央へドラッグしてください。クリックでも末尾へ追加できます。
+        正解に必要なブロックは5個です。使わないブロックも含め、毎回ランダムな順に表示されます。
       </p>
       <div id="block-palette" class="block-palette" aria-label="使用できる文章ブロック"></div>
     </section>
@@ -68,12 +69,20 @@
         <p>上から実行される順に並べます。繰り返す処理は、ブロック内の点線枠へ入れてください。</p>
       </div>
 
-      <div id="assembly-list" class="assembly-list dropzone" data-zone="root" aria-label="文章ブロック組立てエリア">
-        <div class="empty-state" data-empty-for="root">
-          <span class="empty-icon" aria-hidden="true">＋</span>
-          <strong>ここにブロックを配置</strong>
-          <p>左側の一覧からドラッグ＆ドロップ</p>
+      <div class="flow-canvas" aria-label="フローチャート形式の組立てエリア">
+        <div class="assembly-symbol terminal">開始</div>
+        <span class="assembly-arrow" aria-hidden="true">↓</span>
+        <div class="assembly-symbol input-symbol">入力：n を受け取る</div>
+        <span class="assembly-arrow" aria-hidden="true">↓</span>
+        <div id="assembly-list" class="assembly-list dropzone" data-zone="root" aria-label="処理を配置するエリア">
+          <div class="empty-state" data-empty-for="root">
+            <span class="empty-icon" aria-hidden="true">＋</span>
+            <strong>ここに処理を配置</strong>
+            <p>左側の一覧からドラッグ＆ドロップ</p>
+          </div>
         </div>
+        <span class="assembly-arrow" aria-hidden="true">↓</span>
+        <div class="assembly-symbol terminal">終了</div>
       </div>
 
       <div id="feedback" class="feedback" role="alert" aria-live="polite" hidden></div>

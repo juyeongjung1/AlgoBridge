@@ -1,12 +1,12 @@
 :root {
-  --navy-950: #112233;
-  --navy-900: #17324d;
-  --navy-700: #285472;
-  --navy-100: #eaf0f5;
-  --blue-600: #2765a5;
-  --blue-100: #e7f1fb;
-  --teal-600: #19766f;
-  --teal-100: #e3f4f1;
+  --navy-950: #2f3540;
+  --navy-900: #3d444e;
+  --navy-700: #5d6671;
+  --navy-100: #f3f4f4;
+  --blue-600: #e86f00;
+  --blue-100: #fff0e4;
+  --teal-600: #d95f00;
+  --teal-100: #fff5ea;
   --amber-600: #a96b11;
   --amber-100: #fff3da;
   --green-700: #25724f;
@@ -62,9 +62,10 @@ code {
   align-items: center;
   justify-content: space-between;
   padding: 0 30px;
-  color: #fff;
-  background: var(--navy-950);
-  border-bottom: 4px solid var(--teal-600);
+  color: var(--navy-950);
+  background: #fff;
+  border-bottom: 4px solid var(--blue-600);
+  box-shadow: 0 1px 4px rgba(47, 53, 64, 0.1);
 }
 
 .brand,
@@ -77,18 +78,17 @@ code {
   gap: 13px;
 }
 
-.brand-mark {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 9px;
-  color: #fff;
-  background: var(--blue-600);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+.trainocate-logo {
+  width: 162px;
+  max-height: 42px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 30px;
+  background: #d6d8da;
 }
 
 .brand h1 {
@@ -100,7 +100,7 @@ code {
 
 .brand p {
   margin: 3px 0 0;
-  color: #b9c7d4;
+  color: var(--muted);
   font-size: 11px;
 }
 
@@ -111,13 +111,13 @@ code {
 }
 
 .lesson-progress span {
-  color: #b9c7d4;
+  color: var(--muted);
   font-size: 12px;
 }
 
 .lesson-progress strong {
   padding: 6px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid #d6d8da;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -156,7 +156,7 @@ code {
   place-items: center;
   border-radius: 7px;
   color: #fff;
-  background: var(--navy-900);
+  background: var(--blue-600);
   font-weight: 700;
 }
 
@@ -342,6 +342,11 @@ code {
   border-color: #b8dbc7;
 }
 
+.block-input {
+  background: #f1ecfa;
+  border-color: #d3c4e8;
+}
+
 .source-block.is-used {
   opacity: 0.38;
   cursor: not-allowed;
@@ -374,11 +379,56 @@ code {
   margin: 0;
 }
 
-.assembly-list {
+.flow-canvas {
   min-height: 420px;
   flex: 1;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 12px;
   background: #f6f8fa;
+  border: 1px solid #d5dce1;
+  border-radius: 7px;
+}
+
+.assembly-symbol {
+  min-width: 180px;
+  padding: 7px 16px;
+  color: var(--navy-950);
+  background: #fff;
+  border: 1px solid #aeb9c1;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.assembly-symbol.terminal {
+  min-width: 92px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+}
+
+.input-symbol {
+  clip-path: polygon(7% 0, 100% 0, 93% 100%, 0 100%);
+  background: var(--blue-100);
+  border: 0;
+}
+
+.assembly-arrow {
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--blue-600);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.assembly-list {
+  width: 100%;
+  min-height: 174px;
+  padding: 11px;
   border: 2px dashed #bac6d0;
   border-radius: 7px;
   transition: background 0.15s, border-color 0.15s;
@@ -390,7 +440,7 @@ code {
 }
 
 .empty-state {
-  min-height: 175px;
+  min-height: 145px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -431,6 +481,15 @@ code {
   padding: 11px 40px 11px 42px;
   cursor: grab;
   box-shadow: 0 2px 5px rgba(17, 34, 51, 0.08);
+}
+
+.placed-block.block-output {
+  border: 0;
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+}
+
+.placed-block.block-input {
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
 }
 
 .placed-block::before {
@@ -537,6 +596,11 @@ code {
   justify-content: space-between;
   gap: 10px;
   margin-top: 14px;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding-top: 10px;
+  background: #fff;
 }
 
 .button {
@@ -555,9 +619,9 @@ code {
 
 .button-primary {
   min-width: 136px;
-  border: 1px solid var(--navy-900);
+  border: 1px solid var(--blue-600);
   color: #fff;
-  background: var(--navy-900);
+  background: var(--blue-600);
 }
 
 .button:hover {
@@ -573,6 +637,7 @@ code {
 
 .result-panel {
   position: relative;
+  scroll-margin-top: 12px;
 }
 
 .result-placeholder {
@@ -630,7 +695,7 @@ code {
   justify-content: space-between;
   padding: 13px 15px;
   color: #fff;
-  background: var(--navy-900);
+  background: var(--blue-600);
   border-radius: 6px;
 }
 
