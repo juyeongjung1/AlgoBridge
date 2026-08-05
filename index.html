@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="文章ブロックを組み立ててアルゴリズムを学ぶ研修用プロトタイプ">
+  <title>AlgoBridge | 文章ブロックで学ぶアルゴリズム</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">AB</span>
+      <div>
+        <h1>AlgoBridge</h1>
+        <p>文章からコードへ、考え方をつなぐ</p>
+      </div>
+    </div>
+    <div class="lesson-progress" aria-label="学習の進行状況">
+      <span>アルゴリズム入門</span>
+      <strong>問題 1 / 1</strong>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="panel source-panel" aria-labelledby="problem-heading">
+      <div class="panel-heading">
+        <span class="step-number">1</span>
+        <div>
+          <p class="eyebrow">問題を理解する</p>
+          <h2 id="problem-heading">1から n までの合計</h2>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <p id="problem-description">
+          整数 <code>n</code> が与えられたとき、1から <code>n</code> までの整数の合計を求めて出力してください。
+        </p>
+        <label class="number-input">
+          <span>入力値 n</span>
+          <input id="n-input" type="number" min="1" max="100" step="1" value="3">
+        </label>
+        <p class="input-note">1〜100の整数を入力してください</p>
+      </div>
+
+      <div class="block-list-heading">
+        <h3>処理の文章ブロック</h3>
+        <span>全5個</span>
+      </div>
+      <p class="operation-guide">
+        ブロックを中央へドラッグしてください。クリックでも末尾へ追加できます。
+      </p>
+      <div id="block-palette" class="block-palette" aria-label="使用できる文章ブロック"></div>
+    </section>
+
+    <section class="panel build-panel" aria-labelledby="build-heading">
+      <div class="panel-heading">
+        <span class="step-number">2</span>
+        <div>
+          <p class="eyebrow">処理を組み立てる</p>
+          <h2 id="build-heading">組立てエリア</h2>
+        </div>
+      </div>
+
+      <div class="build-instructions">
+        <span aria-hidden="true">↕</span>
+        <p>上から実行される順に並べます。繰り返す処理は、ブロック内の点線枠へ入れてください。</p>
+      </div>
+
+      <div id="assembly-list" class="assembly-list dropzone" data-zone="root" aria-label="文章ブロック組立てエリア">
+        <div class="empty-state" data-empty-for="root">
+          <span class="empty-icon" aria-hidden="true">＋</span>
+          <strong>ここにブロックを配置</strong>
+          <p>左側の一覧からドラッグ＆ドロップ</p>
+        </div>
+      </div>
+
+      <div id="feedback" class="feedback" role="alert" aria-live="polite" hidden></div>
+
+      <div class="build-actions">
+        <button id="reset-button" class="button button-secondary" type="button">
+          最初からやり直す
+        </button>
+        <button id="run-button" class="button button-primary" type="button">
+          <span aria-hidden="true">▶</span>
+          実行する
+        </button>
+      </div>
+    </section>
+
+    <section class="panel result-panel" aria-labelledby="result-heading">
+      <div class="panel-heading">
+        <span class="step-number">3</span>
+        <div>
+          <p class="eyebrow">動きを確認する</p>
+          <h2 id="result-heading">実行結果・理解支援</h2>
+        </div>
+      </div>
+
+      <div id="result-placeholder" class="result-placeholder">
+        <div class="placeholder-visual" aria-hidden="true">
+          <span>組立て</span>
+          <i>→</i>
+          <span>実行</span>
+          <i>→</i>
+          <span>理解</span>
+        </div>
+        <h3>組み立てた処理を実行してみましょう</h3>
+        <p>正しく組み立てると、出力結果や変数の変化、Javaコードとの対応を確認できます。</p>
+      </div>
+
+      <div id="result-content" class="result-content" hidden>
+        <div class="result-summary">
+          <div>
+            <p class="result-label">実行結果</p>
+            <p id="output-value" class="output-value">出力結果：6</p>
+          </div>
+          <span class="success-badge">実行成功</span>
+        </div>
+
+        <section class="trace-section" aria-labelledby="trace-heading">
+          <div class="section-title-row">
+            <h3 id="trace-heading">変数の変化</h3>
+            <span id="trace-caption">n = 3</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>繰り返し回数</th>
+                  <th>現在の数値</th>
+                  <th>sum の値</th>
+                </tr>
+              </thead>
+              <tbody id="trace-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="support-section" aria-labelledby="support-heading">
+          <h3 id="support-heading">別の表現で確認</h3>
+          <div class="tabs" role="tablist" aria-label="表示の切り替え">
+            <button id="flow-tab" class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="flow-panel">
+              フローチャート
+            </button>
+            <button id="java-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="java-panel">
+              Javaコード
+            </button>
+          </div>
+
+          <div id="flow-panel" class="tab-panel" role="tabpanel" aria-labelledby="flow-tab">
+            <div class="flowchart" aria-label="処理のフローチャート">
+              <div class="flow-node terminal">開始</div>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <div class="flow-node" data-flow-block="declareSum"><code>sum</code> を宣言</div>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <div class="flow-node" data-flow-block="initializeSum"><code>sum</code> に 0 を設定</div>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <div class="flow-loop">
+                <div class="flow-node decision" data-flow-block="loop"><code>i = 1</code> から <code>n</code> まで？</div>
+                <span class="flow-arrow" aria-hidden="true">↓ はい</span>
+                <div class="flow-node" data-flow-block="addCurrent"><code>sum</code> に <code>i</code> を加える</div>
+                <div class="loop-back" aria-hidden="true">次の i へ ↺</div>
+              </div>
+              <span class="flow-arrow" aria-hidden="true">↓ 終了</span>
+              <div class="flow-node output-node" data-flow-block="outputSum"><code>sum</code> を出力</div>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <div class="flow-node terminal">終了</div>
+            </div>
+          </div>
+
+          <div id="java-panel" class="tab-panel" role="tabpanel" aria-labelledby="java-tab" hidden>
+            <p class="code-guide">コードの行を選ぶと、対応する文章ブロックが強調されます。</p>
+            <pre class="java-code" aria-label="対応するJavaコード"><code><button class="code-line" type="button" data-code-block="declareSum"><span>1</span>int sum;</button>
+<button class="code-line" type="button" data-code-block="initializeSum"><span>2</span>sum = 0;</button>
+<span class="code-line code-blank"><span>3</span></span>
+<button class="code-line" type="button" data-code-block="loop"><span>4</span>for (int i = 1; i &lt;= n; i++) {</button>
+<button class="code-line code-indent" type="button" data-code-block="addCurrent"><span>5</span>    sum = sum + i;</button>
+<button class="code-line" type="button" data-code-block="loop"><span>6</span>}</button>
+<span class="code-line code-blank"><span>7</span></span>
+<button class="code-line" type="button" data-code-block="outputSum"><span>8</span>System.out.println(sum);</button></code></pre>
+            <div id="code-correspondence" class="code-correspondence">
+              コードの行をクリックしてください
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+"use strict";
+
+const problems = {
+  sumToN: {
+    id: "sumToN",
+    title: "1から n までの合計",
+    initialInput: 3,
+    blocks: [
+      {
+        id: "declareSum",
+        type: "declaration",
+        label: "合計を格納するための変数 sum を宣言する",
+        shortLabel: "変数 sum を宣言",
+        hint: "変数を用意する"
+      },
+      {
+        id: "initializeSum",
+        type: "assignment",
+        label: "変数 sum に、初期値として 0 を設定する",
+        shortLabel: "sum に 0 を設定",
+        hint: "計算前の値を決める"
+      },
+      {
+        id: "loop",
+        type: "loop",
+        label: "1 から n まで、順に繰り返す",
+        shortLabel: "1 から n まで繰り返す",
+        hint: "内側に処理を配置できる",
+        acceptsChildren: true
+      },
+      {
+        id: "addCurrent",
+        type: "calculation",
+        label: "変数 sum に、現在の数値を加える",
+        shortLabel: "sum に現在の数値を加える",
+        hint: "合計を更新する"
+      },
+      {
+        id: "outputSum",
+        type: "output",
+        label: "変数 sum の値を出力する",
+        shortLabel: "sum の値を出力",
+        hint: "計算結果を表示する"
+      }
+    ],
+    expected: {
+      root: ["declareSum", "initializeSum", "loop", "outputSum"],
+      loop: ["addCurrent"]
+    },
+    execute(input) {
+      let sum = 0;
+      const trace = [{ iteration: "初期状態", current: "-", sum }];
+
+      for (let i = 1; i <= input; i += 1) {
+        sum += i;
+        trace.push({ iteration: `${i}回目`, current: i, sum });
+      }
+
+      return { output: sum, trace };
+    }
+  }
+};
+
+const currentProblem = problems.sumToN;
+const palette = document.querySelector("#block-palette");
+const assemblyList = document.querySelector("#assembly-list");
+const nInput = document.querySelector("#n-input");
+const runButton = document.querySelector("#run-button");
+const resetButton = document.querySelector("#reset-button");
+const feedback = document.querySelector("#feedback");
+const resultPlaceholder = document.querySelector("#result-placeholder");
+const resultContent = document.querySelector("#result-content");
+const outputValue = document.querySelector("#output-value");
+const traceCaption = document.querySelector("#trace-caption");
+const traceBody = document.querySelector("#trace-body");
+const flowTab = document.querySelector("#flow-tab");
+const javaTab = document.querySelector("#java-tab");
+const flowPanel = document.querySelector("#flow-panel");
+const javaPanel = document.querySelector("#java-panel");
+const codeCorrespondence = document.querySelector("#code-correspondence");
+
+let draggedInstanceId = null;
+let instanceCounter = 0;
+
+function getBlockDefinition(blockId) {
+  return currentProblem.blocks.find((block) => block.id === blockId);
+}
+
+function renderPalette() {
+  palette.replaceChildren();
+
+  currentProblem.blocks.forEach((block) => {
+    const element = document.createElement("button");
+    element.type = "button";
+    element.className = `source-block block-${block.type}`;
+    element.dataset.blockId = block.id;
+    element.draggable = true;
+    element.innerHTML = `
+      <span class="block-handle" aria-hidden="true">⠿</span>
+      <span class="block-copy">
+        <strong>${block.label}</strong>
+        <small>${block.hint}</small>
+      </span>
+    `;
+
+    element.addEventListener("dragstart", handlePaletteDragStart);
+    element.addEventListener("dragend", clearDragState);
+    element.addEventListener("click", () => {
+      if (!isBlockUsed(block.id)) {
+        addBlockToZone(block.id, assemblyList);
+      }
+    });
+
+    palette.append(element);
+  });
+}
+
+function createPlacedBlock(blockId) {
+  const block = getBlockDefinition(blockId);
+  const element = document.createElement("div");
+  instanceCounter += 1;
+  element.className = `placed-block block-${block.type}`;
+  element.dataset.blockId = block.id;
+  element.dataset.instanceId = `block-${instanceCounter}`;
+  element.draggable = true;
+  element.innerHTML = `
+    <div class="placed-copy">
+      <strong>${block.label}</strong>
+      <span>${block.hint}</span>
+    </div>
+    <button class="remove-block" type="button" aria-label="「${block.label}」を取り除く">×</button>
+  `;
+
+  if (block.acceptsChildren) {
+    const loopBody = document.createElement("div");
+    loopBody.className = "loop-body dropzone";
+    loopBody.dataset.zone = "loop";
+    loopBody.innerHTML = `
+      <span class="loop-body-label">繰り返しの中で実行する処理</span>
+      <div class="nested-empty" data-empty-for="loop">ここに処理を配置</div>
+    `;
+    attachDropzoneEvents(loopBody);
+    element.append(loopBody);
+  }
+
+  element.addEventListener("dragstart", handlePlacedDragStart);
+  element.addEventListener("dragend", clearDragState);
+  element.querySelector(".remove-block").addEventListener("click", (event) => {
+    event.stopPropagation();
+    element.remove();
+    updateWorkspaceState();
+    clearResults();
+  });
+
+  return element;
+}
+
+function handlePaletteDragStart(event) {
+  const blockId = event.currentTarget.dataset.blockId;
+  if (isBlockUsed(blockId)) {
+    event.preventDefault();
+    return;
+  }
+
+  draggedInstanceId = null;
+  event.dataTransfer.effectAllowed = "copy";
+  event.dataTransfer.setData("text/plain", JSON.stringify({
+    source: "palette",
+    blockId
+  }));
+}
+
+function handlePlacedDragStart(event) {
+  if (event.target !== event.currentTarget && event.target.closest(".placed-block") !== event.currentTarget) {
+    return;
+  }
+
+  const element = event.currentTarget;
+  draggedInstanceId = element.dataset.instanceId;
+  element.classList.add("is-dragging");
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", JSON.stringify({
+    source: "workspace",
+    blockId: element.dataset.blockId,
+    instanceId: draggedInstanceId
+  }));
+  event.stopPropagation();
+}
+
+function clearDragState() {
+  document.querySelectorAll(".is-dragging, .is-drag-over").forEach((element) => {
+    element.classList.remove("is-dragging", "is-drag-over");
+  });
+  draggedInstanceId = null;
+}
+
+function attachDropzoneEvents(zone) {
+  zone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = draggedInstanceId ? "move" : "copy";
+    document.querySelectorAll(".dropzone.is-drag-over").forEach((element) => {
+      if (element !== zone) {
+        element.classList.remove("is-drag-over");
+      }
+    });
+    zone.classList.add("is-drag-over");
+  });
+
+  zone.addEventListener("dragleave", (event) => {
+    if (!zone.contains(event.relatedTarget)) {
+      zone.classList.remove("is-drag-over");
+    }
+  });
+
+  zone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    zone.classList.remove("is-drag-over");
+
+    let payload;
+    try {
+      payload = JSON.parse(event.dataTransfer.getData("text/plain"));
+    } catch {
+      return;
+    }
+
+    if (payload.blockId === "loop" && zone.dataset.zone === "loop") {
+      showFeedback(["繰り返しブロックは、別の繰り返しの中には配置できません。"]);
+      return;
+    }
+
+    const draggedElement = payload.source === "workspace"
+      ? document.querySelector(`[data-instance-id="${payload.instanceId}"]`)
+      : createPlacedBlock(payload.blockId);
+
+    if (!draggedElement || draggedElement.contains(zone)) {
+      return;
+    }
+
+    const reference = getDropReference(zone, event.clientY, draggedElement);
+    zone.insertBefore(draggedElement, reference);
+    updateWorkspaceState();
+    clearResults();
+  });
+}
+
+function getDropReference(zone, pointerY, draggedElement) {
+  const candidates = [...zone.children].filter((child) => {
+    return child.classList.contains("placed-block") && child !== draggedElement;
+  });
+
+  return candidates.find((candidate) => {
+    const box = candidate.getBoundingClientRect();
+    return pointerY < box.top + box.height / 2;
+  }) || null;
+}
+
+function addBlockToZone(blockId, zone) {
+  zone.append(createPlacedBlock(blockId));
+  updateWorkspaceState();
+  clearResults();
+}
+
+function isBlockUsed(blockId) {
+  return Boolean(assemblyList.querySelector(`[data-block-id="${blockId}"]`));
+}
+
+function directBlockIds(zone) {
+  return [...zone.children]
+    .filter((child) => child.classList.contains("placed-block"))
+    .map((child) => child.dataset.blockId);
+}
+
+function updateWorkspaceState() {
+  const rootBlocks = directBlockIds(assemblyList);
+  const rootEmpty = assemblyList.querySelector(':scope > [data-empty-for="root"]');
+  rootEmpty.hidden = rootBlocks.length > 0;
+
+  document.querySelectorAll(".loop-body").forEach((loopBody) => {
+    const nestedEmpty = loopBody.querySelector(':scope > [data-empty-for="loop"]');
+    nestedEmpty.hidden = directBlockIds(loopBody).length > 0;
+  });
+
+  palette.querySelectorAll(".source-block").forEach((sourceBlock) => {
+    const used = isBlockUsed(sourceBlock.dataset.blockId);
+    sourceBlock.classList.toggle("is-used", used);
+    sourceBlock.disabled = used;
+    sourceBlock.draggable = !used;
+    sourceBlock.setAttribute("aria-disabled", String(used));
+  });
+}
+
+function validateAssembly() {
+  const errors = [];
+  const root = directBlockIds(assemblyList);
+  const loopElement = assemblyList.querySelector(':scope > [data-block-id="loop"]');
+  const loopBody = loopElement?.querySelector(':scope > .loop-body');
+  const nested = loopBody ? directBlockIds(loopBody) : [];
+  const positions = Object.fromEntries(root.map((id, index) => [id, index]));
+  const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
+
+  if (!allPlaced.includes("declareSum") ||
+      (positions.declareSum ?? Number.POSITIVE_INFINITY) > Math.min(
+        positions.initializeSum ?? Number.POSITIVE_INFINITY,
+        positions.loop ?? Number.POSITIVE_INFINITY,
+        positions.outputSum ?? Number.POSITIVE_INFINITY
+      )) {
+    errors.push("sum を使う前に、変数を宣言する必要があります。");
+  }
+
+  if (!loopElement) {
+    errors.push("1 から n まで繰り返す処理を配置してください。");
+  }
+
+  if (!nested.includes("addCurrent")) {
+    errors.push("合計を求める処理は、繰り返しの中に配置してください。");
+  }
+
+  if (!allPlaced.includes("initializeSum") ||
+      positions.initializeSum === undefined ||
+      positions.loop === undefined ||
+      positions.initializeSum > positions.loop) {
+    errors.push("繰り返しの前に、sum の初期値を設定してください。");
+  }
+
+  if (!allPlaced.includes("outputSum") ||
+      positions.outputSum === undefined ||
+      positions.outputSum !== root.length - 1 ||
+      (positions.loop !== undefined && positions.outputSum < positions.loop)) {
+    errors.push("最後に、計算した sum の値を出力してください。");
+  }
+
+  const rootMatches = arraysEqual(root, currentProblem.expected.root);
+  const nestedMatches = arraysEqual(nested, currentProblem.expected.loop);
+  if (!rootMatches || !nestedMatches) {
+    if (errors.length === 0) {
+      errors.push("ブロックの順番と、繰り返しの内側にある処理を確認してください。");
+    }
+  }
+
+  return errors;
+}
+
+function arraysEqual(left, right) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function validateInput() {
+  const value = Number(nInput.value);
+  if (!Number.isInteger(value) || value < 1 || value > 100) {
+    return null;
+  }
+  return value;
+}
+
+function showFeedback(messages) {
+  feedback.innerHTML = `
+    <strong>組立てをもう一度確認しましょう</strong>
+    <ul>${messages.map((message) => `<li>${message}</li>`).join("")}</ul>
+  `;
+  feedback.hidden = false;
+}
+
+function clearFeedback() {
+  feedback.hidden = true;
+  feedback.replaceChildren();
+}
+
+function clearResults() {
+  resultContent.hidden = true;
+  resultPlaceholder.hidden = false;
+  clearCorrespondence();
+}
+
+function renderResult(input, result) {
+  outputValue.textContent = `出力結果：${result.output}`;
+  traceCaption.textContent = `n = ${input}`;
+  traceBody.replaceChildren();
+
+  result.trace.forEach((row) => {
+    const tableRow = document.createElement("tr");
+    tableRow.innerHTML = `
+      <td>${row.iteration}</td>
+      <td>${row.current}</td>
+      <td>${row.sum}</td>
+    `;
+    traceBody.append(tableRow);
+  });
+
+  resultPlaceholder.hidden = true;
+  resultContent.hidden = false;
+  selectTab("flow");
+}
+
+function runProgram() {
+  clearFeedback();
+  const input = validateInput();
+  if (input === null) {
+    showFeedback(["入力値 n には、1〜100の整数を設定してください。"]);
+    clearResults();
+    nInput.focus();
+    return;
+  }
+
+  const errors = validateAssembly();
+  if (errors.length > 0) {
+    showFeedback(errors);
+    clearResults();
+    return;
+  }
+
+  const result = currentProblem.execute(input);
+  renderResult(input, result);
+}
+
+function resetWorkspace() {
+  assemblyList.querySelectorAll(':scope > .placed-block').forEach((block) => block.remove());
+  nInput.value = String(currentProblem.initialInput);
+  clearFeedback();
+  clearResults();
+  updateWorkspaceState();
+}
+
+function selectTab(tabName) {
+  const flowSelected = tabName === "flow";
+  flowTab.classList.toggle("is-active", flowSelected);
+  javaTab.classList.toggle("is-active", !flowSelected);
+  flowTab.setAttribute("aria-selected", String(flowSelected));
+  javaTab.setAttribute("aria-selected", String(!flowSelected));
+  flowPanel.hidden = !flowSelected;
+  javaPanel.hidden = flowSelected;
+  clearCorrespondence();
+}
+
+function showCorrespondence(blockId, selectedLine) {
+  const block = getBlockDefinition(blockId);
+  clearCorrespondence();
+
+  document.querySelectorAll(`[data-block-id="${blockId}"]`).forEach((element) => {
+    element.classList.add("is-corresponding");
+  });
+  document.querySelectorAll(`[data-flow-block="${blockId}"]`).forEach((element) => {
+    element.classList.add("is-corresponding");
+  });
+  document.querySelectorAll(`[data-code-block="${blockId}"]`).forEach((element) => {
+    element.classList.add("is-selected");
+  });
+
+  if (selectedLine) {
+    selectedLine.classList.add("is-selected");
+  }
+  codeCorrespondence.textContent = `対応する文章ブロック：${block.label}`;
+}
+
+function clearCorrespondence() {
+  document.querySelectorAll(".is-corresponding").forEach((element) => {
+    element.classList.remove("is-corresponding");
+  });
+  document.querySelectorAll(".code-line.is-selected").forEach((element) => {
+    element.classList.remove("is-selected");
+  });
+  codeCorrespondence.textContent = "コードの行をクリックしてください";
+}
+
+attachDropzoneEvents(assemblyList);
+renderPalette();
+updateWorkspaceState();
+
+runButton.addEventListener("click", runProgram);
+resetButton.addEventListener("click", resetWorkspace);
+flowTab.addEventListener("click", () => selectTab("flow"));
+javaTab.addEventListener("click", () => selectTab("java"));
+
+document.querySelectorAll(".code-line[data-code-block]").forEach((line) => {
+  line.addEventListener("click", () => showCorrespondence(line.dataset.codeBlock, line));
+});
