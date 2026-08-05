@@ -587,6 +587,14 @@ body.is-resizing {
 .block-palette {
   display: grid;
   gap: 9px;
+  min-height: 72px;
+  transition: outline-color 0.15s, background 0.15s;
+}
+
+.block-palette.is-remove-target {
+  outline: 2px dashed var(--red-700);
+  outline-offset: 4px;
+  background: #fff3f3;
 }
 
 .source-block,
