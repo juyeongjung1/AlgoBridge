@@ -91,6 +91,12 @@ code {
   background: #d6d8da;
 }
 
+.algobridge-logo {
+  width: 54px;
+  height: 42px;
+  object-fit: contain;
+}
+
 .brand h1 {
   margin: 0;
   font-size: 21px;
