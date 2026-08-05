@@ -714,13 +714,12 @@ function renderResult(input, result) {
   });
 
   resultContent.hidden = false;
-  openResultPanel();
-  selectTab("flow");
   showSuccessModal();
-  requestAnimationFrame(() => {
-    resultPanel.scrollTo({ top: 0, behavior: "smooth" });
-    resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
-  });
+  resultDetails.open = false;
+  resultPanel.hidden = true;
+  resultReopenButton.hidden = true;
+  workspace.classList.remove("is-result-open");
+  selectTab("flow");
 }
 
 function runProgram() {
@@ -835,10 +834,14 @@ previousHintButton.addEventListener("click", showPreviousHint);
 nextHintButton.addEventListener("click", showNextHint);
 successConfirmButton.addEventListener("click", () => {
   successModal.hidden = true;
-  resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
+  openResultPanel();
+  requestAnimationFrame(() => {
+    resultPanel.scrollTo({ top: 0, behavior: "smooth" });
+    resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
+  });
 });
 resultDetails.addEventListener("toggle", () => {
-  if (!resultDetails.open && !resultContent.hidden) {
+  if (!resultDetails.open && !resultContent.hidden && successModal.hidden) {
     resultPanel.hidden = true;
     resultReopenButton.hidden = false;
     workspace.classList.remove("is-result-open");

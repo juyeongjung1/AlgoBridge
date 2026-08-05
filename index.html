@@ -170,6 +170,17 @@
           </div>
         </section>
 
+        <section class="explanation-section" aria-labelledby="explanation-heading">
+          <h3 id="explanation-heading">なぜこの組み立てになるのか</h3>
+          <ol class="reason-list">
+            <li><strong><code>sum</code> を最初に宣言する理由</strong><p>合計を入れておくための変数を、使う前に用意します。宣言していない変数には値を入れたり、計算に使ったりできません。</p></li>
+            <li><strong><code>sum</code> の初期値を 0 にする理由</strong><p>まだ何も足していない合計は 0 です。また、0 にどの数を足しても値が変わらないため、合計を始める値として適しています。</p></li>
+            <li><strong>ループカウンタ変数 <code>i</code> を 1 から始める理由</strong><p>問題は「1 から n まで」の合計を求めるためです。<code>i</code> を 1 から始め、1 ずつ増やすことで、1、2、…、n を順番に扱えます。</p></li>
+            <li><strong><code>sum</code> に <code>i</code> を加える理由</strong><p>繰り返すたびに、その回の数 <code>i</code> を合計へ足し込みます。これにより、<code>sum</code> は途中までの合計を保持し、最後には 1 から n までの合計になります。</p></li>
+            <li><strong>最後に <code>sum</code> を出力する理由</strong><p>すべての数を足し終えてから出力することで、途中の値ではなく完成した合計を表示できます。</p></li>
+          </ol>
+        </section>
+
         <section class="support-section" aria-labelledby="support-heading">
           <h3 id="support-heading">別の表現で確認</h3>
           <div class="tabs" role="tablist" aria-label="表示の切り替え">
