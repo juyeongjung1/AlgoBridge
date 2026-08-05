@@ -732,6 +732,105 @@ code {
   font-size: 11px;
 }
 
+.hint-area {
+  margin: 8px 0 4px;
+}
+
+.hint-button,
+.next-hint-button {
+  padding: 8px 12px;
+  border: 1px solid #c78927;
+  border-radius: 5px;
+  color: #805512;
+  background: #fff6df;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hint-button span {
+  margin-right: 5px;
+}
+
+.hint-panel {
+  margin-top: 8px;
+  padding: 11px 13px;
+  border-left: 3px solid #c78927;
+  border-radius: 4px;
+  background: #fff8e9;
+}
+
+.hint-count {
+  margin: 0 0 3px;
+  color: #8b641d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.hint-text {
+  margin: 0;
+  color: var(--navy-950);
+  font-size: 12px;
+}
+
+.next-hint-button {
+  margin-top: 9px;
+  background: #fff;
+}
+
+.hint-modal[hidden] {
+  display: none;
+}
+
+.hint-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(25, 35, 46, 0.52);
+}
+
+.hint-modal-dialog {
+  width: min(480px, 100%);
+  padding: 26px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(17, 34, 51, 0.24);
+  text-align: center;
+}
+
+.hint-modal-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: #fff1cb;
+  font-size: 23px;
+}
+
+.hint-modal h2 {
+  margin: 0 0 13px;
+  color: var(--navy-950);
+  font-size: 18px;
+}
+
+.hint-modal p {
+  margin: 7px 0;
+  color: #536271;
+  font-size: 13px;
+}
+
+.hint-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 20px;
+}
+
 .build-actions {
   display: flex;
   justify-content: space-between;

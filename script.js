@@ -141,6 +141,15 @@ const runButton = document.querySelector("#run-button");
 const resetButton = document.querySelector("#reset-button");
 const resultReopenButton = document.querySelector("#result-reopen");
 const feedback = document.querySelector("#feedback");
+const hintArea = document.querySelector("#hint-area");
+const hintButton = document.querySelector("#hint-button");
+const hintPanel = document.querySelector("#hint-panel");
+const hintCount = document.querySelector("#hint-count");
+const hintText = document.querySelector("#hint-text");
+const nextHintButton = document.querySelector("#next-hint-button");
+const hintModal = document.querySelector("#hint-modal");
+const hintConfirmButton = document.querySelector("#hint-confirm-button");
+const hintCancelButton = document.querySelector("#hint-cancel-button");
 const resultContent = document.querySelector("#result-content");
 const outputValue = document.querySelector("#output-value");
 const traceCaption = document.querySelector("#trace-caption");
@@ -156,6 +165,8 @@ const workspace = document.querySelector(".workspace");
 
 let draggedInstanceId = null;
 let instanceCounter = 0;
+let availableHints = [];
+let shownHintCount = 0;
 
 function getBlockDefinition(blockId) {
   return currentProblem.blocks.find((block) => block.id === blockId);
@@ -503,9 +514,91 @@ function showFeedback(messages) {
   feedback.hidden = false;
 }
 
+function getFeedbackSummary() {
+  const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
+  const expectedBlockIds = [...currentProblem.expected.root, ...currentProblem.expected.loop];
+  const hasUnexpectedBlock = allPlaced.some((id) => !expectedBlockIds.includes(id));
+  const hasMissingBlock = expectedBlockIds.some((id) => !allPlaced.includes(id));
+
+  if (hasUnexpectedBlock) {
+    return "この問題には使わない処理ブロックが含まれています。問題文を見直しましょう。";
+  }
+  if (hasMissingBlock) {
+    return "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。";
+  }
+  return "ブロックの順番や、繰り返しの中の配置を見直しましょう。";
+}
+
+function getAttemptHints() {
+  const hints = [];
+  const root = directBlockIds(assemblyList);
+  const loopElement = assemblyList.querySelector(':scope > [data-block-id="loop"]');
+  const loopBody = loopElement?.querySelector(':scope > .loop-body');
+  const nested = loopBody ? directBlockIds(loopBody) : [];
+  const positions = Object.fromEntries(root.map((id, index) => [id, index]));
+  const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
+  const expectedBlockIds = [...currentProblem.expected.root, ...currentProblem.expected.loop];
+
+  if (allPlaced.some((id) => !expectedBlockIds.includes(id))) {
+    hints.push("問題文の「1からnまでの合計」に関係しない変数や処理が入っていないか、見直してみましょう。");
+  }
+  if (!allPlaced.includes("declareSum") || positions.declareSum > (positions.initializeSum ?? Infinity)) {
+    hints.push("計算に使う値は、使い始める前に準備できているでしょうか？");
+  }
+  if (!allPlaced.includes("initializeSum") || positions.initializeSum > (positions.loop ?? Infinity)) {
+    hints.push("足し算を始めるsumの最初の値は、いくつがよいでしょうか？");
+  }
+  if (!loopElement) {
+    hints.push("1からnまでの数を一つずつ扱うには、iをどう変化させるとよいでしょうか？");
+  }
+  if (!nested.includes("addCurrent")) {
+    hints.push("各回の数をsumへ加える処理は、繰り返しの内側と外側のどちらに置くべきでしょうか？");
+  }
+  if (!allPlaced.includes("outputSum") || positions.outputSum !== root.length - 1) {
+    hints.push("求めた合計は、計算の途中と最後のどちらで表示するとよいでしょうか？");
+  }
+  if (hints.length === 0) {
+    hints.push("上から実行される順番と、繰り返しの内側にある処理を見直してみましょう。");
+  }
+
+  return hints;
+}
+
+function prepareHints() {
+  availableHints = getAttemptHints();
+  shownHintCount = 0;
+  hintArea.hidden = false;
+  hintButton.hidden = false;
+  hintPanel.hidden = true;
+  nextHintButton.hidden = true;
+}
+
+function clearHints() {
+  availableHints = [];
+  shownHintCount = 0;
+  hintArea.hidden = true;
+  hintPanel.hidden = true;
+  hintModal.hidden = true;
+}
+
+function showNextHint() {
+  const hint = availableHints[shownHintCount];
+  if (!hint) {
+    return;
+  }
+
+  shownHintCount += 1;
+  hintCount.textContent = `ヒント ${shownHintCount} / ${availableHints.length}`;
+  hintText.textContent = hint;
+  hintPanel.hidden = false;
+  hintButton.hidden = true;
+  nextHintButton.hidden = shownHintCount >= availableHints.length;
+}
+
 function clearFeedback() {
   feedback.hidden = true;
   feedback.replaceChildren();
+  clearHints();
 }
 
 function clearResults() {
@@ -559,7 +652,8 @@ function runProgram() {
 
   const errors = validateAssembly();
   if (errors.length > 0) {
-    showFeedback(errors);
+    showFeedback([getFeedbackSummary()]);
+    prepareHints();
     clearResults();
     return;
   }
@@ -624,6 +718,17 @@ updateWorkspaceState();
 
 runButton.addEventListener("click", runProgram);
 resetButton.addEventListener("click", resetWorkspace);
+hintButton.addEventListener("click", () => {
+  hintModal.hidden = false;
+});
+hintCancelButton.addEventListener("click", () => {
+  hintModal.hidden = true;
+});
+hintConfirmButton.addEventListener("click", () => {
+  hintModal.hidden = true;
+  showNextHint();
+});
+nextHintButton.addEventListener("click", showNextHint);
 resultDetails.addEventListener("toggle", () => {
   if (!resultDetails.open && !resultContent.hidden) {
     resultPanel.hidden = true;

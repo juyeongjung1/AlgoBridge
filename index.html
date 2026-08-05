@@ -89,6 +89,19 @@
       </div>
 
       <div id="feedback" class="feedback" role="alert" aria-live="polite" hidden></div>
+      <div id="hint-area" class="hint-area" hidden>
+        <button id="hint-button" class="hint-button" type="button">
+          <span aria-hidden="true">💡</span>
+          ヒントを見る
+        </button>
+        <section id="hint-panel" class="hint-panel" aria-live="polite" hidden>
+          <p id="hint-count" class="hint-count"></p>
+          <p id="hint-text" class="hint-text"></p>
+          <button id="next-hint-button" class="next-hint-button" type="button" hidden>
+            次のヒントを見る
+          </button>
+        </section>
+      </div>
 
       <div class="build-actions">
         <button id="reset-button" class="button button-secondary" type="button">
@@ -198,6 +211,19 @@
       </details>
     </section>
   </main>
+
+  <div id="hint-modal" class="hint-modal" role="dialog" aria-modal="true" aria-labelledby="hint-modal-title" hidden>
+    <div class="hint-modal-dialog">
+      <span class="hint-modal-icon" aria-hidden="true">💡</span>
+      <h2 id="hint-modal-title">本当にヒントを見ますか？</h2>
+      <p>自力でどれほど考えてもわからないときに使いましょう。</p>
+      <p>軽くヒントで解決しようとしていませんか？<br>それでは学習になりません。</p>
+      <div class="hint-modal-actions">
+        <button id="hint-cancel-button" class="button button-secondary" type="button">いいえ、自力で考える</button>
+        <button id="hint-confirm-button" class="button button-primary" type="button">はい、ヒントを見る</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
