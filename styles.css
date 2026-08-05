@@ -1001,7 +1001,26 @@ body.is-resizing {
 }
 
 .placed-block.block-input {
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  clip-path: none;
+}
+
+.placed-block.block-input > .placed-copy {
+  position: relative;
+  min-height: 58px;
+  padding: 11px 52px 11px 42px;
+  border: 1px solid #d3c4e8;
+  background: #f1ecfa;
   clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+}
+
+.placed-block.block-input::before {
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .placed-block.block-input .remove-block {
@@ -1009,6 +1028,8 @@ body.is-resizing {
   right: 18px;
   color: #5d7080;
   background: #fff;
+  border: 1px solid #d6e0e8;
+  box-shadow: 0 2px 6px rgba(25, 45, 63, 0.18);
   transform: translateY(-50%);
 }
 
