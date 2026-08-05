@@ -215,6 +215,8 @@ function createPlacedBlock(blockId) {
   `;
 
   if (block.acceptsChildren) {
+    element.querySelector(".placed-copy").append(element.querySelector(".remove-block"));
+
     const loopBody = document.createElement("div");
     loopBody.className = "loop-body dropzone";
     loopBody.dataset.zone = "loop";

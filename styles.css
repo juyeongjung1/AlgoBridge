@@ -509,17 +509,19 @@ code {
 }
 
 .placed-block.block-loop::before {
-  top: 29px;
-  z-index: 1;
+  display: none;
 }
 
 .placed-block.block-loop > .placed-copy {
+  position: relative;
+  width: min(400px, calc(100% - 40px));
   min-height: 92px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 14px 58px;
+  margin: 0 auto;
+  padding: 14px 56px 14px 46px;
   background: var(--amber-100);
   border: 1px solid #d6ad60;
   clip-path: polygon(10% 0, 90% 0, 100% 24%, 100% 100%, 0 100%, 0 24%);
@@ -527,24 +529,25 @@ code {
 }
 
 .placed-block.block-loop > .placed-copy strong {
-  max-width: 220px;
+  max-width: 280px;
 }
 
-.placed-block.block-loop > .remove-block {
-  top: 31px;
-  right: 17px;
-  z-index: 2;
+.placed-block.block-loop > .placed-copy .remove-block {
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
 }
 
 .placed-block.block-loop > .loop-body {
-  margin: 11px 20px 10px;
+  margin: 12px 0;
 }
 
 .loop-end-symbol {
   min-height: 48px;
   display: grid;
   place-items: center;
-  margin: 0 20px 10px;
+  width: min(400px, calc(100% - 40px));
+  margin: 0 auto 10px;
   padding: 8px 24px;
   color: #7c5513;
   background: var(--amber-100);
