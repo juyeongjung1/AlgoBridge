@@ -1008,7 +1008,9 @@ body.is-resizing {
   padding: 0;
   overflow: visible;
   border: 0;
+  border-radius: 0;
   background: transparent;
+  box-shadow: none;
   clip-path: none;
 }
 
