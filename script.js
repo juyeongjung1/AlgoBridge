@@ -82,7 +82,7 @@ const problems = [
 problems.sort((left, right) => ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(left.id) - ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(right.id));
 
 const $ = (s) => document.querySelector(s);
-const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
+const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), problemDrawerTab = $("#problem-drawer-tab"), problemDrawerClose = $("#problem-drawer-close"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
 let problemIndex = 0, currentProblem = problems[0], dragged = null, history = [], hints = [], shownHints = 0, isInstructorMode = localStorage.getItem("algobridge-instructor-mode") === "true";
 const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a50192e7";
 const sourceResizer = $("#source-resizer");
@@ -95,7 +95,7 @@ function definition(id) { return [...currentProblem.correct, ...currentProblem.d
 function expectedIds() { return [...currentProblem.expected.root, ...Object.values(currentProblem.expected.nested || {}).flat()]; }
 function values() { return Object.fromEntries(currentProblem.inputs.map((input) => [input.id, $("#input-" + input.id).value])); }
 function problemNumber(index) { return ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"][index] || String(index + 1); }
-function selectProblem(index) { if (index < 0 || index >= problems.length || index === problemIndex) return; problemIndex = index; currentProblem = problems[problemIndex]; history = []; renderProblem(); }
+function selectProblem(index) { if (index < 0 || index >= problems.length || index === problemIndex) return; workspace.classList.remove("is-problem-list-open"); problemIndex = index; currentProblem = problems[problemIndex]; history = []; renderProblem(); }
 
 function renderProblem() {
   $("#lesson-position").textContent = `問題 ${problemIndex + 1} / ${problems.length}`;
@@ -144,6 +144,7 @@ async function instructorLogin(event) { event.preventDefault(); const value = $(
 function updateInstructor() { document.body.classList.toggle("is-instructor-mode", isInstructorMode); $("#instructor-mode-button").textContent = isInstructorMode ? "受講者モードに戻る" : "講師用"; }
 
 addDropEvents(assemblyList); addPaletteDropEvents(); renderProblem(); updateInstructor();
+problemDrawerTab.addEventListener("click", () => workspace.classList.add("is-problem-list-open")); problemDrawerClose.addEventListener("click", () => workspace.classList.remove("is-problem-list-open"));
 sourceResizer.addEventListener("pointerdown", (event) => { const bounds = workspace.getBoundingClientRect(); const startX = event.clientX; const startWidth = $(".source-panel").getBoundingClientRect().width; sourceResizer.setPointerCapture(event.pointerId); document.body.classList.add("is-resizing"); const resize = (moveEvent) => { const maxWidth = Math.min(560, bounds.width - (workspace.classList.contains("is-result-open") ? 820 : 520)); const width = Math.max(280, Math.min(maxWidth, startWidth + moveEvent.clientX - startX)); workspace.style.setProperty("--source-panel-width", `${width}px`); }; const stop = () => { document.body.classList.remove("is-resizing"); sourceResizer.removeEventListener("pointermove", resize); sourceResizer.removeEventListener("pointerup", stop); sourceResizer.removeEventListener("pointercancel", stop); }; sourceResizer.addEventListener("pointermove", resize); sourceResizer.addEventListener("pointerup", stop); sourceResizer.addEventListener("pointercancel", stop); });
 $("#run-button").addEventListener("click", run); $("#undo-button").addEventListener("click", () => { const snap = history.pop(); if (snap) restore(snap); });
 $("#previous-problem-button").addEventListener("click", () => selectProblem(problemIndex - 1));

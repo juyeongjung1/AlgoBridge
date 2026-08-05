@@ -29,6 +29,14 @@
   </header>
 
   <main class="workspace">
+    <button id="problem-drawer-tab" class="problem-drawer-tab" type="button" aria-label="問題リストを開く" title="問題リストを開く">🔖</button>
+    <aside id="problem-list-sidebar" class="problem-list-sidebar" aria-label="問題リスト">
+      <div class="problem-list-sidebar-heading">
+        <div><span class="problem-list-title">問題リスト</span><span id="problem-list-summary">全8問</span></div>
+        <button id="problem-drawer-close" class="problem-drawer-close" type="button">← 閉じる</button>
+      </div>
+      <nav id="problem-list-items" class="problem-list-items" aria-label="問題リスト"></nav>
+    </aside>
     <section class="panel source-panel" aria-labelledby="problem-heading">
       <div class="panel-heading">
         <span class="step-number">1</span>
@@ -37,11 +45,6 @@
           <h2 id="problem-heading">氏名をつなげて表示</h2>
         </div>
       </div>
-
-      <details class="problem-list" open>
-        <summary><span class="problem-list-title">問題リスト</span><span id="problem-list-summary">全8問</span><span class="problem-list-toggle" aria-hidden="true"></span></summary>
-        <nav id="problem-list-items" class="problem-list-items" aria-label="問題リスト"></nav>
-      </details>
 
       <div class="problem-card">
         <p id="problem-description"></p>

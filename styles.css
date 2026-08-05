@@ -293,27 +293,56 @@ body.is-resizing {
   line-height: 1.35;
 }
 
-.problem-list {
-  margin-top: 13px;
-  border: 1px solid #d7e0e6;
-  border-radius: 6px;
-  background: #fafcfd;
+.problem-drawer-tab {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 4;
+  width: 42px;
+  height: 70px;
+  padding: 0;
+  border: 1px solid var(--blue-600);
+  border-radius: 0 7px 7px 0;
+  color: var(--blue-600);
+  background: var(--blue-100);
+  box-shadow: 0 2px 7px rgba(17, 34, 51, 0.12);
+  cursor: pointer;
+  font-size: 20px;
 }
 
-.problem-list summary {
+.problem-list-sidebar {
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 18px;
+  z-index: 5;
+  width: 310px;
+  overflow: auto;
+  padding: 15px;
+  border: 1px solid #d7e0e6;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(17, 34, 51, 0.2);
+  transform: translateX(calc(-100% - 24px));
+  transition: transform 0.24s ease;
+}
+
+.workspace.is-problem-list-open .problem-list-sidebar {
+  transform: translateX(0);
+}
+
+.workspace.is-problem-list-open .problem-drawer-tab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.problem-list-sidebar-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 11px;
-  color: var(--navy-950);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 800;
-  list-style: none;
-}
-
-.problem-list summary::-webkit-details-marker {
-  display: none;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
 }
 
 .problem-list-title {
@@ -335,48 +364,26 @@ body.is-resizing {
 }
 
 #problem-list-summary {
-  margin-left: auto;
+  margin-left: 8px;
   color: var(--muted);
   font-size: 10px;
   font-weight: 600;
 }
 
-.problem-list-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 9px;
-  padding: 4px 7px;
-  border: 1px solid #d1dce4;
+.problem-drawer-close {
+  padding: 5px 8px;
+  border: 1px solid #c2d0dc;
   border-radius: 4px;
-  color: var(--blue-600);
+  color: #405a70;
   background: #fff;
+  cursor: pointer;
   font-size: 10px;
-}
-
-.problem-list-toggle::before {
-  content: "⌃";
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.problem-list-toggle::after {
-  content: "閉じる";
   font-weight: 700;
-}
-
-.problem-list:not([open]) .problem-list-toggle::before {
-  content: "⌄";
-}
-
-.problem-list:not([open]) .problem-list-toggle::after {
-  content: "開く";
 }
 
 .problem-list-items {
   display: grid;
   gap: 4px;
-  padding: 0 7px 8px;
 }
 
 .problem-list-item {
