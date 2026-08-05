@@ -184,7 +184,7 @@ function formatBlockLabel(label) {
 function renderPalette() {
   palette.replaceChildren();
 
-  shuffleBlocks(currentProblem.blocks).forEach((block) => {
+  shuffleBlockGroups(currentProblem.blocks).forEach((block) => {
     const element = document.createElement("button");
     element.type = "button";
     element.className = `source-block block-${block.type}`;
@@ -217,6 +217,20 @@ function shuffleBlocks(blocks) {
     [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
   }
   return shuffled;
+}
+
+function shuffleBlockGroups(blocks) {
+  const groups = new Map();
+
+  blocks.forEach((block) => {
+    if (!groups.has(block.type)) {
+      groups.set(block.type, []);
+    }
+    groups.get(block.type).push(block);
+  });
+
+  return shuffleBlocks([...groups.values()])
+    .flatMap((group) => shuffleBlocks(group));
 }
 
 function createPlacedBlock(blockId) {
