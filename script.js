@@ -787,8 +787,23 @@ function showCorrespondence(blockId, selectedLine) {
   if (selectedLine) {
     selectedLine.classList.add("is-selected");
   }
-  codeCorrespondence.textContent = `対応する文章ブロック：${block.label}`;
+  showCodeExplanation(block, selectedLine);
   focusCorrespondingBlock(blockId);
+}
+
+function showCodeExplanation(block, selectedLine) {
+  const blockLabel = document.createElement("p");
+  blockLabel.className = "code-correspondence-block";
+  blockLabel.textContent = `対応する文章ブロック：${block.label}`;
+
+  const syntaxTitle = document.createElement("strong");
+  syntaxTitle.textContent = selectedLine.dataset.codeTitle;
+
+  const syntaxDescription = document.createElement("p");
+  syntaxDescription.className = "code-correspondence-description";
+  syntaxDescription.textContent = selectedLine.dataset.codeDescription;
+
+  codeCorrespondence.replaceChildren(blockLabel, syntaxTitle, syntaxDescription);
 }
 
 function focusCorrespondingBlock(blockId) {
@@ -813,6 +828,7 @@ function clearCorrespondence() {
   document.querySelectorAll(".code-line.is-selected").forEach((element) => {
     element.classList.remove("is-selected");
   });
+  codeCorrespondence.replaceChildren();
   codeCorrespondence.textContent = "コードの行をクリックしてください";
 }
 
