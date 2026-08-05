@@ -826,6 +826,10 @@ body.is-resizing {
   font-weight: 700;
 }
 
+.flow-canvas [hidden] {
+  display: none !important;
+}
+
 .assembly-list {
   width: 100%;
   min-height: 174px;
