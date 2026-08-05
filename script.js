@@ -592,24 +592,31 @@ function getAttemptHints() {
 
   if (allPlaced.some((id) => !expectedBlockIds.includes(id))) {
     hints.push("問題文の「1からnまでの合計」に関係しない変数や処理が入っていないか、見直してみましょう。");
+    hints.push("この問題では、sum の宣言・初期化・繰り返し・加算・出力に関係するブロックを選びましょう。");
   }
   if (!allPlaced.includes("declareSum") || positions.declareSum > (positions.initializeSum ?? Infinity)) {
     hints.push("計算に使う値は、使い始める前に準備できているでしょうか？");
+    hints.push("変数 sum は、計算を始める前に宣言しましょう。");
   }
   if (!allPlaced.includes("initializeSum") || positions.initializeSum > (positions.loop ?? Infinity)) {
     hints.push("足し算を始めるsumの最初の値は、いくつがよいでしょうか？");
+    hints.push("変数 sum に、繰り返しの前に初期値 0 を設定しましょう。");
   }
   if (!loopElement) {
     hints.push("1からnまでの数を一つずつ扱うには、ループカウンタ変数 i をどう変化させるとよいでしょうか？");
+    hints.push("ループカウンタ変数 i を 1 から n まで、1 ずつ増やしながら繰り返しましょう。");
   }
   if (!nested.includes("addCurrent")) {
     hints.push("各回の数をsumへ加える処理は、繰り返しの内側と外側のどちらに置くべきでしょうか？");
+    hints.push("繰り返しの中に、sum へループカウンタ変数 i の値を加える処理を配置しましょう。");
   }
   if (!allPlaced.includes("outputSum") || positions.outputSum !== root.length - 1) {
     hints.push("求めた合計は、計算の途中と最後のどちらで表示するとよいでしょうか？");
+    hints.push("繰り返しが終わった後、最後に変数 sum の値を出力しましょう。");
   }
   if (hints.length === 0) {
     hints.push("上から実行される順番と、繰り返しの内側にある処理を見直してみましょう。");
+    hints.push("宣言 → 初期化 → 繰り返し（加算）→ 出力、の順番になっているか確認しましょう。");
   }
 
   return hints;
