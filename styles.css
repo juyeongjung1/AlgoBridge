@@ -1355,6 +1355,28 @@ body.is-resizing {
   background: #fff;
 }
 
+.button-undo {
+  border-color: #83a9c8;
+  color: #245c87;
+  background: #edf6fc;
+}
+
+.button-undo:hover:not(:disabled) {
+  border-color: #4a89b8;
+  background: #deeffa;
+}
+
+.button-reset {
+  border-color: #dfa7a7;
+  color: #9a3e3e;
+  background: #fff3f3;
+}
+
+.button-reset:hover {
+  border-color: #c97676;
+  background: #ffe9e9;
+}
+
 .button-primary {
   min-width: 136px;
   border: 1px solid var(--blue-600);
