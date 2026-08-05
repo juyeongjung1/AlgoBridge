@@ -1,1007 +1,147 @@
 "use strict";
 
-const problems = {
-  sumToN: {
-    id: "sumToN",
-    title: "1から n までの合計",
-    initialInput: 3,
-    blocks: [
-      {
-        id: "declareSum",
-        type: "declaration",
-        label: "合計を格納するための変数 sum を宣言する",
-        shortLabel: "変数 sum を宣言",
-        hint: "変数を用意する"
-      },
-      {
-        id: "initializeSum",
-        type: "assignment",
-        label: "変数 sum に、初期値として 0 を設定する",
-        shortLabel: "sum に 0 を設定",
-        hint: "計算前の値を決める"
-      },
-      {
-        id: "loop",
-        type: "loop",
-        label: "ループカウンタ変数 i を 1 から n まで、1 ずつ増やしながら繰り返す",
-        shortLabel: "ループカウンタ変数 i を 1 ずつ増やして繰り返す",
-        hint: "ループカウンタ変数 i の開始・終了・増分を考える",
-        acceptsChildren: true
-      },
-      {
-        id: "addCurrent",
-        type: "calculation",
-        label: "変数 sum に、ループカウンタ変数 i の値を加える",
-        shortLabel: "sum にループカウンタ変数 i の値を加える",
-        hint: "合計を更新する"
-      },
-      {
-        id: "outputSum",
-        type: "output",
-        label: "変数 sum の値を出力する",
-        shortLabel: "sum の値を出力",
-        hint: "計算結果を表示する"
-      },
-      {
-        id: "initializeSumOne",
-        type: "assignment",
-        label: "変数 sum に、初期値として 1 を設定する",
-        shortLabel: "sum に 1 を設定",
-        hint: "初期値を設定する"
-      },
-      {
-        id: "loopToNMinusOne",
-        type: "loop",
-        label: "ループカウンタ変数 i を 1 から n - 1 まで、1 ずつ増やしながら繰り返す",
-        shortLabel: "ループカウンタ変数 i を n - 1 まで増やして繰り返す",
-        hint: "ループカウンタ変数 i の終了条件を考える",
-        acceptsChildren: true
-      },
-      {
-        id: "outputCurrent",
-        type: "output",
-        label: "ループカウンタ変数 i を、その都度出力する",
-        shortLabel: "ループカウンタ変数 i を出力",
-        hint: "途中経過を表示する"
-      },
-      {
-        id: "addToN",
-        type: "calculation",
-        label: "変数 n に、ループカウンタ変数 i の値を加える",
-        shortLabel: "n にループカウンタ変数 i の値を加える",
-        hint: "入力値を更新する"
-      },
-      {
-        id: "subtractCurrent",
-        type: "calculation",
-        label: "変数 sum から、ループカウンタ変数 i の値を引く",
-        shortLabel: "sum からループカウンタ変数 i の値を引く",
-        hint: "値を減らす"
-      },
-      {
-        id: "loopFromZero",
-        type: "loop",
-        label: "ループカウンタ変数 i を 0 から n まで、1 ずつ増やしながら繰り返す",
-        shortLabel: "ループカウンタ変数 i を 0 から増やして繰り返す",
-        hint: "ループカウンタ変数 i の開始値を考える",
-        acceptsChildren: true
-      },
-      {
-        id: "declareAverage",
-        type: "declaration",
-        label: "平均を格納するための変数 average を宣言する",
-        shortLabel: "変数 average を宣言",
-        hint: "別の変数を用意する"
-      },
-      {
-        id: "inputSum",
-        type: "input",
-        label: "変数 sum の値を入力する",
-        shortLabel: "sum の値を入力",
-        hint: "値を受け取る"
-      },
-      {
-        id: "outputN",
-        type: "output",
-        label: "変数 n の値を出力する",
-        shortLabel: "n の値を出力",
-        hint: "入力値を表示する"
-      },
-      {
-        id: "initializeCurrent",
-        type: "assignment",
-        label: "ループカウンタ変数 i に、初期値として 0 を設定する",
-        shortLabel: "ループカウンタ変数 i に 0 を設定",
-        hint: "別の値を初期化する"
-      }
-    ],
-    expected: {
-      root: ["declareSum", "initializeSum", "loop", "outputSum"],
-      loop: ["addCurrent"]
-    },
-    execute(input) {
-      let sum = 0;
-      const trace = [{ iteration: "初期状態", current: "-", sum }];
+const B = (id, type, label, hint = "処理の役割を考える", acceptsChildren = false) => ({ id, type, label, hint, acceptsChildren });
+const I = (id, label, value, type = "number", options = {}) => ({ id, label, value, type, ...options });
+const commonDummies = [
+  B("dummyInput", "input", "計算結果を入力する", "結果を受け取る処理ではありません"),
+  B("dummyOutput", "output", "入力された値をそのまま出力する", "途中の値を表示する処理です"),
+  B("dummyDeclare", "declaration", "使わない変数 result を宣言する", "問題で使う値だけを準備します")
+];
 
-      for (let i = 1; i <= input; i += 1) {
-        sum += i;
-        trace.push({ iteration: `${i}回目`, current: i, sum });
-      }
-
-      return { output: sum, trace };
-    }
-  }
-};
-
-const currentProblem = problems.sumToN;
-const INSTRUCTOR_MODE_STORAGE_KEY = "algobridge-instructor-mode";
-const INSTRUCTOR_PASSWORD_HASH = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a50192e7";
-const palette = document.querySelector("#block-palette");
-const assemblyList = document.querySelector("#assembly-list");
-const nInput = document.querySelector("#n-input");
-const expectedOutputValue = document.querySelector("#expected-output-value");
-const runButton = document.querySelector("#run-button");
-const instructorModeButton = document.querySelector("#instructor-mode-button");
-const instructorModal = document.querySelector("#instructor-modal");
-const instructorForm = document.querySelector("#instructor-form");
-const instructorPassword = document.querySelector("#instructor-password");
-const instructorCancelButton = document.querySelector("#instructor-cancel-button");
-const instructorLoginError = document.querySelector("#instructor-login-error");
-const resetButton = document.querySelector("#reset-button");
-const resetModal = document.querySelector("#reset-modal");
-const resetConfirmButton = document.querySelector("#reset-confirm-button");
-const resetCancelButton = document.querySelector("#reset-cancel-button");
-const undoButton = document.querySelector("#undo-button");
-const feedback = document.querySelector("#feedback");
-const hintArea = document.querySelector("#hint-area");
-const hintButton = document.querySelector("#hint-button");
-const hintPanel = document.querySelector("#hint-panel");
-const hintCount = document.querySelector("#hint-count");
-const hintText = document.querySelector("#hint-text");
-const previousHintButton = document.querySelector("#previous-hint-button");
-const nextHintButton = document.querySelector("#next-hint-button");
-const hintModal = document.querySelector("#hint-modal");
-const hintConfirmButton = document.querySelector("#hint-confirm-button");
-const hintCancelButton = document.querySelector("#hint-cancel-button");
-const successModal = document.querySelector("#success-modal");
-const successConfirmButton = document.querySelector("#success-confirm-button");
-const successKicker = document.querySelector("#success-kicker");
-const successModalTitle = document.querySelector("#success-modal-title");
-const successModalMessage = document.querySelector("#success-modal-message");
-const successBadge = document.querySelector("#success-badge");
-const resultContent = document.querySelector("#result-content");
-const outputValue = document.querySelector("#output-value");
-const traceCaption = document.querySelector("#trace-caption");
-const traceBody = document.querySelector("#trace-body");
-const flowTab = document.querySelector("#flow-tab");
-const javaTab = document.querySelector("#java-tab");
-const flowPanel = document.querySelector("#flow-panel");
-const javaPanel = document.querySelector("#java-panel");
-const codeCorrespondence = document.querySelector("#code-correspondence");
-const resultPanel = document.querySelector(".result-panel");
-const resultDetails = document.querySelector("#result-details");
-const resultToggleIcon = document.querySelector("#result-toggle-icon");
-const resultToggleLabel = document.querySelector("#result-toggle-label");
-const resultDrawerTab = document.querySelector("#result-drawer-tab");
-const workspace = document.querySelector(".workspace");
-const buildPanel = document.querySelector(".build-panel");
-
-let draggedInstanceId = null;
-let instanceCounter = 0;
-let availableHints = [];
-let shownHintCount = 0;
-let placementHistory = [];
-let isInstructorMode = loadInstructorMode();
-
-function getBlockDefinition(blockId) {
-  return currentProblem.blocks.find((block) => block.id === blockId);
+function makeProblem(config) {
+  return { ...config, expected: config.expected || { root: config.correct.map((block) => block.id), nested: {} } };
 }
 
-function loadInstructorMode() {
-  try {
-    return localStorage.getItem(INSTRUCTOR_MODE_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
+const problems = [
+  makeProblem({
+    id: "name", category: "順次", title: "氏名をつなげて表示", inputNote: "例の値を自由に変更して確かめられます。",
+    description: "氏・名・氏（かな）・名（かな）を受け取り、<code>山田太郎 (やまだ たろう)</code> の形で表示してください。",
+    inputs: [I("lastName", "氏", "山田", "text"), I("firstName", "名", "太郎", "text"), I("lastKana", "氏（かな）", "やまだ", "text"), I("firstKana", "名（かな）", "たろう", "text")],
+    correct: [B("declareFullName", "declaration", "表示用の変数 fullName を宣言する", "文字列を入れる変数を用意する"), B("combineName", "calculation", "氏と名を結合して、変数 fullName に設定する", "文字を順に結び付ける"), B("outputFullName", "output", "変数 fullName と、かなを括弧付きで出力する", "完成した文字列を表示する")],
+    dummies: [B("combineKanaOnly", "calculation", "氏（かな）と名（かな）だけを結合する"), B("outputLastName", "output", "氏だけを出力する"), ...commonDummies],
+    execute(v) { const output = `${v.lastName}${v.firstName} (${v.lastKana} ${v.firstKana})`; return { output, traceColumns: ["処理", "fullName の値"], trace: [["結合後", output]] }; },
+    explanation: [["表示用の変数を用意する", "複数の入力値を組み合わせた結果を入れる場所として、fullName を先に宣言します。"], ["氏と名を結合する", "文字列は + でつなげられます。氏、名、空白、かなを順に並べると指定された表示になります。"], ["最後に出力する", "すべての文字を結合してから表示することで、完成した氏名を一度に確認できます。"]],
+    code: [["declareFullName", "String fullName;", "String とは", "String は文字列を入れるための型です。"], ["combineName", "fullName = lastName + firstName;", "+ とは", "文字列どうしを + でつなげます。"], ["outputFullName", "System.out.println(fullName + \" (\" + lastKana + \" \" + firstKana + \")\");", "System.out.println とは", "かっこの中の文字列を画面に表示します。"]]
+  }),
+  makeProblem({
+    id: "triangle", category: "順次", title: "三角形の面積", inputNote: "底辺と高さには 0 より大きい数を入力してください。",
+    description: "三角形の底辺と高さを受け取り、面積を求めて表示してください。", inputs: [I("base", "底辺", 6), I("height", "高さ", 4)],
+    correct: [B("declareArea", "declaration", "面積を格納するための変数 area を宣言する"), B("calculateArea", "calculation", "底辺 × 高さ ÷ 2 を計算して、変数 area に設定する"), B("outputArea", "output", "変数 area の値を出力する")],
+    dummies: [B("calculateRectangle", "calculation", "底辺 × 高さを計算して、そのまま出力する"), B("divideBase", "calculation", "底辺 ÷ 高さを計算する"), ...commonDummies],
+    valid: (v) => Number(v.base) > 0 && Number(v.height) > 0, execute(v) { const area = Number(v.base) * Number(v.height) / 2; return { output: area, traceColumns: ["底辺", "高さ", "area の値"], trace: [[v.base, v.height, area]] }; },
+    explanation: [["面積を入れる変数を宣言する", "計算した面積を保存してから表示するため、area を用意します。"], ["三角形の公式を使う", "三角形の面積は「底辺 × 高さ ÷ 2」です。長方形の半分になるため、最後に 2 で割ります。"], ["area を出力する", "公式で求めた値を画面に表示します。"]],
+    code: [["declareArea", "double area;", "double とは", "double は小数を含む数を入れられる型です。"], ["calculateArea", "area = base * height / 2;", "計算と代入", "右側で面積を計算し、結果を area に入れます。"], ["outputArea", "System.out.println(area);", "出力", "計算済みの area を表示します。"]]
+  }),
+  makeProblem({
+    id: "evenOdd", category: "選択", title: "偶数・奇数の判定", inputNote: "整数を入力してください。", description: "整数を1つ受け取り、その値が偶数か奇数かを判定して表示してください。", inputs: [I("number", "入力値", 8)],
+    correct: [B("checkRemainder", "decision", "入力値を 2 で割った余りが 0 か判定する"), B("outputEvenOdd", "output", "判定結果として「偶数」または「奇数」を出力する")], dummies: [B("checkDivideTwo", "decision", "入力値を 2 で割った結果が 0 か判定する"), B("outputNumber", "output", "入力値をそのまま出力する"), ...commonDummies],
+    execute(v) { const output = Number(v.number) % 2 === 0 ? "偶数" : "奇数"; return { output, traceColumns: ["入力値", "2で割った余り", "判定"], trace: [[v.number, Number(v.number) % 2, output]] }; },
+    explanation: [["余りで判定する", "偶数は 2 で割り切れる数なので、2 で割った余りが 0 かを調べます。"], ["条件に応じて表示を変える", "余りが 0 なら偶数、それ以外なら奇数を出力します。"]],
+    code: [["checkRemainder", "if (number % 2 == 0) {", "if文と %", "% は割り算の余りを求めます。if は条件が成り立つときに処理を選ぶ文です。"], ["outputEvenOdd", "    System.out.println(\"偶数\");", "条件が真のとき", "条件が成り立つ場合に偶数を表示します。"], ["outputEvenOdd", "} else { System.out.println(\"奇数\"); }", "else とは", "if の条件が成り立たない場合の処理です。"]]
+  }),
+  makeProblem({
+    id: "max", category: "選択", title: "2つの値の大きい方", inputNote: "2つの整数を入力してください。", description: "2つの整数を受け取り、大きい方の値を表示してください。", inputs: [I("a", "入力値 a", 12), I("b", "入力値 b", 7)],
+    correct: [B("compareValues", "decision", "変数 a が変数 b 以上か判定する"), B("outputLarger", "output", "大きい方の値を出力する")], dummies: [B("compareEqual", "decision", "変数 a と変数 b が等しいか判定する"), B("outputSmaller", "output", "小さい方の値を出力する"), ...commonDummies],
+    execute(v) { const output = Number(v.a) >= Number(v.b) ? Number(v.a) : Number(v.b); return { output, traceColumns: ["a", "b", "大きい方"], trace: [[v.a, v.b, output]] }; },
+    explanation: [["2つの値を比較する", "a が b 以上かを調べれば、どちらを表示すればよいか選べます。"], ["条件に応じて値を出力する", "条件が真なら a、そうでなければ b を表示します。同じ値の場合も a を出力できるため、以上（>=）を使います。"]],
+    code: [["compareValues", "if (a >= b) {", "比較演算子 >=", "左の値が右の値以上なら true になります。"], ["outputLarger", "    System.out.println(a);", "真の場合", "a が大きい、または同じときに a を表示します。"], ["outputLarger", "} else { System.out.println(b); }", "elseの場合", "a が b より小さいときに b を表示します。"]]
+  }),
+  makeProblem({
+    id: "weekday", category: "選択", title: "曜日を表示", inputNote: "0〜6 の整数を入力してください。", description: "0 なら日曜日、1 なら月曜日、…、6 なら土曜日を表示し、それ以外は Error と表示してください。", inputs: [I("day", "曜日の番号", 1)],
+    correct: [B("declareWeekday", "declaration", "曜日を格納するための変数 weekday を宣言する"), B("selectWeekday", "decision", "入力値に応じて、曜日または Error を変数 weekday に設定する"), B("outputWeekday", "output", "変数 weekday の値を出力する")], dummies: [B("loopWeekday", "loop", "0 から 6 まで繰り返して曜日を表示する"), B("outputDay", "output", "入力値をそのまま出力する"), ...commonDummies],
+    execute(v) { const names = ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"]; const output = Number.isInteger(Number(v.day)) && Number(v.day) >= 0 && Number(v.day) <= 6 ? names[Number(v.day)] : "Error"; return { output, traceColumns: ["入力値", "weekday の値"], trace: [[v.day, output]] }; },
+    explanation: [["曜日を入れる変数を用意する", "選択した曜日の文字列を保存するために weekday を宣言します。"], ["番号ごとに処理を選ぶ", "0〜6 のどれかに応じて曜日を選びます。範囲外の値には Error を設定します。"], ["選択後に出力する", "どの分岐を通っても weekday に結果を入れてから、一度だけ表示します。"]],
+    code: [["declareWeekday", "String weekday;", "String とは", "曜日のような文字を入れる型です。"], ["selectWeekday", "switch (day) {", "switch文とは", "1つの値に応じて複数の処理を選ぶ文です。"], ["selectWeekday", "    case 0: weekday = \"日曜日\"; break;", "case と break", "case は一致する値の処理、break は switch 文を終える指示です。"], ["outputWeekday", "System.out.println(weekday);", "出力", "選ばれた曜日または Error を表示します。"]]
+  }),
+  makeProblem({
+    id: "greeting", category: "選択", title: "時間帯に応じた挨拶", inputNote: "0〜23 の整数を入力してください。", description: "時刻を受け取り、0〜11 は「おはようございます」、12〜17 は「こんにちは」、18〜23 は「こんばんは」、それ以外は案内文を表示してください。", inputs: [I("hour", "時刻", 15)],
+    correct: [B("declareGreeting", "declaration", "挨拶を格納するための変数 greeting を宣言する"), B("selectGreeting", "decision", "時刻の範囲に応じて、変数 greeting に挨拶を設定する"), B("outputGreeting", "output", "変数 greeting の値を出力する")], dummies: [B("checkMorningOnly", "decision", "時刻が 12 より小さいかだけ判定する"), B("outputHour", "output", "時刻をそのまま出力する"), ...commonDummies],
+    execute(v) { const h = Number(v.hour); const output = h >= 0 && h <= 11 ? "おはようございます" : h <= 17 && h >= 12 ? "こんにちは" : h <= 23 && h >= 18 ? "こんばんは" : "0〜23時で指定してください"; return { output, traceColumns: ["時刻", "greeting の値"], trace: [[v.hour, output]] }; },
+    explanation: [["挨拶を入れる変数を宣言する", "選んだ挨拶を1か所に保存して、最後に表示できるようにします。"], ["範囲を上から順に判定する", "時刻は複数の範囲に分かれます。小さい時間帯から順に条件を確認します。"], ["範囲外も扱う", "0〜23 以外の場合を最後に用意すると、想定外の入力にも案内を返せます。"]],
+    code: [["declareGreeting", "String greeting;", "String とは", "文字列を入れる変数の型です。"], ["selectGreeting", "if (hour >= 0 && hour <= 11) {", "&& とは", "&& は「かつ」を表し、2つの条件が両方成り立つかを調べます。"], ["selectGreeting", "} else if (hour <= 17) {", "else if とは", "前の条件に当てはまらない場合に、次の条件を調べます。"], ["outputGreeting", "System.out.println(greeting);", "出力", "決定した挨拶を表示します。"]]
+  }),
+  makeProblem({
+    id: "leap", category: "ネストした選択", title: "うるう年の判定", inputNote: "西暦を整数で入力してください。", description: "4で割り切れる年はうるう年、ただし100で割り切れる年はうるう年ではなく、400で割り切れる年はうるう年です。このルールで判定してください。", inputs: [I("year", "西暦", 2020)],
+    correct: [B("declareLeap", "declaration", "判定結果を格納するための変数 leapYear を宣言する"), B("checkLeapRules", "decision", "4・100・400 で割り切れるかを順に判定して、変数 leapYear に結果を設定する"), B("outputLeap", "output", "変数 leapYear の値を出力する")], dummies: [B("checkFourOnly", "decision", "4 で割り切れるかだけを判定する"), B("checkHundredFirst", "decision", "100 で割り切れる年を必ずうるう年にする"), ...commonDummies],
+    execute(v) { const y = Number(v.year); const leap = y % 400 === 0 || (y % 4 === 0 && y % 100 !== 0); const output = leap ? "うるう年です" : "うるう年ではありません"; return { output, traceColumns: ["西暦", "4で割り切れる", "100で割り切れる", "400で割り切れる", "判定"], trace: [[y, y % 4 === 0 ? "はい" : "いいえ", y % 100 === 0 ? "はい" : "いいえ", y % 400 === 0 ? "はい" : "いいえ", output]] }; },
+    explanation: [["結果を入れる変数を宣言する", "うるう年かどうかという文字列の結果を保存するために leapYear を用意します。"], ["例外を含むルールを順に判定する", "400で割り切れる年はうるう年です。そうでなく100で割り切れる年は平年、それ以外で4で割り切れる年はうるう年になります。"], ["ネストで例外を表す", "大きなルールの中に例外の条件を置くことで、2100年のような例外も正しく判定できます。"]],
+    code: [["declareLeap", "String leapYear;", "String とは", "判定結果の文章を入れる型です。"], ["checkLeapRules", "if (year % 400 == 0) {", "最初の例外", "400で割り切れる年は必ずうるう年です。"], ["checkLeapRules", "} else if (year % 100 == 0) {", "2つ目の条件", "400では割り切れず100で割り切れる年は平年です。"], ["checkLeapRules", "} else if (year % 4 == 0) {", "通常の条件", "残った年は4で割り切れるかを調べます。"], ["outputLeap", "System.out.println(leapYear);", "出力", "判定結果を表示します。"]]
+  }),
+  makeProblem({
+    id: "sum", category: "繰り返し", title: "1から n までの合計", inputNote: "1〜100の整数を入力してください。", description: "整数 <code>n</code> が与えられたとき、1から <code>n</code> までの整数の合計を求めて出力してください。", inputs: [I("n", "入力値 n", 3, "number", { min: 1, max: 100 })],
+    correct: [B("declareSum", "declaration", "合計を格納するための変数 sum を宣言する"), B("initializeSum", "assignment", "変数 sum に、初期値として 0 を設定する"), B("loop", "loop", "ループカウンタ変数 i を 1 から n まで、1 ずつ増やしながら繰り返す", "開始・終了・増分を考える", true), B("addCurrent", "calculation", "変数 sum に、ループカウンタ変数 i の値を加える"), B("outputSum", "output", "変数 sum の値を出力する")],
+    dummies: [B("initializeSumOne", "assignment", "変数 sum に、初期値として 1 を設定する"), B("loopFromZero", "loop", "ループカウンタ変数 i を 0 から n まで、1 ずつ増やしながら繰り返す", "開始値を考える", true), B("outputCurrent", "output", "ループカウンタ変数 i を、その都度出力する"), B("addToN", "calculation", "変数 n に、ループカウンタ変数 i の値を加える"), ...commonDummies], expected: { root: ["declareSum", "initializeSum", "loop", "outputSum"], nested: { loop: ["addCurrent"] } },
+    valid: (v) => Number.isInteger(Number(v.n)) && Number(v.n) >= 1 && Number(v.n) <= 100,
+    execute(v) { let sum = 0; const trace = [["初期状態", "-", sum]]; for (let i = 1; i <= Number(v.n); i += 1) { sum += i; trace.push([`${i}回目`, i, sum]); } return { output: sum, traceColumns: ["繰り返し回数", "ループカウンタ変数 i", "sum の値"], trace }; },
+    explanation: [["sum を最初に宣言する理由", "合計を入れる箱を、使う前に用意します。"], ["初期値を 0 にする理由", "まだ何も足していない合計は0であり、0は足しても計算を変えません。"], ["i を 1 から始める理由", "問題が1からnまでを扱うため、ループカウンタ変数 i も1から始めます。"], ["sum に i を加える理由", "繰り返すたびに現在の i を足すことで、sum が途中までの合計になります。"], ["最後に出力する理由", "すべて加え終えた完成した合計を表示します。"]],
+    code: [["declareSum", "int sum;", "int とは", "int は整数を入れるための型です。"], ["initializeSum", "sum = 0;", "=（代入）とは", "右側の値を左側の変数に入れます。"], ["loop", "for (int i = 1; i <= n; i++) {", "for文とは", "初期化・継続条件・増分をまとめて書く繰り返しです。"], ["addCurrent", "    sum = sum + i;", "加算して代入", "sum と i を足した新しい値を、sum に入れ直します。"], ["loop", "}", "波かっこ", "繰り返す処理の終わりを表します。"], ["outputSum", "System.out.println(sum);", "出力", "完成した sum を表示します。"]]
+  })
+];
+
+problems.sort((left, right) => ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(left.id) - ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(right.id));
+
+const $ = (s) => document.querySelector(s);
+const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
+let problemIndex = 0, currentProblem = problems[0], dragged = null, history = [], hints = [], shownHints = 0, isInstructorMode = localStorage.getItem("algobridge-instructor-mode") === "true";
+const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a50192e7";
+
+function escapeHtml(text) { return String(text).replace(/[&<>\"]/g, (x) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x])); }
+function formatLabel(text) { return escapeHtml(text).replace(/(sum|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|number|year|hour|day|[abni])/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(宣言する|設定する|出力する|結合する|加える|判定する|繰り返す)/g, '<span class="token-verb">$1</span>'); }
+function blocks() { return [...assemblyList.querySelectorAll(".placed-block")]; }
+function directIds(zone) { return [...zone.querySelectorAll(":scope > .placed-block")].map((x) => x.dataset.blockId); }
+function definition(id) { return [...currentProblem.correct, ...currentProblem.dummies].find((b) => b.id === id); }
+function expectedIds() { return [...currentProblem.expected.root, ...Object.values(currentProblem.expected.nested || {}).flat()]; }
+function values() { return Object.fromEntries(currentProblem.inputs.map((input) => [input.id, $("#input-" + input.id).value])); }
+
+function renderProblem() {
+  $("#lesson-position").textContent = `問題 ${problemIndex + 1} / ${problems.length}`;
+  $("#problem-heading").textContent = currentProblem.title; $("#problem-description").innerHTML = currentProblem.description; $("#problem-category").textContent = currentProblem.category;
+  $("#input-note").textContent = currentProblem.inputNote; $("#assembly-input-symbol").textContent = `入力：${currentProblem.inputs.map((x) => x.label).join("、")}`;
+  problemInputs.replaceChildren();
+  currentProblem.inputs.forEach((input) => { const label = document.createElement("label"); label.className = "number-input"; label.innerHTML = `<span>${escapeHtml(input.label)}</span><input id="input-${input.id}" type="${input.type}" value="${escapeHtml(input.value)}" ${input.min !== undefined ? `min="${input.min}"` : ""} ${input.max !== undefined ? `max="${input.max}"` : ""}>`; problemInputs.append(label); });
+  problemInputs.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateExpectedOutput));
+  $("#previous-problem-button").disabled = problemIndex === 0; $("#next-problem-button").disabled = problemIndex === problems.length - 1;
+  $("#block-count").textContent = `全${currentProblem.correct.length + currentProblem.dummies.length}個（正解は${currentProblem.correct.length}個）`;
+  resetWorkspace(false); renderLearningSupport(); updateExpectedOutput();
 }
 
-function saveInstructorMode() {
-  try {
-    localStorage.setItem(INSTRUCTOR_MODE_STORAGE_KEY, String(isInstructorMode));
-  } catch {
-    // ローカル保存が使えない環境では、その画面を開いている間だけ講師モードを維持する。
-  }
-}
-
-function updateInstructorMode() {
-  document.body.classList.toggle("is-instructor-mode", isInstructorMode);
-  instructorModeButton.textContent = isInstructorMode ? "受講者モードに戻る" : "講師用";
-}
-
-async function hashPassword(value) {
-  const digest = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-function openInstructorModal() {
-  instructorPassword.value = "";
-  instructorLoginError.hidden = true;
-  instructorModal.hidden = false;
-  instructorPassword.focus();
-}
-
-async function authenticateInstructor(event) {
-  event.preventDefault();
-
-  if (!window.crypto?.subtle) {
-    instructorLoginError.textContent = "このブラウザではパスワード確認を利用できません。";
-    instructorLoginError.hidden = false;
-    return;
-  }
-
-  const passwordHash = await hashPassword(instructorPassword.value);
-  if (passwordHash !== INSTRUCTOR_PASSWORD_HASH) {
-    instructorLoginError.textContent = "パスワードが正しくありません。";
-    instructorLoginError.hidden = false;
-    instructorPassword.focus();
-    return;
-  }
-
-  isInstructorMode = true;
-  saveInstructorMode();
-  updateInstructorMode();
-  instructorModal.hidden = true;
-}
-
-function formatBlockLabel(label) {
-  const escapedLabel = label.replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;"
-  }[character]));
-
-  return escapedLabel.replace(/sum|average|ループカウンタ変数 i|現在の数値|\bn\b|0|1|宣言する|設定する|繰り返す|加える|出力する|引く|入力する/g, (token) => {
-    if (["sum", "average", "ループカウンタ変数 i", "現在の数値", "n"].includes(token)) {
-      return `<span class="token-variable">${token}</span>`;
-    }
-    if (["0", "1"].includes(token)) {
-      return `<span class="token-value">${token}</span>`;
-    }
-    return `<span class="token-verb">${token}</span>`;
-  });
-}
-
-function renderPalette() {
-  palette.replaceChildren();
-
-  shuffleBlockGroups(currentProblem.blocks).forEach((block) => {
-    const element = document.createElement("button");
-    element.type = "button";
-    element.className = `source-block block-${block.type}`;
-    element.dataset.blockId = block.id;
-    element.draggable = true;
-    element.innerHTML = `
-      <span class="block-handle" aria-hidden="true">⠿</span>
-      <span class="block-copy">
-        <strong>${formatBlockLabel(block.label)}</strong>
-        <small>${block.hint}</small>
-      </span>
-    `;
-
-    element.addEventListener("dragstart", handlePaletteDragStart);
-    element.addEventListener("dragend", clearDragState);
-    element.addEventListener("click", () => {
-      if (!isBlockUsed(block.id)) {
-        addBlockToZone(block.id, assemblyList);
-      }
-    });
-
-    palette.append(element);
-  });
-}
-
-function shuffleBlocks(blocks) {
-  const shuffled = [...blocks];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
-}
-
-function shuffleBlockGroups(blocks) {
-  const groups = new Map();
-
-  blocks.forEach((block) => {
-    if (!groups.has(block.type)) {
-      groups.set(block.type, []);
-    }
-    groups.get(block.type).push(block);
-  });
-
-  return shuffleBlocks([...groups.values()])
-    .flatMap((group) => shuffleBlocks(group));
-}
-
-function createPlacedBlock(blockId) {
-  const block = getBlockDefinition(blockId);
-  const element = document.createElement("div");
-  instanceCounter += 1;
-  element.className = `placed-block block-${block.type}`;
-  element.dataset.blockId = block.id;
-  element.dataset.instanceId = `block-${instanceCounter}`;
-  element.draggable = true;
-  element.innerHTML = `
-    <div class="placed-copy">
-      <strong>${formatBlockLabel(block.label)}</strong>
-      <span>${block.hint}</span>
-    </div>
-    <button class="remove-block" type="button" aria-label="「${block.label}」を取り除く">×</button>
-  `;
-
-  if (block.acceptsChildren) {
-    element.querySelector(".placed-copy").append(element.querySelector(".remove-block"));
-
-    const loopBody = document.createElement("div");
-    loopBody.className = "loop-body dropzone";
-    loopBody.dataset.zone = "loop";
-    loopBody.innerHTML = `
-      <span class="loop-body-label">繰り返しの中で実行する処理</span>
-      <div class="nested-empty" data-empty-for="loop">ここに処理を配置</div>
-    `;
-    attachDropzoneEvents(loopBody);
-    element.append(loopBody);
-
-    const loopEnd = document.createElement("div");
-    loopEnd.className = "loop-end-symbol";
-    loopEnd.innerHTML = "<span>繰り返し終了</span>";
-    element.append(loopEnd);
-  }
-
-  element.addEventListener("dragstart", handlePlacedDragStart);
-  element.addEventListener("dragend", clearDragState);
-  element.querySelector(".remove-block").addEventListener("click", (event) => {
-    event.stopPropagation();
-    savePlacementHistory();
-    element.remove();
-    updateWorkspaceState();
-    clearResults();
-  });
-
-  return element;
-}
-
-function handlePaletteDragStart(event) {
-  const blockId = event.currentTarget.dataset.blockId;
-  if (isBlockUsed(blockId)) {
-    event.preventDefault();
-    return;
-  }
-
-  draggedInstanceId = null;
-  event.dataTransfer.effectAllowed = "copy";
-  event.dataTransfer.setData("text/plain", JSON.stringify({
-    source: "palette",
-    blockId
-  }));
-}
-
-function handlePlacedDragStart(event) {
-  if (event.target !== event.currentTarget && event.target.closest(".placed-block") !== event.currentTarget) {
-    return;
-  }
-
-  const element = event.currentTarget;
-  draggedInstanceId = element.dataset.instanceId;
-  element.classList.add("is-dragging");
-  event.dataTransfer.effectAllowed = "move";
-  event.dataTransfer.setData("text/plain", JSON.stringify({
-    source: "workspace",
-    blockId: element.dataset.blockId,
-    instanceId: draggedInstanceId
-  }));
-  event.stopPropagation();
-}
-
-function clearDragState() {
-  document.querySelectorAll(".is-dragging, .is-drag-over").forEach((element) => {
-    element.classList.remove("is-dragging", "is-drag-over");
-  });
-  draggedInstanceId = null;
-}
-
-function attachDropzoneEvents(zone) {
-  zone.addEventListener("dragover", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = draggedInstanceId ? "move" : "copy";
-    document.querySelectorAll(".dropzone.is-drag-over").forEach((element) => {
-      if (element !== zone) {
-        element.classList.remove("is-drag-over");
-      }
-    });
-    zone.classList.add("is-drag-over");
-  });
-
-  zone.addEventListener("dragleave", (event) => {
-    if (!zone.contains(event.relatedTarget)) {
-      zone.classList.remove("is-drag-over");
-    }
-  });
-
-  zone.addEventListener("drop", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    zone.classList.remove("is-drag-over");
-
-    let payload;
-    try {
-      payload = JSON.parse(event.dataTransfer.getData("text/plain"));
-    } catch {
-      return;
-    }
-
-    if (payload.blockId === "loop" && zone.dataset.zone === "loop") {
-      showFeedback(["繰り返しブロックは、別の繰り返しの中には配置できません。"]);
-      return;
-    }
-
-    const draggedElement = payload.source === "workspace"
-      ? document.querySelector(`[data-instance-id="${payload.instanceId}"]`)
-      : createPlacedBlock(payload.blockId);
-
-    if (!draggedElement || draggedElement.contains(zone)) {
-      return;
-    }
-
-    const reference = getDropReference(zone, event.clientY, draggedElement);
-    savePlacementHistory();
-    zone.insertBefore(draggedElement, reference);
-    updateWorkspaceState();
-    clearResults();
-  });
-}
-
-function getDropReference(zone, pointerY, draggedElement) {
-  const candidates = [...zone.children].filter((child) => {
-    return child.classList.contains("placed-block") && child !== draggedElement;
-  });
-
-  const reference = candidates.find((candidate) => {
-    const box = candidate.getBoundingClientRect();
-    return pointerY < box.top + box.height / 2;
-  });
-
-  return reference || zone.querySelector(':scope > .drop-space') || null;
-}
-
-function addBlockToZone(blockId, zone) {
-  savePlacementHistory();
-  zone.insertBefore(createPlacedBlock(blockId), zone.querySelector(':scope > .drop-space'));
-  updateWorkspaceState();
-  clearResults();
-}
-
-function isBlockUsed(blockId) {
-  return Boolean(assemblyList.querySelector(`[data-block-id="${blockId}"]`));
-}
-
-function directBlockIds(zone) {
-  return [...zone.children]
-    .filter((child) => child.classList.contains("placed-block"))
-    .map((child) => child.dataset.blockId);
-}
-
-function getPlacementSnapshot(zone = assemblyList) {
-  return [...zone.children]
-    .filter((child) => child.classList.contains("placed-block"))
-    .map((block) => {
-      const loopBody = block.querySelector(':scope > .loop-body');
-      return {
-        blockId: block.dataset.blockId,
-        children: loopBody ? getPlacementSnapshot(loopBody) : []
-      };
-    });
-}
-
-function restorePlacementSnapshot(snapshot, zone = assemblyList) {
-  snapshot.forEach((item) => {
-    const block = createPlacedBlock(item.blockId);
-    zone.insertBefore(block, zone.querySelector(':scope > .drop-space'));
-    const loopBody = block.querySelector(':scope > .loop-body');
-    if (loopBody) {
-      restorePlacementSnapshot(item.children, loopBody);
-    }
-  });
-}
-
-function updateUndoButton() {
-  undoButton.disabled = placementHistory.length === 0;
-}
-
-function savePlacementHistory() {
-  placementHistory.push(getPlacementSnapshot());
-  updateUndoButton();
-}
-
-function undoLastPlacement() {
-  const snapshot = placementHistory.pop();
-  if (!snapshot) {
-    return;
-  }
-
-  assemblyList.querySelectorAll(':scope > .placed-block').forEach((block) => block.remove());
-  restorePlacementSnapshot(snapshot);
-  clearFeedback();
-  clearResults();
-  updateWorkspaceState();
-  updateUndoButton();
-}
-
-function updateWorkspaceState() {
-  const rootBlocks = directBlockIds(assemblyList);
-  const rootEmpty = assemblyList.querySelector(':scope > [data-empty-for="root"]');
-  const rootDropSpace = assemblyList.querySelector(':scope > [data-drop-space-for="root"]');
-  rootEmpty.hidden = rootBlocks.length > 0;
-  rootDropSpace.hidden = rootBlocks.length === 0;
-
-  document.querySelectorAll(".loop-body").forEach((loopBody) => {
-    const nestedEmpty = loopBody.querySelector(':scope > [data-empty-for="loop"]');
-    nestedEmpty.hidden = directBlockIds(loopBody).length > 0;
-  });
-
-  palette.querySelectorAll(".source-block").forEach((sourceBlock) => {
-    const used = isBlockUsed(sourceBlock.dataset.blockId);
-    sourceBlock.classList.toggle("is-used", used);
-    sourceBlock.disabled = used;
-    sourceBlock.draggable = !used;
-    sourceBlock.setAttribute("aria-disabled", String(used));
-  });
-}
-
-function validateAssembly() {
-  const errors = [];
-  const root = directBlockIds(assemblyList);
-  const loopElement = assemblyList.querySelector(':scope > [data-block-id="loop"]');
-  const loopBody = loopElement?.querySelector(':scope > .loop-body');
-  const nested = loopBody ? directBlockIds(loopBody) : [];
-  const positions = Object.fromEntries(root.map((id, index) => [id, index]));
-  const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
-  const expectedBlockIds = [
-    ...currentProblem.expected.root,
-    ...currentProblem.expected.loop
-  ];
-  const unexpectedBlocks = allPlaced.filter((id) => !expectedBlockIds.includes(id));
-  const missingBlocks = expectedBlockIds.filter((id) => !allPlaced.includes(id));
-
-  if (unexpectedBlocks.length > 0) {
-    errors.push("この問題の合計計算には使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。");
-  } else if (missingBlocks.length > 0) {
-    errors.push("必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。");
-  }
-
-  if (!allPlaced.includes("declareSum") ||
-      (positions.declareSum ?? Number.POSITIVE_INFINITY) > Math.min(
-        positions.initializeSum ?? Number.POSITIVE_INFINITY,
-        positions.loop ?? Number.POSITIVE_INFINITY,
-        positions.outputSum ?? Number.POSITIVE_INFINITY
-      )) {
-    errors.push("sum を使う前に、変数を宣言する必要があります。");
-  }
-
-  if (!loopElement) {
-    errors.push("1 から n まで繰り返す処理を配置してください。");
-  }
-
-  if (!nested.includes("addCurrent")) {
-    errors.push("合計を求める処理は、繰り返しの中に配置してください。");
-  }
-
-  if (!allPlaced.includes("initializeSum") ||
-      positions.initializeSum === undefined ||
-      positions.loop === undefined ||
-      positions.initializeSum > positions.loop) {
-    errors.push("繰り返しの前に、sum の初期値を設定してください。");
-  }
-
-  if (!allPlaced.includes("outputSum") ||
-      positions.outputSum === undefined ||
-      positions.outputSum !== root.length - 1 ||
-      (positions.loop !== undefined && positions.outputSum < positions.loop)) {
-    errors.push("最後に、計算した sum の値を出力してください。");
-  }
-
-  const rootMatches = arraysEqual(root, currentProblem.expected.root);
-  const nestedMatches = arraysEqual(nested, currentProblem.expected.loop);
-  if (!rootMatches || !nestedMatches) {
-    if (errors.length === 0) {
-      errors.push("ブロックの順番と、繰り返しの内側にある処理を確認してください。");
-    }
-  }
-
-  return errors;
-}
-
-function arraysEqual(left, right) {
-  return left.length === right.length && left.every((value, index) => value === right[index]);
-}
-
-function validateInput() {
-  const value = Number(nInput.value);
-  if (!Number.isInteger(value) || value < 1 || value > 100) {
-    return null;
-  }
-  return value;
-}
-
-function updateExpectedOutput() {
-  const input = validateInput();
-  expectedOutputValue.textContent = input === null ? "-" : currentProblem.execute(input).output;
-}
-
-function showFeedback(messages) {
-  feedback.innerHTML = `
-    <strong>組立てをもう一度確認しましょう</strong>
-    <ul>${messages.map((message) => `<li>${message}</li>`).join("")}</ul>
-  `;
-  feedback.hidden = false;
-}
-
-function getFeedbackSummary() {
-  const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
-  const expectedBlockIds = [...currentProblem.expected.root, ...currentProblem.expected.loop];
-  const hasUnexpectedBlock = allPlaced.some((id) => !expectedBlockIds.includes(id));
-  const hasMissingBlock = expectedBlockIds.some((id) => !allPlaced.includes(id));
-
-  if (hasUnexpectedBlock) {
-    return "この問題には使わない処理ブロックが含まれています。問題文を見直しましょう。";
-  }
-  if (hasMissingBlock) {
-    return "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。";
-  }
-  return "ブロックの順番や、繰り返しの中の配置を見直しましょう。";
-}
-
-function getAttemptHints() {
-  const hints = [];
-  const root = directBlockIds(assemblyList);
-  const loopElement = assemblyList.querySelector(':scope > [data-block-id="loop"]');
-  const loopBody = loopElement?.querySelector(':scope > .loop-body');
-  const nested = loopBody ? directBlockIds(loopBody) : [];
-  const positions = Object.fromEntries(root.map((id, index) => [id, index]));
-  const allPlaced = [...assemblyList.querySelectorAll(".placed-block")].map((item) => item.dataset.blockId);
-  const expectedBlockIds = [...currentProblem.expected.root, ...currentProblem.expected.loop];
-
-  if (allPlaced.some((id) => !expectedBlockIds.includes(id))) {
-    hints.push("問題文の「1からnまでの合計」に関係しない変数や処理が入っていないか、見直してみましょう。");
-    hints.push("この問題では、sum の宣言・初期化・繰り返し・加算・出力に関係するブロックを選びましょう。");
-  }
-  if (!allPlaced.includes("declareSum") || positions.declareSum > (positions.initializeSum ?? Infinity)) {
-    hints.push("計算に使う値は、使い始める前に準備できているでしょうか？");
-    hints.push("変数 sum は、計算を始める前に宣言しましょう。");
-  }
-  if (!allPlaced.includes("initializeSum") || positions.initializeSum > (positions.loop ?? Infinity)) {
-    hints.push("足し算を始めるsumの最初の値は、いくつがよいでしょうか？");
-    hints.push("変数 sum に、繰り返しの前に初期値 0 を設定しましょう。");
-  }
-  if (!loopElement) {
-    hints.push("1からnまでの数を一つずつ扱うには、ループカウンタ変数 i をどう変化させるとよいでしょうか？");
-    hints.push("ループカウンタ変数 i を 1 から n まで、1 ずつ増やしながら繰り返しましょう。");
-  }
-  if (!nested.includes("addCurrent")) {
-    hints.push("各回の数をsumへ加える処理は、繰り返しの内側と外側のどちらに置くべきでしょうか？");
-    hints.push("繰り返しの中に、sum へループカウンタ変数 i の値を加える処理を配置しましょう。");
-  }
-  if (!allPlaced.includes("outputSum") || positions.outputSum !== root.length - 1) {
-    hints.push("求めた合計は、計算の途中と最後のどちらで表示するとよいでしょうか？");
-    hints.push("繰り返しが終わった後、最後に変数 sum の値を出力しましょう。");
-  }
-  if (hints.length === 0) {
-    hints.push("上から実行される順番と、繰り返しの内側にある処理を見直してみましょう。");
-    hints.push("宣言 → 初期化 → 繰り返し（加算）→ 出力、の順番になっているか確認しましょう。");
-  }
-
-  return hints;
-}
-
-function prepareHints() {
-  availableHints = getAttemptHints();
-  shownHintCount = 0;
-  hintArea.hidden = false;
-  hintButton.hidden = false;
-  hintPanel.hidden = true;
-  previousHintButton.hidden = true;
-  nextHintButton.hidden = true;
-}
-
-function clearHints() {
-  availableHints = [];
-  shownHintCount = 0;
-  hintArea.hidden = true;
-  hintPanel.hidden = true;
-  hintModal.hidden = true;
-}
-
-function showNextHint() {
-  if (shownHintCount >= availableHints.length) {
-    return;
-  }
-
-  shownHintCount += 1;
-  renderCurrentHint();
-}
-
-function showPreviousHint() {
-  if (shownHintCount <= 1) {
-    return;
-  }
-
-  shownHintCount -= 1;
-  renderCurrentHint();
-}
-
-function renderCurrentHint() {
-  hintCount.textContent = `ヒント ${shownHintCount} / ${availableHints.length}`;
-  hintText.textContent = availableHints[shownHintCount - 1];
-  hintPanel.hidden = false;
-  hintButton.hidden = true;
-  previousHintButton.hidden = shownHintCount <= 1;
-  nextHintButton.hidden = shownHintCount >= availableHints.length;
-}
-
-function clearFeedback() {
-  feedback.hidden = true;
-  feedback.replaceChildren();
-  clearHints();
-}
-
-function clearResults() {
-  resultContent.hidden = true;
-  resultPanel.hidden = true;
-  resultDrawerTab.hidden = true;
-  successModal.hidden = true;
-  workspace.classList.remove("is-result-open");
-  clearCorrespondence();
-}
-
-function showSuccessModal(isInstructorPreview = false) {
-  successKicker.textContent = isInstructorPreview ? "INSTRUCTOR MODE" : "COMPLETED!";
-  successModalTitle.textContent = isInstructorPreview ? "正解例を表示します" : "正解です！";
-  successModalMessage.textContent = isInstructorPreview
-    ? "講師モードのため、組み立て状況にかかわらず正しい実行結果と解説を確認できます。"
-    : "処理の順番と繰り返しの配置が、正しく組み立てられています。";
-  successConfirmButton.textContent = isInstructorPreview ? "正解例を確認する" : "結果を確認する";
-  successModal.hidden = false;
-  successConfirmButton.focus();
-}
-
-function openResultPanel() {
-  resultPanel.hidden = false;
-  resultDrawerTab.hidden = true;
-  workspace.classList.add("is-result-open");
-  resultDetails.open = true;
-  updateResultToggle();
-}
-
-function collapseResultPanel() {
-  resultPanel.hidden = true;
-  resultDrawerTab.hidden = false;
-  workspace.classList.remove("is-result-open");
-}
-
-function updateResultToggle() {
-  const isOpen = resultDetails.open;
-  resultToggleIcon.textContent = isOpen ? "›" : "‹";
-  resultToggleLabel.textContent = isOpen ? "折り畳む" : "展開する";
-}
-
-function renderResult(input, result, isInstructorPreview = false) {
-  outputValue.textContent = `出力結果：${result.output}`;
-  traceCaption.textContent = `n = ${input}`;
-  traceBody.replaceChildren();
-
-  result.trace.forEach((row) => {
-    const tableRow = document.createElement("tr");
-    tableRow.innerHTML = `
-      <td>${row.iteration}</td>
-      <td>${row.current}</td>
-      <td>${row.sum}</td>
-    `;
-    traceBody.append(tableRow);
-  });
-
-  successBadge.textContent = isInstructorPreview ? "講師用・正解例" : "実行成功";
-  resultContent.hidden = false;
-  showSuccessModal(isInstructorPreview);
-  resultDetails.open = false;
-  resultPanel.hidden = true;
-  resultDrawerTab.hidden = true;
-  workspace.classList.remove("is-result-open");
-  updateResultToggle();
-  selectTab("flow");
-}
-
-function runProgram() {
-  clearFeedback();
-  const input = validateInput();
-  if (input === null) {
-    showFeedback(["入力値 n には、1〜100の整数を設定してください。"]);
-    clearResults();
-    nInput.focus();
-    return;
-  }
-
-  const errors = validateAssembly();
-  if (errors.length > 0) {
-    if (isInstructorMode) {
-      renderResult(input, currentProblem.execute(input), true);
-      return;
-    }
-    showFeedback([getFeedbackSummary()]);
-    prepareHints();
-    clearResults();
-    return;
-  }
-
-  const result = currentProblem.execute(input);
-  renderResult(input, result);
-}
-
-function resetWorkspace() {
-  if (directBlockIds(assemblyList).length > 0) {
-    savePlacementHistory();
-  }
-  assemblyList.querySelectorAll(':scope > .placed-block').forEach((block) => block.remove());
-  nInput.value = String(currentProblem.initialInput);
-  updateExpectedOutput();
-  clearFeedback();
-  clearResults();
-  renderPalette();
-  updateWorkspaceState();
-}
-
-function selectTab(tabName) {
-  const flowSelected = tabName === "flow";
-  flowTab.classList.toggle("is-active", flowSelected);
-  javaTab.classList.toggle("is-active", !flowSelected);
-  flowTab.setAttribute("aria-selected", String(flowSelected));
-  javaTab.setAttribute("aria-selected", String(!flowSelected));
-  flowPanel.hidden = !flowSelected;
-  javaPanel.hidden = flowSelected;
-  clearCorrespondence();
-}
-
-function showCorrespondence(blockId, selectedLine) {
-  const block = getBlockDefinition(blockId);
-  clearCorrespondence();
-
-  document.querySelectorAll(`[data-block-id="${blockId}"]`).forEach((element) => {
-    element.classList.add("is-corresponding");
-  });
-  document.querySelectorAll(`[data-flow-block="${blockId}"]`).forEach((element) => {
-    element.classList.add("is-corresponding");
-  });
-  document.querySelectorAll(`[data-code-block="${blockId}"]`).forEach((element) => {
-    element.classList.add("is-selected");
-  });
-
-  if (selectedLine) {
-    selectedLine.classList.add("is-selected");
-  }
-  showCodeExplanation(block, selectedLine);
-  focusCorrespondingBlock(blockId);
-}
-
-function showCodeExplanation(block, selectedLine) {
-  const blockLabel = document.createElement("p");
-  blockLabel.className = "code-correspondence-block";
-  blockLabel.textContent = `対応する文章ブロック：${block.label}`;
-
-  const syntaxTitle = document.createElement("strong");
-  syntaxTitle.textContent = selectedLine.dataset.codeTitle;
-
-  const syntaxDescription = document.createElement("p");
-  syntaxDescription.className = "code-correspondence-description";
-  syntaxDescription.textContent = selectedLine.dataset.codeDescription;
-
-  codeCorrespondence.replaceChildren(blockLabel, syntaxTitle, syntaxDescription);
-}
-
-function focusCorrespondingBlock(blockId) {
-  const correspondingBlock = assemblyList.querySelector(`[data-block-id="${blockId}"]`);
-  if (!correspondingBlock) {
-    return;
-  }
-
-  const panelBox = buildPanel.getBoundingClientRect();
-  const blockBox = correspondingBlock.getBoundingClientRect();
-  const targetTop = buildPanel.scrollTop + blockBox.top - panelBox.top - (buildPanel.clientHeight - blockBox.height) / 2;
-
-  buildPanel.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
-  correspondingBlock.tabIndex = -1;
-  correspondingBlock.focus({ preventScroll: true });
-}
-
-function clearCorrespondence() {
-  document.querySelectorAll(".is-corresponding").forEach((element) => {
-    element.classList.remove("is-corresponding");
-  });
-  document.querySelectorAll(".code-line.is-selected").forEach((element) => {
-    element.classList.remove("is-selected");
-  });
-  codeCorrespondence.replaceChildren();
-  codeCorrespondence.textContent = "コードの行をクリックしてください";
-}
-
-attachDropzoneEvents(assemblyList);
-renderPalette();
-updateWorkspaceState();
-updateExpectedOutput();
-updateInstructorMode();
-updateResultToggle();
-
-nInput.addEventListener("input", updateExpectedOutput);
-runButton.addEventListener("click", runProgram);
-instructorModeButton.addEventListener("click", () => {
-  if (isInstructorMode) {
-    isInstructorMode = false;
-    saveInstructorMode();
-    updateInstructorMode();
-    return;
-  }
-  openInstructorModal();
-});
-instructorCancelButton.addEventListener("click", () => {
-  instructorModal.hidden = true;
-});
-instructorForm.addEventListener("submit", authenticateInstructor);
-resetButton.addEventListener("click", () => {
-  resetModal.hidden = false;
-  resetCancelButton.focus();
-});
-resetCancelButton.addEventListener("click", () => {
-  resetModal.hidden = true;
-});
-resetConfirmButton.addEventListener("click", () => {
-  resetModal.hidden = true;
-  resetWorkspace();
-});
-undoButton.addEventListener("click", undoLastPlacement);
-hintButton.addEventListener("click", () => {
-  hintModal.hidden = false;
-});
-hintCancelButton.addEventListener("click", () => {
-  hintModal.hidden = true;
-});
-hintConfirmButton.addEventListener("click", () => {
-  hintModal.hidden = true;
-  showNextHint();
-});
-previousHintButton.addEventListener("click", showPreviousHint);
-nextHintButton.addEventListener("click", showNextHint);
-successConfirmButton.addEventListener("click", () => {
-  successModal.hidden = true;
-  openResultPanel();
-  requestAnimationFrame(() => {
-    resultPanel.scrollTo({ top: 0, behavior: "smooth" });
-    resultPanel.scrollIntoView({ block: "start", behavior: "smooth" });
-  });
-});
-resultDetails.addEventListener("toggle", () => {
-  updateResultToggle();
-  if (!resultDetails.open && !resultContent.hidden && successModal.hidden) {
-    collapseResultPanel();
-  }
-});
-resultDrawerTab.addEventListener("click", () => {
-  openResultPanel();
-  requestAnimationFrame(() => resultPanel.scrollIntoView({ block: "start", behavior: "smooth" }));
-});
-flowTab.addEventListener("click", () => selectTab("flow"));
-javaTab.addEventListener("click", () => selectTab("java"));
-
-document.querySelectorAll(".code-line[data-code-block]").forEach((line) => {
-  line.addEventListener("click", () => showCorrespondence(line.dataset.codeBlock, line));
-});
+function updateExpectedOutput() { const v = values(); expectedOutputValue.textContent = isValid(v) ? currentProblem.execute(v).output : "-"; }
+function isValid(v) { return currentProblem.valid ? currentProblem.valid(v) : Object.values(v).every((x) => String(x).trim() !== ""); }
+function shuffle(list) { return [...list].sort(() => Math.random() - .5); }
+function renderPalette() { palette.replaceChildren(); const grouped = Object.values([...currentProblem.correct, ...currentProblem.dummies].reduce((groups, block) => { (groups[block.type] ||= []).push(block); return groups; }, {})); shuffle(grouped).forEach((group) => shuffle(group).forEach((block) => { const button = document.createElement("button"); button.type = "button"; button.className = `source-block block-${block.type}`; button.draggable = true; button.dataset.blockId = block.id; button.innerHTML = `<span class="block-handle">⠿</span><span class="block-copy"><strong>${formatLabel(block.label)}</strong><small>${escapeHtml(block.hint)}</small></span>`; button.addEventListener("dragstart", () => { dragged = { id: block.id, source: "palette" }; }); button.addEventListener("click", () => addBlock(block.id, assemblyList)); palette.append(button); })); updatePalette(); }
+function createEmpty(zone, nested = false) { const empty = document.createElement("div"); empty.className = nested ? "nested-empty" : "empty-state"; empty.dataset.empty = "true"; empty.innerHTML = nested ? "ここに繰り返しの中の処理を配置" : '<span class="empty-icon">＋</span><strong>ここに処理を配置</strong><p>左側の一覧からドラッグ＆ドロップ</p>'; zone.append(empty); }
+function createBlock(id) { const block = definition(id), item = document.createElement("article"); item.className = `placed-block block-${block.type}`; item.draggable = true; item.dataset.blockId = id; item.innerHTML = `<div class="placed-copy"><strong>${formatLabel(block.label)}</strong><span>${escapeHtml(block.hint)}</span><button class="remove-block" type="button" aria-label="削除">×</button></div>`; item.querySelector(".remove-block").addEventListener("click", () => { saveHistory(); item.remove(); refreshAssembly(); }); item.addEventListener("dragstart", () => { dragged = { id, source: "placed", item }; }); if (block.acceptsChildren) { const body = document.createElement("div"); body.className = "loop-body dropzone"; body.dataset.zone = id; body.innerHTML = '<span class="loop-body-label">繰り返しの中で実行する処理</span>'; createEmpty(body, true); addDropEvents(body); item.append(body); const end = document.createElement("div"); end.className = "loop-end-symbol"; end.innerHTML = "<span>繰り返し終了</span>"; item.append(end); } return item; }
+function addBlock(id, zone) { if (blocks().some((x) => x.dataset.blockId === id)) return; saveHistory(); zone.querySelector(":scope > [data-empty]")?.remove(); zone.append(createBlock(id)); refreshAssembly(); }
+function addDropEvents(zone) { zone.addEventListener("dragover", (event) => { event.preventDefault(); zone.classList.add("is-drag-over"); }); zone.addEventListener("dragleave", () => zone.classList.remove("is-drag-over")); zone.addEventListener("drop", (event) => { event.preventDefault(); zone.classList.remove("is-drag-over"); if (!dragged) return; const id = dragged.id; if (dragged.source === "placed") { saveHistory(); dragged.item.remove(); } if (!blocks().some((x) => x.dataset.blockId === id)) { zone.querySelector(":scope > [data-empty]")?.remove(); zone.append(createBlock(id)); } dragged = null; refreshAssembly(); }); }
+function refreshAssembly() { [assemblyList, ...assemblyList.querySelectorAll(".loop-body")].forEach((zone) => { if (!directIds(zone).length && !zone.querySelector(":scope > [data-empty]")) createEmpty(zone, zone !== assemblyList); }); updatePalette(); clearFeedback(); clearResults(); }
+function updatePalette() { palette.querySelectorAll(".source-block").forEach((button) => { const used = blocks().some((x) => x.dataset.blockId === button.dataset.blockId); button.disabled = used; button.draggable = !used; button.classList.toggle("is-used", used); }); $("#undo-button").disabled = !history.length; }
+function snapshot() { return [...assemblyList.children].filter((x) => x.classList.contains("placed-block")).map((x) => ({ id: x.dataset.blockId, children: x.querySelector(".loop-body") ? directIds(x.querySelector(".loop-body")) : [] })); }
+function saveHistory() { history.push(snapshot()); }
+function restore(snap) { assemblyList.replaceChildren(); snap.forEach((entry) => { const block = createBlock(entry.id); assemblyList.append(block); const zone = block.querySelector(".loop-body"); entry.children.forEach((id) => { zone.querySelector(":scope > [data-empty]")?.remove(); zone.append(createBlock(id)); }); }); refreshAssembly(); }
+function resetWorkspace(withHistory = true) { if (withHistory && blocks().length) saveHistory(); assemblyList.replaceChildren(); createEmpty(assemblyList); renderPalette(); clearFeedback(); clearResults(); }
+function validateAssembly() { const root = directIds(assemblyList), all = blocks().map((x) => x.dataset.blockId), expected = expectedIds(); if (all.some((id) => !expected.includes(id))) return false; if (expected.some((id) => !all.includes(id))) return false; if (JSON.stringify(root) !== JSON.stringify(currentProblem.expected.root)) return false; return Object.entries(currentProblem.expected.nested || {}).every(([parent, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .loop-body`) || document.createElement("div"))) === JSON.stringify(ids)); }
+function feedbackText() { const all = blocks().map((x) => x.dataset.blockId); return all.some((id) => !expectedIds().includes(id)) ? "この問題では使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。" : "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。"; }
+function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = currentProblem.correct.flatMap((b) => [`「${b.hint}」という役割の処理が必要か考えてみましょう。`, `文章ブロック「${b.label}」を確認しましょう。`]); shownHints = 0; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
+function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; }
+function clearResults() { resultContent.hidden = true; resultPanel.hidden = true; resultDrawerTab.hidden = true; workspace.classList.remove("is-result-open"); clearCorrespondence(); }
+function renderLearningSupport() { const reasons = $("#reason-list"); reasons.replaceChildren(); currentProblem.explanation.forEach(([title, text]) => { const li = document.createElement("li"); li.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(text)}</p>`; reasons.append(li); }); const flow = $("#flowchart"); flow.replaceChildren(); const flowIds = currentProblem.expected.root; ["開始", ...flowIds, "終了"].forEach((item, index) => { const node = document.createElement("div"); if (item === "開始" || item === "終了") { node.className = "flow-node terminal"; node.textContent = item; } else { const block = definition(item); node.className = `flow-node ${block.type === "output" ? "output-node" : block.type === "decision" ? "decision-node" : block.type === "loop" ? "loop-start-node" : ""}`; node.dataset.flowBlock = item; node.textContent = block.label; } flow.append(node); if (index < flowIds.length + 1) { const arrow = document.createElement("span"); arrow.className = "flow-arrow"; arrow.textContent = "↓"; flow.append(arrow); } }); const code = $("#java-code"); code.replaceChildren(); currentProblem.code.forEach(([id, line, title, description], index) => { const button = document.createElement("button"); button.className = "code-line"; button.type = "button"; button.dataset.codeBlock = id; button.dataset.codeTitle = title; button.dataset.codeDescription = description; button.innerHTML = `<span class="line-number">${index + 1}</span><span class="code-content">${highlight(line)}</span>`; button.addEventListener("click", () => showCorrespondence(id, button)); code.append(button); }); }
+function highlight(line) { return escapeHtml(line).replace(/\b(int|double|String|if|else|for|switch|case|break)\b/g, '<span class="syntax-keyword">$1</span>').replace(/(\b\d+\b)/g, '<span class="syntax-number">$1</span>').replace(/(System|out|println)/g, '<span class="syntax-method">$1</span>'); }
+function renderResult(v, preview = false) { const result = currentProblem.execute(v); $("#output-value").textContent = `出力結果：${result.output}`; $("#trace-caption").textContent = currentProblem.inputs.map((x) => `${x.label} = ${v[x.id]}`).join(" / "); $("#trace-head").innerHTML = `<tr>${result.traceColumns.map((x) => `<th>${escapeHtml(x)}</th>`).join("")}</tr>`; const tbody = $("#trace-body"); tbody.replaceChildren(); result.trace.forEach((row) => { const tr = document.createElement("tr"); tr.innerHTML = row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join(""); tbody.append(tr); }); $("#success-badge").textContent = preview ? "講師用・正解例" : "実行成功"; resultContent.hidden = false; $("#success-kicker").textContent = preview ? "INSTRUCTOR MODE" : "COMPLETED!"; $("#success-modal-title").textContent = preview ? "正解例を表示します" : "正解です！"; $("#success-modal-message").textContent = preview ? "講師モードのため、正しい処理例の結果と解説を確認できます。" : "処理の順番と配置が、正しく組み立てられています。"; $("#success-confirm-button").textContent = preview ? "正解例を確認する" : "結果を確認する"; $("#success-modal").hidden = false; resultDetails.open = false; }
+function run() { const v = values(); clearFeedback(); if (!isValid(v)) { showFeedback("入力値の範囲や形式を確認してください。"); return; } if (!validateAssembly()) { if (isInstructorMode) renderResult(v, true); else showFeedback(feedbackText()); return; } renderResult(v); }
+function openResult() { resultPanel.hidden = false; resultDrawerTab.hidden = true; workspace.classList.add("is-result-open"); resultDetails.open = true; }
+function closeResult() { resultPanel.hidden = true; resultDrawerTab.hidden = false; workspace.classList.remove("is-result-open"); }
+function clearCorrespondence() { document.querySelectorAll(".is-corresponding,.is-selected").forEach((x) => x.classList.remove("is-corresponding", "is-selected")); codeCorrespondence.textContent = "コードの行をクリックしてください"; }
+function showCorrespondence(id, line) { clearCorrespondence(); document.querySelectorAll(`[data-block-id="${id}"],[data-flow-block="${id}"]`).forEach((x) => x.classList.add("is-corresponding")); line.classList.add("is-selected"); codeCorrespondence.innerHTML = `<strong>${escapeHtml(line.dataset.codeTitle)}</strong><p class="code-correspondence-description">${escapeHtml(line.dataset.codeDescription)}</p>`; const block = assemblyList.querySelector(`[data-block-id="${id}"]`); if (block) { block.scrollIntoView({ behavior: "smooth", block: "center" }); block.focus({ preventScroll: true }); } }
+async function instructorLogin(event) { event.preventDefault(); const value = $("#instructor-password").value; const encoded = new TextEncoder().encode(value); const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", encoded))).map((b) => b.toString(16).padStart(2, "0")).join(""); if (hash !== passwordHash) { $("#instructor-login-error").textContent = "パスワードが違います。"; $("#instructor-login-error").hidden = false; return; } isInstructorMode = true; localStorage.setItem("algobridge-instructor-mode", "true"); $("#instructor-modal").hidden = true; updateInstructor(); }
+function updateInstructor() { document.body.classList.toggle("is-instructor-mode", isInstructorMode); $("#instructor-mode-button").textContent = isInstructorMode ? "受講者モードに戻る" : "講師用"; }
+
+addDropEvents(assemblyList); renderProblem(); updateInstructor();
+$("#run-button").addEventListener("click", run); $("#undo-button").addEventListener("click", () => { const snap = history.pop(); if (snap) restore(snap); });
+$("#previous-problem-button").addEventListener("click", () => { if (problemIndex) { problemIndex -= 1; currentProblem = problems[problemIndex]; history = []; renderProblem(); } });
+$("#next-problem-button").addEventListener("click", () => { if (problemIndex < problems.length - 1) { problemIndex += 1; currentProblem = problems[problemIndex]; history = []; renderProblem(); } });
+$("#reset-button").addEventListener("click", () => { $("#reset-modal").hidden = false; }); $("#reset-cancel-button").addEventListener("click", () => { $("#reset-modal").hidden = true; }); $("#reset-confirm-button").addEventListener("click", () => { $("#reset-modal").hidden = true; renderProblem(); });
+$("#hint-button").addEventListener("click", () => { $("#hint-modal").hidden = false; }); $("#hint-cancel-button").addEventListener("click", () => { $("#hint-modal").hidden = true; }); $("#hint-confirm-button").addEventListener("click", () => { $("#hint-modal").hidden = true; shownHints = 1; renderHint(); });
+function renderHint() { hintPanel.hidden = false; hintButton.hidden = true; hintCount.textContent = `ヒント ${shownHints} / ${hints.length}`; hintText.textContent = hints[shownHints - 1]; previousHintButton.hidden = shownHints <= 1; nextHintButton.hidden = shownHints >= hints.length; } previousHintButton.addEventListener("click", () => { shownHints -= 1; renderHint(); }); nextHintButton.addEventListener("click", () => { shownHints += 1; renderHint(); });
+$("#success-confirm-button").addEventListener("click", () => { $("#success-modal").hidden = true; openResult(); }); resultDetails.addEventListener("toggle", () => { if (!resultDetails.open && !resultContent.hidden && $("#success-modal").hidden) closeResult(); }); resultDrawerTab.addEventListener("click", openResult);
+$("#flow-tab").addEventListener("click", () => { $("#flow-tab").classList.add("is-active"); $("#java-tab").classList.remove("is-active"); $("#flow-panel").hidden = false; $("#java-panel").hidden = true; }); $("#java-tab").addEventListener("click", () => { $("#java-tab").classList.add("is-active"); $("#flow-tab").classList.remove("is-active"); $("#java-panel").hidden = false; $("#flow-panel").hidden = true; });
+$("#instructor-mode-button").addEventListener("click", () => { if (isInstructorMode) { isInstructorMode = false; localStorage.removeItem("algobridge-instructor-mode"); updateInstructor(); } else { $("#instructor-modal").hidden = false; $("#instructor-password").focus(); } }); $("#instructor-cancel-button").addEventListener("click", () => { $("#instructor-modal").hidden = true; }); $("#instructor-form").addEventListener("submit", instructorLogin);

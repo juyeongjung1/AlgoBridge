@@ -22,7 +22,7 @@
     <div class="header-actions">
       <div class="lesson-progress" aria-label="学習の進行状況">
         <span>アルゴリズム入門</span>
-        <strong>問題 1 / 1</strong>
+        <strong id="lesson-position">問題 1 / 8</strong>
       </div>
       <button id="instructor-mode-button" class="instructor-mode-button" type="button">講師用</button>
     </div>
@@ -34,31 +34,32 @@
         <span class="step-number">1</span>
         <div>
           <p class="eyebrow">問題を理解する</p>
-          <h2 id="problem-heading">1から n までの合計</h2>
+          <h2 id="problem-heading">氏名をつなげて表示</h2>
         </div>
       </div>
 
       <div class="problem-card">
-        <p id="problem-description">
-          整数 <code>n</code> が与えられたとき、1から <code>n</code> までの整数の合計を求めて出力してください。
-        </p>
+        <p id="problem-description"></p>
         <div class="expected-output" aria-live="polite">
           <span>期待する出力結果</span>
-          <strong id="expected-output-value">6</strong>
+          <strong id="expected-output-value">-</strong>
         </div>
-        <label class="number-input">
-          <span>入力値 n</span>
-          <input id="n-input" type="number" min="1" max="100" step="1" value="3">
-        </label>
-        <p class="input-note">1〜100の整数を入力してください</p>
+        <div id="problem-inputs" class="problem-inputs"></div>
+        <p id="input-note" class="input-note"></p>
+      </div>
+
+      <div class="problem-navigation" aria-label="問題の切り替え">
+        <button id="previous-problem-button" class="button button-secondary" type="button">← 前の問題</button>
+        <span id="problem-category" class="problem-category"></span>
+        <button id="next-problem-button" class="button button-secondary" type="button">次の問題 →</button>
       </div>
 
       <div class="block-list-heading">
         <h3>処理の文章ブロック</h3>
-        <span>全15個（正解は5個）</span>
+        <span id="block-count"></span>
       </div>
       <p class="operation-guide">
-        正解に必要なブロックは5個です。使わないブロックも含め、毎回ランダムな順に表示されます。
+        正解に必要なブロックだけを選び、上から実行される順に並べましょう。使わないブロックも含まれています。
       </p>
       <div id="block-palette" class="block-palette" aria-label="使用できる文章ブロック"></div>
     </section>
@@ -80,7 +81,7 @@
       <div class="flow-canvas" aria-label="フローチャート形式の組立てエリア">
         <div class="assembly-symbol terminal">開始</div>
         <span class="assembly-arrow" aria-hidden="true">↓</span>
-        <div class="assembly-symbol input-symbol">入力：n を受け取る</div>
+        <div id="assembly-input-symbol" class="assembly-symbol input-symbol">入力を受け取る</div>
         <span class="assembly-arrow" aria-hidden="true">↓</span>
         <div id="assembly-list" class="assembly-list dropzone" data-zone="root" aria-label="処理を配置するエリア">
           <div class="empty-state" data-empty-for="root">
@@ -162,13 +163,7 @@
           </div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>繰り返し回数</th>
-                  <th>ループカウンタ変数 <code>i</code></th>
-                  <th>sum の値</th>
-                </tr>
-              </thead>
+              <thead id="trace-head"></thead>
               <tbody id="trace-body"></tbody>
             </table>
           </div>
@@ -176,13 +171,7 @@
 
         <section class="explanation-section" aria-labelledby="explanation-heading">
           <h3 id="explanation-heading">なぜこの組み立てになるのか</h3>
-          <ol class="reason-list">
-            <li><strong><code>sum</code> を最初に宣言する理由</strong><p>合計を入れておくための変数を、使う前に用意します。宣言していない変数には値を入れたり、計算に使ったりできません。</p></li>
-            <li><strong><code>sum</code> の初期値を 0 にする理由</strong><p>まだ何も足していない合計は 0 です。また、0 にどの数を足しても値が変わらないため、合計を始める値として適しています。</p></li>
-            <li><strong>ループカウンタ変数 <code>i</code> を 1 から始める理由</strong><p>問題は「1 から n まで」の合計を求めるためです。<code>i</code> を 1 から始め、1 ずつ増やすことで、1、2、…、n を順番に扱えます。</p></li>
-            <li><strong><code>sum</code> に <code>i</code> を加える理由</strong><p>繰り返すたびに、その回の数 <code>i</code> を合計へ足し込みます。これにより、<code>sum</code> は途中までの合計を保持し、最後には 1 から n までの合計になります。</p></li>
-            <li><strong>最後に <code>sum</code> を出力する理由</strong><p>すべての数を足し終えてから出力することで、途中の値ではなく完成した合計を表示できます。</p></li>
-          </ol>
+          <ol id="reason-list" class="reason-list"></ol>
         </section>
 
         <section class="support-section" aria-labelledby="support-heading">
@@ -197,37 +186,12 @@
           </div>
 
           <div id="flow-panel" class="tab-panel" role="tabpanel" aria-labelledby="flow-tab">
-            <div class="flowchart" aria-label="処理のフローチャート">
-              <div class="flow-node terminal">開始</div>
-              <span class="flow-arrow" aria-hidden="true">↓</span>
-              <div class="flow-node" data-flow-block="declareSum"><code>sum</code> を宣言</div>
-              <span class="flow-arrow" aria-hidden="true">↓</span>
-              <div class="flow-node" data-flow-block="initializeSum"><code>sum</code> に 0 を設定</div>
-              <span class="flow-arrow" aria-hidden="true">↓</span>
-              <div class="flow-loop">
-                <div class="flow-node loop-start-node" data-flow-block="loop"><span>ループカウンタ変数 <code>i</code> を 1 から <code>n</code> まで、1 ずつ増やしながら繰り返す</span></div>
-                <span class="flow-arrow" aria-hidden="true">↓</span>
-                <div class="flow-node" data-flow-block="addCurrent"><code>sum</code> にループカウンタ変数 <code>i</code> の値を加える</div>
-                <div class="loop-back" aria-hidden="true">次のループカウンタ変数 <code>i</code> へ ↺</div>
-                <div class="flow-node loop-end-node" data-flow-block="loop"><span>繰り返し終了</span></div>
-              </div>
-              <span class="flow-arrow" aria-hidden="true">↓ 終了</span>
-              <div class="flow-node output-node" data-flow-block="outputSum"><code>sum</code> を出力</div>
-              <span class="flow-arrow" aria-hidden="true">↓</span>
-              <div class="flow-node terminal">終了</div>
-            </div>
+            <div id="flowchart" class="flowchart" aria-label="処理のフローチャート"></div>
           </div>
 
           <div id="java-panel" class="tab-panel" role="tabpanel" aria-labelledby="java-tab" hidden>
             <p class="code-guide">コードの行を選ぶと、対応する文章ブロックとJava構文の説明を確認できます。</p>
-            <pre class="java-code" aria-label="対応するJavaコード"><code><button class="code-line" type="button" data-code-block="declareSum" data-code-title="int とは" data-code-description="int は、整数を入れるための変数の種類です。ここでは、合計を入れておく sum という名前の箱を作っています。"><span class="line-number">1</span><span class="code-content"><span class="syntax-keyword">int</span> <span class="syntax-variable">sum</span><span class="syntax-punctuation">;</span></span></button>
-<button class="code-line" type="button" data-code-block="initializeSum" data-code-title="=（代入）とは" data-code-description="= は、右側の値を左側の変数に入れる記号です。sum = 0; は、sum という箱に 0 を入れる、という意味です。"><span class="line-number">2</span><span class="code-content"><span class="syntax-variable">sum</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span></button>
-<span class="code-line code-blank"><span class="line-number">3</span></span>
-<button class="code-line" type="button" data-code-block="loop" data-code-title="for文とは" data-code-description="for文は、同じ処理を繰り返すための書き方です。int i = 1 で i を 1 にし、i &lt;= n の間だけ繰り返し、i++ で i を 1 ずつ増やします。"><span class="line-number">4</span><span class="code-content"><span class="syntax-keyword">for</span> <span class="syntax-bracket">(</span><span class="syntax-keyword">int</span> <span class="syntax-variable">i</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-variable">i</span> <span class="syntax-operator">&lt;=</span> <span class="syntax-variable">n</span><span class="syntax-punctuation">;</span> <span class="syntax-variable">i</span><span class="syntax-operator">++</span><span class="syntax-bracket">)</span> <span class="syntax-bracket">{</span></span></button>
-<button class="code-line code-indent" type="button" data-code-block="addCurrent" data-code-title="足し算して代入する" data-code-description="右側の sum + i を先に計算し、その結果を左側の sum に入れ直します。これにより、sum は繰り返すたびに合計へ更新されます。"><span class="line-number">5</span><span class="code-content">    <span class="syntax-variable">sum</span> <span class="syntax-operator">=</span> <span class="syntax-variable">sum</span> <span class="syntax-operator">+</span> <span class="syntax-variable">i</span><span class="syntax-punctuation">;</span></span></button>
-<button class="code-line" type="button" data-code-block="loop" data-code-title="}（波かっこ）とは" data-code-description="} は、for文の中で繰り返す処理の終わりを表します。この後、i を 1 増やして、条件を満たしていれば再び中の処理を実行します。"><span class="line-number">6</span><span class="code-content"><span class="syntax-bracket">}</span></span></button>
-<span class="code-line code-blank"><span class="line-number">7</span></span>
-<button class="code-line" type="button" data-code-block="outputSum" data-code-title="System.out.println とは" data-code-description="System.out.println は、かっこの中にある値を画面へ表示する命令です。ここでは、計算し終えた sum の値を出力します。"><span class="line-number">8</span><span class="code-content"><span class="syntax-class">System</span><span class="syntax-punctuation">.</span><span class="syntax-field">out</span><span class="syntax-punctuation">.</span><span class="syntax-method">println</span><span class="syntax-bracket">(</span><span class="syntax-variable">sum</span><span class="syntax-bracket">)</span><span class="syntax-punctuation">;</span></span></button></code></pre>
+            <pre class="java-code" aria-label="対応するJavaコード"><code id="java-code"></code></pre>
             <div id="code-correspondence" class="code-correspondence">
               コードの行をクリックしてください
             </div>
