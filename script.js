@@ -92,16 +92,21 @@ function directIds(zone) { return [...zone.querySelectorAll(":scope > .placed-bl
 function definition(id) { return [...currentProblem.correct, ...currentProblem.dummies].find((b) => b.id === id); }
 function expectedIds() { return [...currentProblem.expected.root, ...Object.values(currentProblem.expected.nested || {}).flat()]; }
 function values() { return Object.fromEntries(currentProblem.inputs.map((input) => [input.id, $("#input-" + input.id).value])); }
+function problemNumber(index) { return ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"][index] || String(index + 1); }
+function selectProblem(index) { if (index < 0 || index >= problems.length || index === problemIndex) return; problemIndex = index; currentProblem = problems[problemIndex]; history = []; renderProblem(); }
 
 function renderProblem() {
   $("#lesson-position").textContent = `問題 ${problemIndex + 1} / ${problems.length}`;
-  $("#problem-heading").textContent = currentProblem.title; $("#problem-description").innerHTML = currentProblem.description; $("#problem-category").textContent = currentProblem.category;
+  $("#problem-heading").textContent = `問題 ${problemNumber(problemIndex)}：${currentProblem.title}`; $("#problem-description").innerHTML = currentProblem.description; $("#problem-category").textContent = currentProblem.category;
   $("#input-note").textContent = currentProblem.inputNote; $("#assembly-input-symbol").textContent = `入力：${currentProblem.inputs.map((x) => x.label).join("、")}`;
   problemInputs.replaceChildren();
   currentProblem.inputs.forEach((input) => { const label = document.createElement("label"); label.className = "number-input"; label.innerHTML = `<span>${escapeHtml(input.label)}</span><input id="input-${input.id}" type="${input.type}" value="${escapeHtml(input.value)}" ${input.min !== undefined ? `min="${input.min}"` : ""} ${input.max !== undefined ? `max="${input.max}"` : ""}>`; problemInputs.append(label); });
   problemInputs.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateExpectedOutput));
   $("#previous-problem-button").disabled = problemIndex === 0; $("#next-problem-button").disabled = problemIndex === problems.length - 1;
   $("#block-count").textContent = `全${currentProblem.correct.length + currentProblem.dummies.length}個（正解は${currentProblem.correct.length}個）`;
+  $("#problem-list-summary").textContent = `全${problems.length}問`;
+  const list = $("#problem-list-items"); list.replaceChildren();
+  problems.forEach((problem, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "problem-list-item"; button.classList.toggle("is-current", index === problemIndex); button.innerHTML = `<span class="problem-list-number">${problemNumber(index)}</span><span><strong>問題 ${problemNumber(index)}</strong><small>${escapeHtml(problem.title)} <em>${escapeHtml(problem.category)}</em></small></span>`; button.addEventListener("click", () => selectProblem(index)); list.append(button); });
   resetWorkspace(false); renderLearningSupport(); updateExpectedOutput();
 }
 
@@ -137,8 +142,8 @@ function updateInstructor() { document.body.classList.toggle("is-instructor-mode
 
 addDropEvents(assemblyList); renderProblem(); updateInstructor();
 $("#run-button").addEventListener("click", run); $("#undo-button").addEventListener("click", () => { const snap = history.pop(); if (snap) restore(snap); });
-$("#previous-problem-button").addEventListener("click", () => { if (problemIndex) { problemIndex -= 1; currentProblem = problems[problemIndex]; history = []; renderProblem(); } });
-$("#next-problem-button").addEventListener("click", () => { if (problemIndex < problems.length - 1) { problemIndex += 1; currentProblem = problems[problemIndex]; history = []; renderProblem(); } });
+$("#previous-problem-button").addEventListener("click", () => selectProblem(problemIndex - 1));
+$("#next-problem-button").addEventListener("click", () => selectProblem(problemIndex + 1));
 $("#reset-button").addEventListener("click", () => { $("#reset-modal").hidden = false; }); $("#reset-cancel-button").addEventListener("click", () => { $("#reset-modal").hidden = true; }); $("#reset-confirm-button").addEventListener("click", () => { $("#reset-modal").hidden = true; renderProblem(); });
 $("#hint-button").addEventListener("click", () => { $("#hint-modal").hidden = false; }); $("#hint-cancel-button").addEventListener("click", () => { $("#hint-modal").hidden = true; }); $("#hint-confirm-button").addEventListener("click", () => { $("#hint-modal").hidden = true; shownHints = 1; renderHint(); });
 function renderHint() { hintPanel.hidden = false; hintButton.hidden = true; hintCount.textContent = `ヒント ${shownHints} / ${hints.length}`; hintText.textContent = hints[shownHints - 1]; previousHintButton.hidden = shownHints <= 1; nextHintButton.hidden = shownHints >= hints.length; } previousHintButton.addEventListener("click", () => { shownHints -= 1; renderHint(); }); nextHintButton.addEventListener("click", () => { shownHints += 1; renderHint(); });
