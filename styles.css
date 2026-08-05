@@ -1004,6 +1004,19 @@ body.is-resizing {
   clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
 }
 
+.placed-block.block-input .remove-block {
+  top: 50%;
+  right: 18px;
+  color: #5d7080;
+  background: #fff;
+  transform: translateY(-50%);
+}
+
+.placed-block.block-input .remove-block:hover {
+  color: var(--red-700);
+  background: #fff;
+}
+
 .placed-block.block-decision {
   min-height: 74px;
   padding: 18px 64px;
