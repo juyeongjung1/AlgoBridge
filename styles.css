@@ -136,6 +136,14 @@ code {
   grid-template-columns: minmax(260px, 23fr) minmax(450px, 44fr) minmax(360px, 33fr);
 }
 
+.app-footer {
+  padding: 7px 30px 10px;
+  color: #87929d;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-align: right;
+}
+
 .panel {
   min-width: 0;
   overflow: auto;
