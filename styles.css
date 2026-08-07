@@ -129,6 +129,70 @@ code {
   font-weight: 600;
 }
 
+.completion-progress {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 7px;
+  align-items: center;
+  padding: 5px 11px;
+  border: 1px solid #f0b96c;
+  border-radius: 7px;
+  background: #fff8ec;
+}
+
+.completion-progress > span {
+  color: #9a5b12;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.completion-progress strong {
+  color: var(--blue-600);
+  font-size: 19px;
+  line-height: 1;
+}
+
+.completion-progress strong small {
+  color: var(--navy-700);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.completion-progress em {
+  grid-column: 1 / -1;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.completion-progress.is-completed {
+  border-color: #75b798;
+  background: #effaf3;
+}
+
+.completion-progress.is-completed > span,
+.completion-progress.is-completed em {
+  color: #237547;
+}
+
+.completion-reset-button {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #c8d1d9;
+  border-radius: 5px;
+  color: #536575;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.completion-reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
