@@ -779,6 +779,11 @@ body.is-resizing {
   border-color: #b9c8e1;
 }
 
+.block-else {
+  background: #f4effb;
+  border-color: #cfc0e5;
+}
+
 .source-block.is-used {
   opacity: 0.38;
   cursor: not-allowed;
@@ -967,7 +972,7 @@ body.is-resizing {
   min-height: 82px;
 }
 
-.decision-branch .drop-space {
+.branch-body .drop-space {
   min-height: 72px;
 }
 
@@ -1154,7 +1159,7 @@ body.is-resizing {
   top: 26px;
 }
 
-.placed-block.block-decision.has-decision-branches {
+.placed-block.has-branch-body {
   margin-bottom: 14px;
   padding: 0;
   border: 0;
@@ -1163,11 +1168,11 @@ body.is-resizing {
   clip-path: none;
 }
 
-.placed-block.block-decision.has-decision-branches::before {
+.placed-block.has-branch-body::before {
   display: none;
 }
 
-.placed-block.block-decision.has-decision-branches > .placed-copy {
+.placed-block.has-branch-body > .placed-copy {
   position: relative;
   width: min(440px, calc(100% - 44px));
   min-height: 98px;
@@ -1183,20 +1188,20 @@ body.is-resizing {
   text-align: center;
 }
 
-.placed-block.block-decision.has-decision-branches > .placed-copy .remove-block {
+.placed-block.has-branch-body > .placed-copy .remove-block {
   top: 50%;
   right: 44px;
   transform: translateY(-50%);
 }
 
-.decision-branches {
+.branch-bodies {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 12px;
 }
 
-.decision-branch {
+.branch-body {
   min-width: 0;
   padding: 8px;
   border: 1.5px dashed #9bb0ca;
@@ -1204,7 +1209,7 @@ body.is-resizing {
   background: #f7faff;
 }
 
-.decision-branch-label {
+.branch-body-label {
   display: block;
   margin-bottom: 6px;
   color: #466782;
@@ -1213,8 +1218,17 @@ body.is-resizing {
   font-weight: 700;
 }
 
-.decision-branch .placed-block {
+.branch-body .placed-block {
   margin-bottom: 7px;
+}
+
+.placed-block.block-else.has-branch-body > .placed-copy {
+  min-height: 58px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-color: #cfc0e5;
+  background: #f4effb;
+  clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
 }
 
 .placed-block::before {
@@ -1884,11 +1898,20 @@ tbody tr:last-child {
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
+.flow-node.else-node {
+  border-color: #cfc0e5;
+  background: #f4effb;
+}
+
 .flow-decision-branches {
   width: min(360px, 100%);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.flow-decision-branches.is-single {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .flow-decision-branch {
