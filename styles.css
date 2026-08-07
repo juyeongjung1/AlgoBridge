@@ -784,6 +784,11 @@ body.is-resizing {
   border-color: #cfc0e5;
 }
 
+.block-elseIf {
+  background: #f4effb;
+  border-color: #cfc0e5;
+}
+
 .source-block.is-used {
   opacity: 0.38;
   cursor: not-allowed;
@@ -1222,7 +1227,8 @@ body.is-resizing {
   margin-bottom: 7px;
 }
 
-.placed-block.block-else.has-branch-body > .placed-copy {
+.placed-block.block-else.has-branch-body > .placed-copy,
+.placed-block.block-elseIf.has-branch-body > .placed-copy {
   min-height: 58px;
   padding-top: 12px;
   padding-bottom: 12px;
