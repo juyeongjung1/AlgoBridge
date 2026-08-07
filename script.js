@@ -81,13 +81,56 @@ const problems = [
   })
 ];
 
+const problemHints = {
+  name: [
+    { simple: "完成形の表示には、4つの入力値だけでなく、空白やかっこも必要です。どこで完成した文字列を作るか考えましょう。", concrete: "氏・名・氏（かな）・名（かな）をそれぞれ受け取り、fullName を用意してから「氏名 (かな かな)」の形に整えます。" },
+    { simple: "入力値と、整形後の文字列は役割が異なります。表示用の値を入れる場所を用意できているでしょうか。", concrete: "4つの入力用変数の後に、整形後の文字列を入れる変数 fullName を宣言します。" },
+    { simple: "画面に表示するのは途中の文字ではなく、整形が終わった値です。", concrete: "最後に、整形後の変数 fullName の値を出力します。" }
+  ],
+  triangle: [
+    { simple: "面積を出す前に、計算に必要な2つの値がそろっているか確認しましょう。", concrete: "底辺を base、高さを height として、それぞれ入力値を受け取ります。" },
+    { simple: "三角形の面積は、長方形の面積とどのような関係でしょうか。", concrete: "面積は「底辺 × 高さ ÷ 2」です。計算結果を area に設定します。" },
+    { simple: "出力する値は、計算式そのものではなく、計算後の結果です。", concrete: "最後に変数 area の値を出力します。" }
+  ],
+  evenOdd: [
+    { simple: "偶数か奇数かでは、判定の後に必ず2つの経路のどちらかを通ります。", concrete: "number を 2 で割った余りが 0 か判定するブロックを置きます。" },
+    { simple: "真の経路と偽の経路では、表示する文字列が異なります。", concrete: "真の経路には「偶数」を出力するブロック、偽の経路には「奇数」を出力するブロックを直接配置します。" },
+    { simple: "判定に使う値は、判定する前に変数として受け取る必要があります。", concrete: "最初に整数の入力値を受け取り、変数 number を宣言すると同時に設定します。" }
+  ],
+  max: [
+    { simple: "2つの値のどちらを出力するかは、比較結果によって変わります。", concrete: "a が b 以上か判定する if ブロックを置きます。" },
+    { simple: "比較が真の場合と偽の場合に、それぞれどちらの変数を表示するか考えましょう。", concrete: "真の経路では a を出力し、偽の経路では else ブロック内で b を出力します。" },
+    { simple: "比較する前に、2つの値を別々に準備する必要があります。", concrete: "入力値 a と入力値 b は、どちらが先でも構いませんが、両方を受け取ってから比較します。" }
+  ],
+  weekday: [
+    { simple: "1つの数値に応じて多くの処理を選ぶときは、各場合を分けて考えます。", concrete: "day の値に応じて分岐する switch ブロックを置き、0〜6 とそれ以外の8つの領域を使います。" },
+    { simple: "どの経路でも、最後に表示する変数へ文字列を設定する必要があります。", concrete: "0 の領域には「日曜日」、1 の領域には「月曜日」…、それ以外には「Error」を weekday に設定します。" },
+    { simple: "曜日を選ぶ処理と、表示する処理は分けられています。", concrete: "switch の後に、変数 weekday の値を出力します。" }
+  ],
+  greeting: [
+    { simple: "時間帯は複数あります。上から順に条件を確認すると、次に調べる範囲が絞れます。", concrete: "最初は hour が 0〜11 かを if で判定し、偽の経路に else if をつなげます。" },
+    { simple: "各時間帯では、表示用の変数へ異なる挨拶を設定します。", concrete: "朝は「おはようございます」、12〜17時は「こんにちは」、18〜23時は「こんばんは」を greeting に設定します。" },
+    { simple: "どの時間帯にも当てはまらない場合も、最後に扱う必要があります。", concrete: "最後の else の中で「0〜23時で指定してください」を greeting に設定し、最後に greeting を出力します。" }
+  ],
+  sum: [
+    { simple: "合計を作るには、最初に何も足していない状態を表す値が必要です。", concrete: "sum を宣言し、繰り返しの前に sum を 0 に設定します。" },
+    { simple: "問題文は 1 から n までです。繰り返しの開始値・終了値・増やし方を確認しましょう。", concrete: "ループカウンタ変数 i を 1 から n まで、1ずつ増やしながら繰り返します。" },
+    { simple: "繰り返しの中では、毎回の値を合計へ反映させます。", concrete: "繰り返しブロックの内側に「sum に i を加える」を置き、繰り返し後に sum を出力します。" }
+  ],
+  leap: [
+    { simple: "うるう年には例外があります。どの条件を先に調べるべきか、ルールの優先順位を考えましょう。", concrete: "最初に 400 で割り切れるかを判定し、偽の経路で 100、さらに 4 の条件へ進みます。" },
+    { simple: "各条件の真の経路では、判定結果の文字列を設定します。", concrete: "400 と 4 の真の経路では「うるう年です」、100 の真の経路では「うるう年ではありません」を leapYear に設定します。" },
+    { simple: "すべての条件に当てはまらない年も、最後に結果を決める必要があります。", concrete: "最後の else で「うるう年ではありません」を設定し、分岐の後に leapYear を出力します。" }
+  ]
+};
+
 problems.sort((left, right) => ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(left.id) - ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(right.id));
 
 const $ = (s) => document.querySelector(s);
-const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), problemDrawerTab = $("#problem-drawer-tab"), problemDrawerClose = $("#problem-drawer-close"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
+const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), concreteHintButton = $("#concrete-hint-button"), concreteHintText = $("#concrete-hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), problemDrawerTab = $("#problem-drawer-tab"), problemDrawerClose = $("#problem-drawer-close"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
 const completionStorageKey = "algobridge-completed-problems";
 function loadCompletions() { try { const saved = JSON.parse(localStorage.getItem(completionStorageKey) || "{}"); return Object.fromEntries(problems.filter((problem) => saved?.[problem.id]?.inputValues && typeof saved[problem.id].inputValues === "object").map((problem) => [problem.id, saved[problem.id]])); } catch { return {}; } }
-let problemIndex = 0, currentProblem = problems[0], dragged = null, history = [], hints = [], shownHints = 0, isInstructorMode = localStorage.getItem("algobridge-instructor-mode") === "true", completedProblems = loadCompletions();
+let problemIndex = 0, currentProblem = problems[0], dragged = null, history = [], hints = [], shownHints = 0, concreteHintVisible = false, isInstructorMode = localStorage.getItem("algobridge-instructor-mode") === "true", completedProblems = loadCompletions();
 const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a50192e7";
 const sourceResizer = $("#source-resizer");
 
@@ -144,8 +187,8 @@ function restore(snap) { assemblyList.replaceChildren(); snap.forEach((entry) =>
 function resetWorkspace(withHistory = true) { if (withHistory && blocks().length) saveHistory(); assemblyList.replaceChildren(); createEmpty(assemblyList); updateAssemblySymbols(); renderPalette(); clearFeedback(); clearResults(); }
 function validateAssembly() { const root = directIds(assemblyList), all = blocks().map((x) => x.dataset.blockId), expected = expectedIds(); if (all.some((id) => !expected.includes(id))) return false; if (expected.some((id) => !all.includes(id))) return false; const unordered = currentProblem.unorderedPrefix || []; const rootMatches = unordered.length ? unordered.every((id) => root.slice(0, unordered.length).includes(id)) && JSON.stringify(root.slice(unordered.length)) === JSON.stringify(currentProblem.expected.root.slice(unordered.length)) : JSON.stringify(root) === JSON.stringify(currentProblem.expected.root); if (!rootMatches) return false; const nestedMatches = Object.entries(currentProblem.expected.nested || {}).every(([parent, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .loop-body`) || document.createElement("div"))) === JSON.stringify(ids)); const branchMatches = Object.entries(currentProblem.expected.branches || {}).every(([parent, branchMap]) => Object.entries(branchMap).every(([name, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .branch-body[data-branch="${name}"]`) || document.createElement("div"))) === JSON.stringify(ids))); return nestedMatches && branchMatches; }
 function feedbackText() { const all = blocks().map((x) => x.dataset.blockId); return all.some((id) => !expectedIds().includes(id)) ? "この問題では使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。" : "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。"; }
-function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = currentProblem.correct.flatMap((b) => [`「${b.hint}」という役割の処理が必要か考えてみましょう。`, `文章ブロック「${b.label}」を確認しましょう。`]); shownHints = 0; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
-function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; }
+function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = problemHints[currentProblem.id] || currentProblem.correct.map((block) => ({ simple: `「${block.hint}」という役割の処理が必要か考えてみましょう。`, concrete: `文章ブロック「${block.label}」を確認しましょう。` })); shownHints = 0; concreteHintVisible = false; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
+function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; concreteHintVisible = false; }
 function clearResults() { resultContent.hidden = true; resultPanel.hidden = true; resultDrawerTab.hidden = true; workspace.classList.remove("is-result-open"); clearCorrespondence(); }
 function createFlowNode(id, label, className = "") {
   const node = document.createElement("div");
@@ -301,8 +344,8 @@ $("#previous-problem-button").addEventListener("click", () => selectProblem(prob
 $("#next-problem-button").addEventListener("click", () => selectProblem(problemIndex + 1));
 $("#reset-button").addEventListener("click", () => { $("#reset-modal").hidden = false; }); $("#reset-cancel-button").addEventListener("click", () => { $("#reset-modal").hidden = true; }); $("#reset-confirm-button").addEventListener("click", () => { $("#reset-modal").hidden = true; renderProblem(); });
 $("#reset-completion-button").addEventListener("click", () => { $("#completion-reset-modal").hidden = false; }); $("#completion-reset-cancel-button").addEventListener("click", () => { $("#completion-reset-modal").hidden = true; }); $("#completion-reset-confirm-button").addEventListener("click", () => { completedProblems = {}; localStorage.removeItem(completionStorageKey); $("#completion-reset-modal").hidden = true; renderProblem(); });
-$("#hint-button").addEventListener("click", () => { $("#hint-modal").hidden = false; }); $("#hint-cancel-button").addEventListener("click", () => { $("#hint-modal").hidden = true; }); $("#hint-confirm-button").addEventListener("click", () => { $("#hint-modal").hidden = true; shownHints = 1; renderHint(); });
-function renderHint() { hintPanel.hidden = false; hintButton.hidden = true; hintCount.textContent = `ヒント ${shownHints} / ${hints.length}`; hintText.textContent = hints[shownHints - 1]; previousHintButton.hidden = shownHints <= 1; nextHintButton.hidden = shownHints >= hints.length; } previousHintButton.addEventListener("click", () => { shownHints -= 1; renderHint(); }); nextHintButton.addEventListener("click", () => { shownHints += 1; renderHint(); });
+$("#hint-button").addEventListener("click", () => { $("#hint-modal").hidden = false; }); $("#hint-cancel-button").addEventListener("click", () => { $("#hint-modal").hidden = true; }); $("#hint-confirm-button").addEventListener("click", () => { $("#hint-modal").hidden = true; shownHints = 1; concreteHintVisible = false; renderHint(); });
+function renderHint() { const hint = hints[shownHints - 1]; hintPanel.hidden = false; hintButton.hidden = true; hintCount.textContent = `ヒント ${shownHints} / ${hints.length}`; hintText.textContent = hint.simple; concreteHintButton.hidden = concreteHintVisible; concreteHintText.hidden = !concreteHintVisible; concreteHintText.textContent = hint.concrete; previousHintButton.hidden = shownHints <= 1; nextHintButton.hidden = shownHints >= hints.length; } concreteHintButton.addEventListener("click", () => { concreteHintVisible = true; renderHint(); }); previousHintButton.addEventListener("click", () => { shownHints -= 1; concreteHintVisible = false; renderHint(); }); nextHintButton.addEventListener("click", () => { shownHints += 1; concreteHintVisible = false; renderHint(); });
 $("#success-confirm-button").addEventListener("click", () => { $("#success-modal").hidden = true; openResult(); }); resultDetails.addEventListener("toggle", () => { if (!resultDetails.open && !resultContent.hidden && $("#success-modal").hidden) closeResult(); }); resultDrawerTab.addEventListener("click", openResult);
 $("#flow-tab").addEventListener("click", () => { $("#flow-tab").classList.add("is-active"); $("#java-tab").classList.remove("is-active"); $("#flow-panel").hidden = false; $("#java-panel").hidden = true; }); $("#java-tab").addEventListener("click", () => { $("#java-tab").classList.add("is-active"); $("#flow-tab").classList.remove("is-active"); $("#java-panel").hidden = false; $("#flow-panel").hidden = true; });
 $("#instructor-mode-button").addEventListener("click", () => { if (isInstructorMode) { isInstructorMode = false; localStorage.removeItem("algobridge-instructor-mode"); updateInstructor(); } else { $("#instructor-modal").hidden = false; $("#instructor-password").focus(); } }); $("#instructor-cancel-button").addEventListener("click", () => { $("#instructor-modal").hidden = true; }); $("#instructor-form").addEventListener("submit", instructorLogin);

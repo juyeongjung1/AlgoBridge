@@ -1378,6 +1378,28 @@ body.is-resizing {
   font-size: 12px;
 }
 
+.concrete-hint-button {
+  margin-top: 9px;
+  padding: 6px 10px;
+  border: 1px solid #c78927;
+  border-radius: 4px;
+  color: #805512;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.concrete-hint-text {
+  margin: 9px 0 0;
+  padding: 8px 10px;
+  border-radius: 4px;
+  color: #62460f;
+  background: #ffefd0;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
 .next-hint-button {
   margin-top: 9px;
   background: #fff;
