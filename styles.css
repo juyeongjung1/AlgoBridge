@@ -1931,6 +1931,12 @@ tbody tr:last-child {
   background: #f4effb;
 }
 
+.flow-node.no-action-node {
+  color: #64788a;
+  background: #fff;
+  border-style: dashed;
+}
+
 .flow-decision-branches {
   width: min(360px, 100%);
   display: grid;

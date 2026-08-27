@@ -44,10 +44,10 @@ const problems = [
   makeProblem({
     id: "max", category: "選択", title: "2つの値の大きい方", inputNote: "2つの整数を入力してください。", description: "2つの整数を受け取り、大きい方の値を表示してください。", inputs: [I("a", "入力値 a", 12), I("b", "入力値 b", 7)],
     unorderedPrefix: ["inputA", "inputB"],
-    correct: [B("inputA", "input", "1つ目の整数を受け取り、変数 a を宣言すると同時に設定する", "1つ目の入力値を受け取りながら変数を宣言する"), B("inputB", "input", "2つ目の整数を受け取り、変数 b を宣言すると同時に設定する", "2つ目の入力値を受け取りながら変数を宣言する"), B("compareValues", "decision", "変数 a が変数 b より大きいか判定する", "if の条件を確認する", true, [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]]), B("outputA", "output", "変数 a の値を出力する", "真の経路で実行する処理"), B("outputB", "output", "変数 b の値を出力する", "偽の経路で実行する処理"), B("compareLess", "decision", "変数 a が変数 b より小さいか判定する", "別解の if の条件を確認する", true, [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]]), B("outputBWhenLess", "output", "変数 b の値を出力する", "別解の真の経路で実行する処理"), B("outputAWhenGreater", "output", "変数 a の値を出力する", "別解の偽の経路で実行する処理")], dummies: [B("compareEqual", "decision", "変数 a と変数 b が等しいか判定する"), B("outputSmaller", "output", "小さい方の値を出力する"), B("setResultByAddition", "assignment", "変数 result に、変数 a と変数 b を足した値を設定する"), B("compareLessOrEqual", "decision", "変数 a が変数 b 以下か判定する"), B("compareSumToZero", "decision", "変数 a と変数 b の合計が 0 か判定する"), B("checkAIsPositive", "decision", "変数 a が 0 以上か判定する"), ...commonDummies], expected: { root: ["inputA", "inputB", "compareValues"], branches: { compareValues: { true: ["outputA"], false: ["outputB"] } } }, validSolutions: [{ root: ["inputA", "inputB", "compareValues"], branches: { compareValues: { true: ["outputA"], false: ["outputB"] } } }, { root: ["inputA", "inputB", "compareLess"], branches: { compareLess: { true: ["outputBWhenLess"], false: ["outputAWhenGreater"] } } }],
-    execute(v) { const output = Number(v.a) >= Number(v.b) ? Number(v.a) : Number(v.b); return { output, traceColumns: ["a", "b", "大きい方"], trace: [[v.a, v.b, output]] }; },
-    explanation: [["2つの整数を受け取る", "比較する値を a と b に設定します。比較前に両方の値が用意できていれば、入力順は入れ替わっても構いません。"], ["比較する向きは2通りある", "a が b より大きいかを調べて a を出す方法と、a が b より小さいかを調べて b を出す方法は、どちらも正しい考え方です。"], ["同じ値でも矛盾しない", "a と b が同じなら、どちらを出力しても同じ値です。両方の解法で正しい結果になります。"]],
-    code: [["inputA", "int a = 12;  // 1つ目の入力値", "1つ目の整数を受け取る", "入力された整数を a に設定します。"], ["inputB", "int b = 7;  // 2つ目の整数を受け取る", "入力された整数を b に設定します。"], ["compareValues", "if (a >= b) {", "比較演算子 >=", "左の値が右の値以上なら true になります。"], ["outputA", "    System.out.println(a);", "if の中の処理", "a が大きい、または同じときに a を表示します。"], ["elseOutputB", "} else {", "else の開始", "条件が偽の場合に実行する処理を始めます。"], ["outputB", "    System.out.println(b);", "else の中の処理", "a が b より小さいときに b を表示します。"], ["compareValues", "}", "波かっこ", "if / else 全体の終わりを表します。"]]
+    correct: [B("inputA", "input", "1つ目の整数を受け取り、変数 a を宣言すると同時に設定する", "1つ目の入力値を準備する"), B("inputB", "input", "2つ目の整数を受け取り、変数 b を宣言すると同時に設定する", "2つ目の入力値を準備する"), B("declareMax", "declaration", "大きい方の値を格納するための変数 max を宣言する", "比較結果を保存する変数を用意する"), B("initializeMax", "assignment", "変数 max に、初期値として変数 a の値を設定する", "まず片方を大きい値の候補にする"), B("compareBWithMax", "decision", "変数 b が変数 max より大きいか判定する", "もう片方が現在の候補より大きいか確認する", true, [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]]), B("updateMaxWithB", "assignment", "変数 max に、変数 b の値を設定する", "より大きい値で候補を更新する"), B("outputMax", "output", "変数 max の値を出力する", "比較後の大きい値を表示する")], dummies: [B("initializeMaxZero", "assignment", "変数 max に、初期値として 0 を設定する"), B("initializeMaxSum", "assignment", "変数 max に、変数 a と変数 b の合計を設定する"), B("compareBEqualMax", "decision", "変数 b が変数 max と等しいか判定する"), B("compareBSmallerMax", "decision", "変数 b が変数 max より小さいか判定する"), B("compareAWithB", "decision", "変数 a が変数 b より大きいか判定する"), B("updateMaxWithA", "assignment", "変数 max に、変数 a の値をもう一度設定する"), B("outputA", "output", "変数 a の値を出力する"), B("outputB", "output", "変数 b の値を出力する"), B("setResultByAddition", "assignment", "変数 result に、変数 a と変数 b を足した値を設定する"), ...commonDummies], expected: { root: ["inputA", "inputB", "declareMax", "initializeMax", "compareBWithMax", "outputMax"], branches: { compareBWithMax: { true: ["updateMaxWithB"], false: [] } } },
+    execute(v) { const a = Number(v.a), b = Number(v.b), output = Math.max(a, b); return { output, traceColumns: ["処理", "a", "b", "max の値"], trace: [["初期値を設定", a, b, a], [b > a ? "b で更新" : "更新なし", a, b, output]] }; },
+    explanation: [["2つの整数を受け取る", "比較する値を a と b に設定します。この2つの入力順は入れ替わっても構いません。"], ["max を用意する", "比較中の大きい値を保存するため、変数 max を宣言します。"], ["a を最初の候補にする", "まだ比較していないため、まず max に a を設定し、現時点の大きい値の候補とします。"], ["b と max を比較する", "b が現在の max より大きい場合だけ、max を b に更新します。偽の場合は a の方が大きいか同じなので、何も変更しません。"], ["max を出力する", "比較が終わった max には、a と b のうち大きい方の値が入っています。"]],
+    code: [["inputA", "int a = 12;  // 1つ目の入力値", "変数 a", "1つ目の整数を受け取り、int 型の変数 a に設定します。"], ["inputB", "int b = 7;  // 2つ目の入力値", "変数 b", "2つ目の整数を受け取り、int 型の変数 b に設定します。"], ["declareMax", "int max;", "変数 max", "大きい方の値を保存する整数型の変数を用意します。"], ["initializeMax", "max = a;", "最初の候補", "比較を始める前に、まず a を大きい値の候補として max に入れます。"], ["compareBWithMax", "if (b > max) {", "比較演算子 >", "b が現在の max より大きい場合だけ、波かっこの中を実行します。"], ["updateMaxWithB", "    max = b;", "max の更新", "b の方が大きいと分かったため、max を b の値に入れ替えます。"], ["compareBWithMax", "}", "波かっこ", "条件が真の場合に実行する範囲の終わりです。"], ["outputMax", "System.out.println(max);", "結果の出力", "比較後に残った max の値を表示します。"]]
   }),
   makeProblem({
     id: "weekday", category: "選択", title: "曜日を表示", inputNote: "0〜6 の整数を入力してください。", description: "0 なら日曜日、1 なら月曜日、…、6 なら土曜日を表示し、それ以外は Error と表示してください。", inputs: [I("day", "曜日の番号", 1)],
@@ -98,9 +98,9 @@ const problemHints = {
     { simple: "判定に使う値は、判定する前に変数として受け取る必要があります。", concrete: "最初に整数の入力値を受け取り、変数 number を宣言すると同時に設定します。" }
   ],
   max: [
-    { simple: "2つの値のどちらを出力するかは、比較結果によって変わります。", concrete: "a が b 以上か判定する if ブロックを置きます。" },
-    { simple: "比較が真の場合と偽の場合に、それぞれどちらの変数を表示するか考えましょう。", concrete: "真の経路では a を出力し、偽の経路では else ブロック内で b を出力します。" },
-    { simple: "比較する前に、2つの値を別々に準備する必要があります。", concrete: "入力値 a と入力値 b は、どちらが先でも構いませんが、両方を受け取ってから比較します。" }
+    { simple: "比較を始める前に、現時点で一番大きい値の候補を保存する場所が必要です。", concrete: "変数 max を宣言し、最初の候補として a の値を設定します。" },
+    { simple: "もう片方の値が、現在の候補より大きい場合だけ候補を入れ替えます。", concrete: "b が max より大きいか判定し、真の領域に「max に b を設定する」を配置します。偽の領域では何も更新しません。" },
+    { simple: "比較が終わった後に出力するのは、入力値そのものではなく、更新後の候補です。", concrete: "判定ブロックの後に、変数 max の値を出力します。" }
   ],
   weekday: [
     { simple: "1つの数値に応じて多くの処理を選ぶときは、各場合を分けて考えます。", concrete: "day の値に応じて分岐する switch ブロックを置き、0〜6 とそれ以外の8つの領域を使います。" },
@@ -124,17 +124,10 @@ const problemHints = {
   ]
 };
 
-const maxProblem = problems.find((problem) => problem.id === "max");
-maxProblem.explanation = [["2つの整数を受け取る", "比較する値を a と b に設定します。比較前に両方の値が用意できていれば、入力順は入れ替わっても構いません。"], ["比較する向きは2通りある", "a が b より大きいかを調べて a を出す方法と、a が b より小さいかを調べて b を出す方法は、どちらも正しい考え方です。"], ["同じ値でも矛盾しない", "a と b が同じなら、どちらを出力しても同じ値です。両方の解法で正しい結果になります。"]];
-maxProblem.code = [["inputA", "int a = 12;  // 1つ目の入力値", "1つ目の整数を受け取る", "入力された整数を a に設定します。"], ["inputB", "int b = 7;  // 2つ目の入力値", "2つ目の整数を受け取る", "入力された整数を b に設定します。"], ["compareValues", "if (a > b) {", "比較演算子 >", "a が b より大きいときだけ true になります。"], ["outputA", "    System.out.println(a);", "if の中の処理", "a が大きいときに a を表示します。"], ["elseOutputB", "} else {", "else の開始", "a が b 以下の場合に実行する処理を始めます。"], ["outputB", "    System.out.println(b);", "else の中の処理", "b が a 以上の場合に b を表示します。"], ["compareValues", "}", "波かっこ", "if / else 全体の終わりを表します。"], ["compareLess", "// 別解: if (a < b) {", "別解", "比較の向きを反対にしても、真の経路で b を出せば正解です。"], ["outputBWhenLess", "//     System.out.println(b);", "別解の真の経路", "a が b より小さいときに b を表示します。"], ["elseOutputA", "// } else {", "別解の else", "a が b 以上の場合は a を表示する経路へ進みます。"], ["outputAWhenGreater", "//     System.out.println(a);", "別解の偽の経路", "a が b 以上のときに a を表示します。"], ["compareLess", "// }", "別解の終わり", "別解の if / else 全体の終わりです。"]];
-maxProblem.code[4][0] = "outputB";
-maxProblem.code[9][0] = "outputAWhenGreater";
 const greetingProblem = problems.find((problem) => problem.id === "greeting");
 greetingProblem.code.find(([id]) => id === "elseGreeting")[0] = "setHourGuide";
 const leapProblem = problems.find((problem) => problem.id === "leap");
 leapProblem.code.find(([id]) => id === "elseCommonYear")[0] = "setCommonByDefault";
-problemHints.max = [{ simple: "2つの値のどちらを出力するかは、比較結果によって変わります。", concrete: "a が b より大きいかを判定して a を出す方法と、a が b より小さいかを判定して b を出す方法の2通りがあります。" }, { simple: "真の場合と偽の場合に、必ず大きい方を出力できているか確認しましょう。", concrete: "a > b なら真の経路で a、それ以外なら b を出力します。別解では a < b なら b、それ以外なら a を出力します。" }, { simple: "a と b が同じ場合も、出力結果は同じです。", concrete: "同じ値なら a を出しても b を出しても結果は同じため、どちらの比較方法も正解として扱います。" }];
-
 problems.sort((left, right) => ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(left.id) - ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(right.id));
 
 const $ = (s) => document.querySelector(s);
@@ -146,12 +139,12 @@ const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a5
 const sourceResizer = $("#source-resizer");
 
 function escapeHtml(text) { return String(text).replace(/[&<>\"]/g, (x) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x])); }
-function formatLabel(text) { return escapeHtml(text).replace(/(sum|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|number|year|hour|day|[abni])/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
+function formatLabel(text) { return escapeHtml(text).replace(/(sum|max|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|number|year|hour|day|[abni])/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
 function blocks() { return [...assemblyList.querySelectorAll(".placed-block")]; }
 function directIds(zone) { return [...zone.querySelectorAll(":scope > .placed-block")].map((x) => x.dataset.blockId); }
 function definition(id) { return [...currentProblem.correct, ...currentProblem.dummies].find((b) => b.id === id); }
 function expectedIdsFor(expected) { return [...expected.root, ...Object.values(expected.nested || {}).flat(), ...Object.values(expected.branches || {}).flatMap((branch) => Object.values(branch).flat())]; }
-function expectedIds() { return [...new Set((currentProblem.validSolutions || [currentProblem.expected]).flatMap(expectedIdsFor))]; }
+function expectedIds() { return expectedIdsFor(currentProblem.expected); }
 function values() { return Object.fromEntries(currentProblem.inputs.map((input) => [input.id, $("#input-" + input.id).value])); }
 function problemNumber(index) { return ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"][index] || String(index + 1); }
 function selectProblem(index) { if (index < 0 || index >= problems.length || index === problemIndex) return; workspace.classList.remove("is-problem-list-open"); problemIndex = index; currentProblem = problems[problemIndex]; history = []; renderProblem(); }
@@ -180,7 +173,7 @@ function updateExpectedOutput() { const v = values(); expectedOutputValue.textCo
 function isValid(v) { return currentProblem.valid ? currentProblem.valid(v) : Object.values(v).every((x) => String(x).trim() !== ""); }
 function shuffle(list) { return [...list].sort(() => Math.random() - .5); }
 function renderPalette() { palette.replaceChildren(); const grouped = Object.values([...currentProblem.correct, ...currentProblem.dummies].reduce((groups, block) => { (groups[block.type] ||= []).push(block); return groups; }, {})); shuffle(grouped).forEach((group) => shuffle(group).forEach((block) => { const button = document.createElement("button"); button.type = "button"; button.className = `source-block block-${block.type}`; button.draggable = true; button.dataset.blockId = block.id; button.innerHTML = `<span class="block-handle">⠿</span><span class="block-copy"><strong>${formatLabel(block.label)}</strong><small>${escapeHtml(block.hint)}</small></span>`; button.addEventListener("dragstart", () => { dragged = { id: block.id, source: "palette" }; }); button.addEventListener("click", () => addBlock(block.id, assemblyList)); palette.append(button); })); updatePalette(); }
-function zoneMessage(zone, next = false) { if (zone.classList.contains("branch-body")) return next ? "次の処理をここに配置" : "ここに処理を配置"; return next ? "次の繰り返し処理をここに配置" : "ここに繰り返しの中の処理を配置"; }
+function zoneMessage(zone, next = false) { if (zone.classList.contains("branch-body")) return next ? "必要な場合は次の処理をここに配置" : "必要な場合はここに処理を配置"; return next ? "次の繰り返し処理をここに配置" : "ここに繰り返しの中の処理を配置"; }
 function createEmpty(zone, nested = false) { const empty = document.createElement("div"); empty.className = nested ? "nested-empty" : "empty-state"; empty.dataset.empty = "true"; empty.innerHTML = nested ? zoneMessage(zone) : '<span class="empty-icon">＋</span><strong>ここに処理を配置</strong><p>左側の一覧からドラッグ＆ドロップ</p>'; zone.append(empty); }
 function createDropSpace(zone, nested = false) { const space = document.createElement("div"); space.className = "drop-space"; space.dataset.dropSpace = "true"; space.textContent = nested ? zoneMessage(zone, true) : "次の処理をここに配置"; zone.append(space); return space; }
 function updateZoneDropSpace(zone) { const nested = zone !== assemblyList; const hasBlocks = directIds(zone).length > 0; const empty = zone.querySelector(":scope > [data-empty]"); let space = zone.querySelector(":scope > .drop-space"); if (!hasBlocks) { space?.remove(); if (!empty) createEmpty(zone, nested); return; } empty?.remove(); if (!space) space = createDropSpace(zone, nested); zone.append(space); }
@@ -198,7 +191,7 @@ function restoreBlock(entry, zone) { const saved = typeof entry === "string" ? {
 function restore(snap) { assemblyList.replaceChildren(); snap.forEach((entry) => restoreBlock(entry, assemblyList)); refreshAssembly(); }
 function resetWorkspace(withHistory = true) { if (withHistory && blocks().length) saveHistory(); assemblyList.replaceChildren(); createEmpty(assemblyList); updateAssemblySymbols(); renderPalette(); clearFeedback(); clearResults(); }
 function matchesSolution(expected) { const root = directIds(assemblyList), all = blocks().map((x) => x.dataset.blockId), expectedIdsForSolution = expectedIdsFor(expected); if (all.length !== expectedIdsForSolution.length || all.some((id) => !expectedIdsForSolution.includes(id))) return false; const unordered = currentProblem.unorderedPrefix || []; const rootMatches = unordered.length ? unordered.every((id) => root.slice(0, unordered.length).includes(id)) && JSON.stringify(root.slice(unordered.length)) === JSON.stringify(expected.root.slice(unordered.length)) : JSON.stringify(root) === JSON.stringify(expected.root); if (!rootMatches) return false; const nestedMatches = Object.entries(expected.nested || {}).every(([parent, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .loop-body`) || document.createElement("div"))) === JSON.stringify(ids)); const branchMatches = Object.entries(expected.branches || {}).every(([parent, branchMap]) => Object.entries(branchMap).every(([name, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .branch-body[data-branch="${name}"]`) || document.createElement("div"))) === JSON.stringify(ids))); return nestedMatches && branchMatches; }
-function validateAssembly() { return (currentProblem.validSolutions || [currentProblem.expected]).some(matchesSolution); }
+function validateAssembly() { return matchesSolution(currentProblem.expected); }
 function feedbackText() { const all = blocks().map((x) => x.dataset.blockId); return all.some((id) => !expectedIds().includes(id)) ? "この問題では使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。" : "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。"; }
 function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = problemHints[currentProblem.id] || currentProblem.correct.map((block) => ({ simple: `「${block.hint}」という役割の処理が必要か考えてみましょう。`, concrete: `文章ブロック「${block.label}」を確認しましょう。` })); shownHints = 0; concreteHintVisible = false; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
 function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; concreteHintVisible = false; }
@@ -244,6 +237,10 @@ function appendFlowBlock(container, id) {
       branch.className = `flow-decision-branch flow-decision-branch-${name}`;
       const label = block.branches?.find(([branchName]) => branchName === name)?.[1] || (name === "true" ? "真（はい）" : "偽（いいえ）");
       branch.innerHTML = `<strong>${escapeHtml(label)}</strong>`;
+      if (!branchIds.length) {
+        appendFlowArrow(branch);
+        branch.append(createFlowNode("", "処理なし", "no-action-node"));
+      }
       branchIds.forEach((branchId) => {
         appendFlowArrow(branch);
         appendFlowBlock(branch, branchId);
