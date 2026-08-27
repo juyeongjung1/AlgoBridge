@@ -141,7 +141,7 @@ const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a5
 const sourceResizer = $("#source-resizer");
 
 function escapeHtml(text) { return String(text).replace(/[&<>\"]/g, (x) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x])); }
-function formatLabel(text) { return escapeHtml(text).replace(/(sum|max|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|number|year|hour|day|[abni])/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
+function formatLabel(text) { return escapeHtml(text).replace(/\b(sum|max|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|heightCm|weightKg|heightM|bmi|number|year|hour|day|basePremium|discount|invoice|customerName|policyNumber|policyLabel|age|contractStatus|accidentCode|reception|monthlyPremium|months|annualPremium|premiums|average|maxPremium|threshold|count|policyNumbers|target|found|ages|eligibleAge|statuses|unpaidCount|first|second|temporary|paidMonths|policyYears|accidentType|a|b|n|i)\b/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
 function blocks() { return [...assemblyList.querySelectorAll(".placed-block")]; }
 function directIds(zone) { return [...zone.querySelectorAll(":scope > .placed-block")].map((x) => x.dataset.blockId); }
 function definition(id) { return [...currentProblem.correct, ...currentProblem.dummies].find((b) => b.id === id); }
