@@ -128,7 +128,9 @@ const greetingProblem = problems.find((problem) => problem.id === "greeting");
 greetingProblem.code.find(([id]) => id === "elseGreeting")[0] = "setHourGuide";
 const leapProblem = problems.find((problem) => problem.id === "leap");
 leapProblem.code.find(([id]) => id === "elseCommonYear")[0] = "setCommonByDefault";
-problems.sort((left, right) => ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(left.id) - ["name", "triangle", "evenOdd", "max", "weekday", "greeting", "sum", "leap"].indexOf(right.id));
+problems.push(...window.createAdditionalProblems({ B, I, makeProblem, commonDummies }));
+const lessonOrder = ["name", "triangle", "bmi", "billing", "policyFormat", "evenOdd", "max", "eligibility", "contractStatus", "greeting", "weekday", "accidentCategory", "sum", "evenSum", "fizzBuzz", "annualPremium", "leap", "arraySum", "arrayAverage", "premiumMax", "thresholdCount", "policySearch", "firstEligible", "paymentStatusCount", "premiumStats", "swapPremium", "bubblePass", "bubbleSort", "claimReception", "coverageDecision"];
+problems.sort((left, right) => lessonOrder.indexOf(left.id) - lessonOrder.indexOf(right.id));
 
 const $ = (s) => document.querySelector(s);
 const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), concreteHintButton = $("#concrete-hint-button"), concreteHintText = $("#concrete-hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), problemDrawerTab = $("#problem-drawer-tab"), problemDrawerClose = $("#problem-drawer-close"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
@@ -146,7 +148,7 @@ function definition(id) { return [...currentProblem.correct, ...currentProblem.d
 function expectedIdsFor(expected) { return [...expected.root, ...Object.values(expected.nested || {}).flat(), ...Object.values(expected.branches || {}).flatMap((branch) => Object.values(branch).flat())]; }
 function expectedIds() { return expectedIdsFor(currentProblem.expected); }
 function values() { return Object.fromEntries(currentProblem.inputs.map((input) => [input.id, $("#input-" + input.id).value])); }
-function problemNumber(index) { return ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"][index] || String(index + 1); }
+function problemNumber(index) { return ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳", "㉑", "㉒", "㉓", "㉔", "㉕", "㉖", "㉗", "㉘", "㉙", "㉚"][index] || String(index + 1); }
 function selectProblem(index) { if (index < 0 || index >= problems.length || index === problemIndex) return; workspace.classList.remove("is-problem-list-open"); problemIndex = index; currentProblem = problems[problemIndex]; history = []; renderProblem(); }
 function isCompleted(problem = currentProblem) { return Boolean(completedProblems[problem.id]); }
 function savedInputValues(problem = currentProblem) { return completedProblems[problem.id]?.inputValues || {}; }
@@ -193,7 +195,7 @@ function resetWorkspace(withHistory = true) { if (withHistory && blocks().length
 function matchesSolution(expected) { const root = directIds(assemblyList), all = blocks().map((x) => x.dataset.blockId), expectedIdsForSolution = expectedIdsFor(expected); if (all.length !== expectedIdsForSolution.length || all.some((id) => !expectedIdsForSolution.includes(id))) return false; const unordered = currentProblem.unorderedPrefix || []; const rootMatches = unordered.length ? unordered.every((id) => root.slice(0, unordered.length).includes(id)) && JSON.stringify(root.slice(unordered.length)) === JSON.stringify(expected.root.slice(unordered.length)) : JSON.stringify(root) === JSON.stringify(expected.root); if (!rootMatches) return false; const nestedMatches = Object.entries(expected.nested || {}).every(([parent, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .loop-body`) || document.createElement("div"))) === JSON.stringify(ids)); const branchMatches = Object.entries(expected.branches || {}).every(([parent, branchMap]) => Object.entries(branchMap).every(([name, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .branch-body[data-branch="${name}"]`) || document.createElement("div"))) === JSON.stringify(ids))); return nestedMatches && branchMatches; }
 function validateAssembly() { return matchesSolution(currentProblem.expected); }
 function feedbackText() { const all = blocks().map((x) => x.dataset.blockId); return all.some((id) => !expectedIds().includes(id)) ? "この問題では使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。" : "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。"; }
-function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = problemHints[currentProblem.id] || currentProblem.correct.map((block) => ({ simple: `「${block.hint}」という役割の処理が必要か考えてみましょう。`, concrete: `文章ブロック「${block.label}」を確認しましょう。` })); shownHints = 0; concreteHintVisible = false; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
+function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = currentProblem.hints || problemHints[currentProblem.id] || currentProblem.correct.map((block) => ({ simple: `「${block.hint}」という役割の処理が必要か考えてみましょう。`, concrete: `文章ブロック「${block.label}」を確認しましょう。` })); shownHints = 0; concreteHintVisible = false; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
 function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; concreteHintVisible = false; }
 function clearResults() { resultContent.hidden = true; resultPanel.hidden = true; resultDrawerTab.hidden = true; workspace.classList.remove("is-result-open"); clearCorrespondence(); }
 function createFlowNode(id, label, className = "") {
@@ -260,8 +262,7 @@ function appendFlowBlock(container, id) {
   loop.append(createFlowNode(id, block.label, "loop-start-node"));
   nestedIds.forEach((nestedId) => {
     appendFlowArrow(loop);
-    const nestedBlock = definition(nestedId);
-    loop.append(createFlowNode(nestedId, nestedBlock.label, flowClass(nestedBlock)));
+    appendFlowBlock(loop, nestedId);
   });
   const back = document.createElement("div");
   back.className = "loop-back";
