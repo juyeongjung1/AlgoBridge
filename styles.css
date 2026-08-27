@@ -272,7 +272,7 @@ body.is-instructor-mode .instructor-mode-button {
 }
 
 .workspace.is-result-open {
-  grid-template-columns: var(--source-panel-width) 10px minmax(450px, 1.3fr) minmax(360px, 1fr);
+  grid-template-columns: var(--source-panel-width) 10px minmax(0, 1fr);
 }
 
 .source-resizer {
@@ -978,7 +978,8 @@ body.is-resizing {
 }
 
 .branch-body .drop-space {
-  min-height: 72px;
+  min-height: 46px;
+  font-size: 10px;
 }
 
 .drop-space[hidden] {
@@ -1204,6 +1205,12 @@ body.is-resizing {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 12px;
+}
+
+/* 最上位の分岐だけを横並びにし、ネストした条件は縦につなげる。 */
+.branch-body .branch-bodies {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 
 .branch-body {
@@ -1658,8 +1665,21 @@ body.is-resizing {
 }
 
 .result-panel {
-  position: relative;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 6;
+  width: min(480px, calc(100% - var(--source-panel-width) - 64px));
+  overflow-y: auto;
   scroll-margin-top: 12px;
+  box-shadow: -12px 0 28px rgba(17, 34, 51, 0.16);
+  animation: result-panel-slide-in 0.22s ease-out;
+}
+
+@keyframes result-panel-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .result-details-summary {
