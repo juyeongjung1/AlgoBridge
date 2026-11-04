@@ -189,11 +189,13 @@
 
         <section class="explanation-section" aria-labelledby="explanation-heading">
           <h3 id="explanation-heading">なぜこの組み立てになるのか</h3>
+          <p class="section-note">以下は基本の解き方の説明です。同じ結果になる別の組み立ても認めています。</p>
           <ol id="reason-list" class="reason-list"></ol>
         </section>
 
         <section class="support-section" aria-labelledby="support-heading">
           <h3 id="support-heading">別の表現で確認</h3>
+          <p id="learning-layout-note" class="section-note"></p>
           <div class="tabs" role="tablist" aria-label="表示の切り替え">
             <button id="flow-tab" class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="flow-panel">
               フローチャート
@@ -204,11 +206,13 @@
           </div>
 
           <div id="flow-panel" class="tab-panel" role="tabpanel" aria-labelledby="flow-tab">
+            <p class="section-note">分岐は条件に合う経路だけを実行します。上下の分岐枠を順番に実行する意味ではありません。</p>
             <div id="flowchart" class="flowchart" aria-label="処理のフローチャート"></div>
           </div>
 
           <div id="java-panel" class="tab-panel" role="tabpanel" aria-labelledby="java-tab" hidden>
             <p class="code-guide">コードの行を選ぶと、対応する文章ブロックに加え、この行の役割と単語・記号の意味を確認できます。</p>
+            <p class="section-note">mainメソッド内の処理例です。入力APIは省略し、画面の入力値を直接設定しています。Arrays.toStringを使う例では、クラスの前にimport java.util.Arrays;を記述します。</p>
             <pre class="java-code" aria-label="対応するJavaコード"><code id="java-code"></code></pre>
             <div id="code-correspondence" class="code-correspondence">
               コードの行をクリックしてください
@@ -295,6 +299,7 @@
   </div>
 
   <script src="additional-problems.js"></script>
+  <script src="problem-engine.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 const B = (id, type, label, hint = "処理の役割を考える", acceptsChildren = false, branches = null) => ({ id, type, label, hint, acceptsChildren, branches });
 const I = (id, label, value, type = "number", options = {}) => ({ id, label, value, type, ...options });
 const commonDummies = [
-  B("dummyInput", "input", "計算結果を入力する", "結果を受け取る処理ではありません"),
-  B("dummyOutput", "output", "入力された値をそのまま出力する", "途中の値を表示する処理です")
+  B("dummyInput", "input", "計算結果を入力する", "入力する情報を考える"),
+  B("dummyOutput", "output", "入力された値をそのまま出力する", "表示する情報を考える")
 ];
 
 function makeProblem(config) {
@@ -57,11 +57,11 @@ const problems = [
     code: [["inputDay", "int day = 1;  // 曜日の番号", "曜日の番号を受け取る", "入力された番号を day に設定します。"], ["declareWeekday", "String weekday;", "String とは", "曜日のような文字を入れる型です。"], ["selectWeekday", "switch (day) {", "switch文とは", "1つの値に応じて複数の処理を選ぶ文です。"], ["setSunday", "    case 0: weekday = \"日曜日\"; break;", "case と break", "day が 0 の場合に日曜日を設定し、break で switch を終えます。"], ["setMonday", "    case 1: weekday = \"月曜日\"; break;", "case と break", "day が 1 の場合に月曜日を設定します。"], ["setTuesday", "    case 2: weekday = \"火曜日\"; break;", "case と break", "day が 2 の場合に火曜日を設定します。"], ["setWednesday", "    case 3: weekday = \"水曜日\"; break;", "case と break", "day が 3 の場合に水曜日を設定します。"], ["setThursday", "    case 4: weekday = \"木曜日\"; break;", "case と break", "day が 4 の場合に木曜日を設定します。"], ["setFriday", "    case 5: weekday = \"金曜日\"; break;", "case と break", "day が 5 の場合に金曜日を設定します。"], ["setSaturday", "    case 6: weekday = \"土曜日\"; break;", "case と break", "day が 6 の場合に土曜日を設定します。"], ["setWeekdayError", "    default: weekday = \"Error\";", "default とは", "どの case にも一致しない場合に Error を設定します。"], ["selectWeekday", "}", "波かっこ", "switch 文の終わりを表します。"], ["outputWeekday", "System.out.println(weekday);", "出力", "選ばれた曜日または Error を表示します。"]]
   }),
   makeProblem({
-    id: "greeting", category: "選択", title: "時間帯に応じた挨拶", inputNote: "0〜23 の整数を入力してください。", description: "時刻を受け取り、0〜11 は「おはようございます」、12〜17 は「こんにちは」、18〜23 は「こんばんは」、それ以外は案内文を表示してください。", inputs: [I("hour", "時刻", 15)],
+    id: "greeting", category: "選択", title: "時間帯に応じた挨拶", inputNote: "整数の時刻を入力してください。0〜23以外では案内文を表示します。", description: "時刻を受け取り、0〜11 は「おはようございます」、12〜17 は「こんにちは」、18〜23 は「こんばんは」、それ以外は案内文を表示してください。", inputs: [I("hour", "時刻", 15)],
     correct: [B("inputHour", "input", "時刻を受け取り、変数 hour を宣言すると同時に設定する", "時刻を受け取りながら変数を宣言する"), B("declareGreeting", "declaration", "挨拶を格納するための変数 greeting を宣言する"), B("checkMorning", "decision", "変数 hour が 0 以上 11 以下か判定する", "最初の条件を確認する", true, [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]]), B("setMorning", "assignment", "変数 greeting に文字列「おはようございます」を設定する"), B("checkAfternoon", "decision", "変数 hour が 12 以上 17 以下か判定する", "次の時間帯の条件を確認する", true, [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]]), B("setAfternoon", "assignment", "変数 greeting に文字列「こんにちは」を設定する"), B("checkEvening", "decision", "変数 hour が 18 以上 23 以下か判定する", "最後の時間帯の条件を確認する", true, [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]]), B("setEvening", "assignment", "変数 greeting に文字列「こんばんは」を設定する"), B("setHourGuide", "assignment", "変数 greeting に文字列「0〜23時で指定してください」を設定する"), B("outputGreeting", "output", "変数 greeting の値を出力する")], dummies: [B("checkMorningOnly", "decision", "時刻が 12 より小さいかだけ判定する"), B("wrongElseIf", "decision", "変数 hour が 12 より小さいか判定する", "次の時間帯の条件を確認する"), B("outputHour", "output", "時刻をそのまま出力する"), B("setResultAsHour", "assignment", "変数 result に、入力された時刻を設定する"), B("setMorningForAfternoon", "decision", "変数 hour が 12〜17 のとき、「おはようございます」を変数 greeting に設定する"), B("setHelloAfterNoon", "decision", "変数 hour が 12 以上なら、「こんにちは」を変数 greeting に設定する"), B("setGreetingForValidHour", "decision", "変数 hour が 0〜23 のとき、「こんにちは」を変数 greeting に設定する"), ...commonDummies], expected: { root: ["inputHour", "declareGreeting", "checkMorning", "outputGreeting"], branches: { checkMorning: { true: ["setMorning"], false: ["checkAfternoon"] }, checkAfternoon: { true: ["setAfternoon"], false: ["checkEvening"] }, checkEvening: { true: ["setEvening"], false: ["setHourGuide"] } } },
     execute(v) { const h = Number(v.hour); const output = h >= 0 && h <= 11 ? "おはようございます" : h <= 17 && h >= 12 ? "こんにちは" : h <= 23 && h >= 18 ? "こんばんは" : "0〜23時で指定してください"; return { output, traceColumns: ["時刻", "greeting の値"], trace: [[v.hour, output]] }; },
-    explanation: [["時刻を受け取る", "入力された時刻を hour に設定します。後の条件分岐では、この値がどの時間帯に入るかを調べます。"], ["挨拶を入れる変数を宣言する", "選んだ挨拶を1か所に保存して、最後に表示できるようにします。"], ["if / else if を上から順に確認する", "時刻は複数の範囲に分かれます。先に当てはまる時間帯を決め、残りだけを次の else if で調べます。"], ["else で範囲外を扱う", "0〜23 のどれにも当てはまらない場合を最後に用意すると、想定外の入力にも案内を返せます。"]],
-    code: [["inputHour", "int hour = 15;  // 時刻の入力値", "時刻を受け取る", "入力された時刻を hour に設定します。"], ["declareGreeting", "String greeting;", "String とは", "文字列を入れる変数の型です。"], ["checkMorning", "if (hour >= 0 && hour <= 11) {", "if と &&", "0以上かつ11以下なら、朝の処理を実行します。"], ["setMorning", "    greeting = \"おはようございます\";", "if の中の処理", "朝の挨拶を greeting に設定します。"], ["checkAfternoon", "} else if (hour <= 17) {", "else if", "朝でなかった場合だけ、17以下かを確認します。"], ["setAfternoon", "    greeting = \"こんにちは\";", "else if の中の処理", "昼の挨拶を greeting に設定します。"], ["checkEvening", "} else if (hour <= 23) {", "else if", "ここまで当てはまらなければ、23以下かを確認します。"], ["setEvening", "    greeting = \"こんばんは\";", "else if の中の処理", "夜の挨拶を greeting に設定します。"], ["elseGreeting", "} else {", "else", "どの時間帯にも当てはまらない場合の処理を始めます。"], ["setHourGuide", "    greeting = \"0〜23時で指定してください\";", "else の中の処理", "範囲外の時刻への案内を設定します。"], ["checkMorning", "}", "波かっこ", "if / else if / else 全体の終わりを表します。"], ["outputGreeting", "System.out.println(greeting);", "出力", "決定した挨拶を表示します。"]]
+    explanation: [["時刻を受け取る", "入力された時刻を hour に設定します。後の条件分岐では、この値がどの時間帯に入るかを調べます。"], ["挨拶を入れる変数を宣言する", "選んだ挨拶を1か所に保存して、最後に表示できるようにします。"], ["偽の経路で次の if を確認する", "時刻は複数の範囲に分かれます。先に当てはまる時間帯を決め、残りだけを偽の経路の次の if で調べます。これは else if と同じ考え方です。"], ["else で範囲外を扱う", "0〜23 のどれにも当てはまらない場合を最後に用意すると、想定外の入力にも案内を返せます。"]],
+    code: [["inputHour", "int hour = 15;  // 時刻の入力値", "時刻を受け取る", "入力された時刻を hour に設定します。"], ["declareGreeting", "String greeting;", "String とは", "文字列を入れる変数の型です。"], ["checkMorning", "if (hour >= 0 && hour <= 11) {", "if と &&", "0以上かつ11以下なら、朝の処理を実行します。"], ["setMorning", "    greeting = \"おはようございます\";", "if の中の処理", "朝の挨拶を greeting に設定します。"], ["checkAfternoon", "} else if (hour >= 12 && hour <= 17) {", "else if", "朝でなかった場合だけ、12以上かつ17以下かを確認します。"], ["setAfternoon", "    greeting = \"こんにちは\";", "else if の中の処理", "昼の挨拶を greeting に設定します。"], ["checkEvening", "} else if (hour >= 18 && hour <= 23) {", "else if", "ここまで当てはまらなければ、18以上かつ23以下かを確認します。"], ["setEvening", "    greeting = \"こんばんは\";", "else if の中の処理", "夜の挨拶を greeting に設定します。"], ["elseGreeting", "} else {", "else", "どの時間帯にも当てはまらない場合の処理を始めます。"], ["setHourGuide", "    greeting = \"0〜23時で指定してください\";", "else の中の処理", "範囲外の時刻への案内を設定します。"], ["checkMorning", "}", "波かっこ", "if / else if / else 全体の終わりを表します。"], ["outputGreeting", "System.out.println(greeting);", "出力", "決定した挨拶を表示します。"]]
   }),
   makeProblem({
     id: "leap", category: "ネストした選択", title: "うるう年の判定", inputNote: "西暦を整数で入力してください。", description: "4で割り切れる年はうるう年、ただし100で割り切れる年はうるう年ではなく、400で割り切れる年はうるう年です。このルールで判定してください。", inputs: [I("year", "西暦", 2020)],
@@ -131,6 +131,7 @@ leapProblem.code.find(([id]) => id === "elseCommonYear")[0] = "setCommonByDefaul
 problems.push(...window.createAdditionalProblems({ B, I, makeProblem, commonDummies }));
 const lessonOrder = ["name", "triangle", "bmi", "billing", "policyFormat", "evenOdd", "max", "eligibility", "contractStatus", "greeting", "weekday", "accidentCategory", "sum", "evenSum", "fizzBuzz", "annualPremium", "leap", "arraySum", "arrayAverage", "premiumMax", "thresholdCount", "policySearch", "firstEligible", "paymentStatusCount", "premiumStats", "swapPremium", "bubblePass", "bubbleSort", "claimReception", "coverageDecision"];
 problems.sort((left, right) => lessonOrder.indexOf(left.id) - lessonOrder.indexOf(right.id));
+problems.forEach(window.AlgoEngine.configure);
 
 const $ = (s) => document.querySelector(s);
 const palette = $("#block-palette"), assemblyList = $("#assembly-list"), problemInputs = $("#problem-inputs"), expectedOutputValue = $("#expected-output-value"), feedback = $("#feedback"), hintArea = $("#hint-area"), hintButton = $("#hint-button"), hintPanel = $("#hint-panel"), hintCount = $("#hint-count"), hintText = $("#hint-text"), concreteHintButton = $("#concrete-hint-button"), concreteHintText = $("#concrete-hint-text"), previousHintButton = $("#previous-hint-button"), nextHintButton = $("#next-hint-button"), resultPanel = $(".result-panel"), resultContent = $("#result-content"), resultDetails = $("#result-details"), resultDrawerTab = $("#result-drawer-tab"), problemDrawerTab = $("#problem-drawer-tab"), problemDrawerClose = $("#problem-drawer-close"), workspace = $(".workspace"), buildPanel = $(".build-panel"), codeCorrespondence = $("#code-correspondence");
@@ -141,7 +142,7 @@ const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a5
 const sourceResizer = $("#source-resizer");
 
 function escapeHtml(text) { return String(text).replace(/[&<>\"]/g, (x) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x])); }
-function formatLabel(text) { return escapeHtml(text).replace(/\b(sum|max|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|heightCm|weightKg|heightM|bmi|number|year|hour|day|basePremium|discount|invoice|customerName|policyNumber|policyLabel|age|contractStatus|accidentCode|reception|monthlyPremium|months|annualPremium|premiums|average|maxPremium|threshold|count|policyNumbers|target|found|ages|eligibleAge|statuses|unpaidCount|first|second|temporary|paidMonths|policyYears|accidentType|a|b|n|i)\b/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
+function formatLabel(text) { return escapeHtml(text).replace(/\b(sum|max|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|heightCm|weightKg|heightM|bmi|number|year|hour|day|basePremium|discount|invoice|customerName|policyNumber|policyLabel|age|contractStatus|accidentCode|reception|monthlyPremium|months|totalPremium|premiums|average|maxPremium|threshold|count|policyNumbers|target|found|ages|eligibleAge|statuses|unpaidCount|first|second|temporary|paidMonths|policyYears|accidentType|a|b|n|i)\b/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
 function blocks() { return [...assemblyList.querySelectorAll(".placed-block")]; }
 function directIds(zone) { return [...zone.querySelectorAll(":scope > .placed-block")].map((x) => x.dataset.blockId); }
 function definition(id) { return [...currentProblem.correct, ...currentProblem.dummies].find((b) => b.id === id); }
@@ -152,7 +153,7 @@ function problemNumber(index) { return ["①", "②", "③", "④", "⑤", "⑥"
 function selectProblem(index) { if (index < 0 || index >= problems.length || index === problemIndex) return; workspace.classList.remove("is-problem-list-open"); problemIndex = index; currentProblem = problems[problemIndex]; history = []; renderProblem(); }
 function isCompleted(problem = currentProblem) { return Boolean(completedProblems[problem.id]); }
 function savedInputValues(problem = currentProblem) { return completedProblems[problem.id]?.inputValues || {}; }
-function saveCompletion(inputValues) { completedProblems[currentProblem.id] = { inputValues }; localStorage.setItem(completionStorageKey, JSON.stringify(completedProblems)); updateCompletionProgress(); }
+function saveCompletion(inputValues) { completedProblems[currentProblem.id] = { inputValues, assembly: snapshot() }; localStorage.setItem(completionStorageKey, JSON.stringify(completedProblems)); updateCompletionProgress(); }
 function updateCompletionProgress() { const count = Object.keys(completedProblems).length; const completed = isCompleted(); $("#completed-count").textContent = count; $("#completed-total").textContent = problems.length; $("#current-completion-status").textContent = `問題${problemNumber(problemIndex)}：${completed ? "正解済み" : "未挑戦"}`; $(".completion-progress").classList.toggle("is-completed", completed); $("#reset-completion-button").disabled = count === 0; }
 
 function renderProblem() {
@@ -161,27 +162,47 @@ function renderProblem() {
   $("#input-note").textContent = currentProblem.inputNote; $("#assembly-input-symbol").textContent = `入力：${currentProblem.inputs.map((x) => x.label).join("、")}`;
   problemInputs.replaceChildren();
   const savedValues = savedInputValues();
-  currentProblem.inputs.forEach((input) => { const label = document.createElement("label"); label.className = "number-input"; const inputValue = savedValues[input.id] ?? input.value; label.innerHTML = `<span>${escapeHtml(input.label)}</span><input id="input-${input.id}" type="${input.type}" value="${escapeHtml(inputValue)}" ${input.min !== undefined ? `min="${input.min}"` : ""} ${input.max !== undefined ? `max="${input.max}"` : ""}>`; problemInputs.append(label); });
-  problemInputs.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateExpectedOutput));
+  currentProblem.inputs.forEach((input) => { const label = document.createElement("label"); label.className = "number-input"; const inputValue = savedValues[input.id] ?? input.value; label.innerHTML = `<span>${escapeHtml(input.label)}</span><input id="input-${input.id}" type="${input.type}" step="${input.step || "any"}" value="${escapeHtml(inputValue)}" ${input.min !== undefined ? `min="${input.min}"` : ""} ${input.max !== undefined ? `max="${input.max}"` : ""}>`; problemInputs.append(label); });
+  problemInputs.querySelectorAll("input").forEach((input) => input.addEventListener("input", () => { clearResults(); updateExpectedOutput(); renderLearningSupport(); }));
   $("#previous-problem-button").disabled = problemIndex === 0; $("#next-problem-button").disabled = problemIndex === problems.length - 1;
-  $("#block-count").textContent = `全${currentProblem.correct.length + currentProblem.dummies.length}個（正解は${currentProblem.correct.length}個）`;
+  $("#block-count").textContent = `全${currentProblem.paletteBlocks.length}個（必要な処理を選択）`;
   $("#problem-list-summary").textContent = `全${problems.length}問`;
   const list = $("#problem-list-items"); list.replaceChildren();
   problems.forEach((problem, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "problem-list-item"; button.classList.toggle("is-current", index === problemIndex); button.innerHTML = `<span class="problem-list-number">${problemNumber(index)}</span><span><strong>問題 ${problemNumber(index)}</strong><small>${escapeHtml(problem.title)} <em>${escapeHtml(problem.category)}</em></small></span>`; button.addEventListener("click", () => selectProblem(index)); list.append(button); });
-  resetWorkspace(false); renderLearningSupport(); updateExpectedOutput(); updateCompletionProgress(); if (isCompleted()) renderResult(values(), "completed");
+  resetWorkspace(false); renderLearningSupport(); updateExpectedOutput(); updateCompletionProgress(); if (isCompleted() && isValid(values())) renderResult(values(), "completed");
 }
 
 function updateExpectedOutput() { const v = values(); expectedOutputValue.textContent = isValid(v) ? currentProblem.execute(v).output : "-"; }
-function isValid(v) { return currentProblem.valid ? currentProblem.valid(v) : Object.values(v).every((x) => String(x).trim() !== ""); }
+function isValid(v) { return !window.AlgoEngine.inputError(currentProblem, v); }
 function shuffle(list) { return [...list].sort(() => Math.random() - .5); }
-function renderPalette() { palette.replaceChildren(); const grouped = Object.values([...currentProblem.correct, ...currentProblem.dummies].reduce((groups, block) => { (groups[block.type] ||= []).push(block); return groups; }, {})); shuffle(grouped).forEach((group) => shuffle(group).forEach((block) => { const button = document.createElement("button"); button.type = "button"; button.className = `source-block block-${block.type}`; button.draggable = true; button.dataset.blockId = block.id; button.innerHTML = `<span class="block-handle">⠿</span><span class="block-copy"><strong>${formatLabel(block.label)}</strong><small>${escapeHtml(block.hint)}</small></span>`; button.addEventListener("dragstart", () => { dragged = { id: block.id, source: "palette" }; }); button.addEventListener("click", () => addBlock(block.id, assemblyList)); palette.append(button); })); updatePalette(); }
+function renderPalette() { palette.replaceChildren(); const grouped = Object.values(currentProblem.paletteBlocks.reduce((groups, block) => { (groups[block.type] ||= []).push(block); return groups; }, {})); shuffle(grouped).forEach((group) => shuffle(group).forEach((block) => { const button = document.createElement("button"); button.type = "button"; button.className = `source-block block-${block.type}`; button.draggable = true; button.dataset.blockId = block.id; button.innerHTML = `<span class="block-handle">⠿</span><span class="block-copy"><strong>${formatLabel(block.label)}</strong><small>${escapeHtml(block.hint)}</small></span>`; button.addEventListener("dragstart", (event) => { dragged = { id: block.id, source: "palette" }; event.dataTransfer?.setData("text/plain", block.id); }); button.addEventListener("dragend", endDrag); button.addEventListener("click", () => addBlock(block.id, assemblyList)); palette.append(button); })); updatePalette(); }
 function zoneMessage(zone, next = false) { if (zone.classList.contains("branch-body")) return next ? "必要な場合は次の処理をここに配置" : "必要な場合はここに処理を配置"; return next ? "次の繰り返し処理をここに配置" : "ここに繰り返しの中の処理を配置"; }
 function createEmpty(zone, nested = false) { const empty = document.createElement("div"); empty.className = nested ? "nested-empty" : "empty-state"; empty.dataset.empty = "true"; empty.innerHTML = nested ? zoneMessage(zone) : '<span class="empty-icon">＋</span><strong>ここに処理を配置</strong><p>左側の一覧からドラッグ＆ドロップ</p>'; zone.append(empty); }
 function createDropSpace(zone, nested = false) { const space = document.createElement("div"); space.className = "drop-space"; space.dataset.dropSpace = "true"; space.textContent = nested ? zoneMessage(zone, true) : "次の処理をここに配置"; zone.append(space); return space; }
 function updateZoneDropSpace(zone) { const nested = zone !== assemblyList; const placedBlocks = [...zone.querySelectorAll(":scope > .placed-block")]; const hasBlocks = placedBlocks.length > 0; const lastBlock = placedBlocks.at(-1); const endsWithNestedBranch = nested && lastBlock?.classList.contains("has-branch-body"); const empty = zone.querySelector(":scope > [data-empty]"); let space = zone.querySelector(":scope > .drop-space"); if (!hasBlocks || endsWithNestedBranch) { space?.remove(); if (!hasBlocks && !empty) createEmpty(zone, nested); return; } empty?.remove(); if (!space) space = createDropSpace(zone, nested); zone.append(space); }
-function createBlock(id) { const block = definition(id), item = document.createElement("article"); item.className = `placed-block block-${block.type}`; item.draggable = true; item.dataset.blockId = id; item.innerHTML = `<div class="placed-copy"><strong>${formatLabel(block.label)}</strong><span>${escapeHtml(block.hint)}</span><button class="remove-block" type="button" aria-label="削除">×</button></div>`; item.querySelector(".remove-block").addEventListener("click", () => { saveHistory(); item.remove(); refreshAssembly(); }); item.addEventListener("dragstart", () => { dragged = { id, source: "placed", item }; }); if (block.type === "loop" && block.acceptsChildren) { const body = document.createElement("div"); body.className = "loop-body dropzone"; body.dataset.zone = id; body.innerHTML = '<span class="loop-body-label">繰り返しの中で実行する処理</span>'; createEmpty(body, true); addDropEvents(body); item.append(body); const end = document.createElement("div"); end.className = "loop-end-symbol"; end.innerHTML = "<span>繰り返し終了</span>"; item.append(end); } const branchDefinitions = block.branches || (block.type === "decision" ? [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]] : null); if (branchDefinitions) { item.classList.add("has-branch-body"); const branches = document.createElement("div"); branches.className = "branch-bodies"; branchDefinitions.forEach(([name, label]) => { const branch = document.createElement("div"); branch.className = `branch-body branch-body-${name} dropzone`; branch.dataset.zone = `${id}:${name}`; branch.dataset.branch = name; branch.innerHTML = `<span class="branch-body-label">${label}</span>`; createEmpty(branch, true); addDropEvents(branch); branches.append(branch); }); item.append(branches); } return item; }
+function createBlock(id) { const block = definition(id), item = document.createElement("article"); item.className = `placed-block block-${block.type}`; item.draggable = true; item.dataset.blockId = id; item.innerHTML = `<div class="placed-copy"><strong>${formatLabel(block.label)}</strong><span>${escapeHtml(block.hint)}</span><button class="remove-block" type="button" aria-label="削除">×</button></div>`; item.querySelector(".remove-block").addEventListener("click", () => { saveHistory(); item.remove(); refreshAssembly(); }); item.addEventListener("dragstart", (event) => { event.stopPropagation(); dragged = { id, source: "placed", item }; event.dataTransfer?.setData("text/plain", id); }); item.addEventListener("dragend", endDrag); if (block.type === "loop" && block.acceptsChildren) { const body = document.createElement("div"); body.className = "loop-body dropzone"; body.dataset.zone = id; body.innerHTML = '<span class="loop-body-label">繰り返しの中で実行する処理</span>'; createEmpty(body, true); addDropEvents(body); item.append(body); const end = document.createElement("div"); end.className = "loop-end-symbol"; end.innerHTML = "<span>繰り返し終了</span>"; item.append(end); } const branchDefinitions = block.branches || (block.type === "decision" ? [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]] : null); if (branchDefinitions) { item.classList.add("has-branch-body"); const branches = document.createElement("div"); branches.className = "branch-bodies"; branchDefinitions.forEach(([name, label]) => { const branch = document.createElement("div"); branch.className = `branch-body branch-body-${name} dropzone`; branch.dataset.zone = `${id}:${name}`; branch.dataset.branch = name; branch.innerHTML = `<span class="branch-body-label">${label}</span>`; createEmpty(branch, true); addDropEvents(branch); branches.append(branch); }); item.append(branches); } return item; }
 function addBlock(id, zone) { if (blocks().some((x) => x.dataset.blockId === id)) return; saveHistory(); zone.querySelector(":scope > [data-empty]")?.remove(); zone.insertBefore(createBlock(id), zone.querySelector(":scope > .drop-space")); refreshAssembly(); }
-function addDropEvents(zone) { zone.addEventListener("dragover", (event) => { event.preventDefault(); zone.classList.add("is-drag-over"); }); zone.addEventListener("dragleave", () => zone.classList.remove("is-drag-over")); zone.addEventListener("drop", (event) => { event.preventDefault(); zone.classList.remove("is-drag-over"); if (!dragged) return; const id = dragged.id; const target = event.target.closest(".placed-block"); const targetInZone = target?.parentElement === zone ? target : null; const item = dragged.source === "placed" ? dragged.item : createBlock(id); if (dragged.source === "placed") { saveHistory(); dragged.item.remove(); } if (dragged.source === "palette" && blocks().some((block) => block.dataset.blockId === id)) return; zone.querySelector(":scope > [data-empty]")?.remove(); if (targetInZone && targetInZone !== item) { const midpoint = targetInZone.getBoundingClientRect().top + targetInZone.getBoundingClientRect().height / 2; zone.insertBefore(item, event.clientY < midpoint ? targetInZone : targetInZone.nextSibling); } else { zone.insertBefore(item, zone.querySelector(":scope > .drop-space")); } dragged = null; refreshAssembly(); }); }
+function endDrag() { dragged = null; document.querySelectorAll(".is-drag-over,.is-remove-target").forEach((zone) => zone.classList.remove("is-drag-over", "is-remove-target")); }
+function addDropEvents(zone) {
+  zone.addEventListener("dragover", (event) => { if (!dragged || dragged.item?.contains(zone)) return; event.preventDefault(); event.stopPropagation(); zone.classList.add("is-drag-over"); });
+  zone.addEventListener("dragleave", (event) => { if (!zone.contains(event.relatedTarget)) zone.classList.remove("is-drag-over"); });
+  zone.addEventListener("drop", (event) => {
+    event.preventDefault(); event.stopPropagation(); zone.classList.remove("is-drag-over");
+    if (!dragged || dragged.item?.contains(zone)) return;
+    const { id, source } = dragged;
+    if (source === "palette" && blocks().some((block) => block.dataset.blockId === id)) return;
+    const item = source === "placed" ? dragged.item : createBlock(id);
+    const target = event.target.closest(".placed-block");
+    if (target === item) return;
+    let before = zone.querySelector(":scope > .drop-space");
+    if (target?.parentElement === zone) { const bounds = target.getBoundingClientRect(); before = event.clientY < bounds.top + bounds.height / 2 ? target : target.nextSibling; }
+    if (item.parentElement === zone && (before === item || before === item.nextSibling)) return;
+    saveHistory();
+    zone.querySelector(":scope > [data-empty]")?.remove();
+    zone.insertBefore(item, before);
+    endDrag(); refreshAssembly();
+  });
+}
 function addPaletteDropEvents() { palette.addEventListener("dragover", (event) => { if (dragged?.source !== "placed") return; event.preventDefault(); palette.classList.add("is-remove-target"); }); palette.addEventListener("dragleave", (event) => { if (!palette.contains(event.relatedTarget)) palette.classList.remove("is-remove-target"); }); palette.addEventListener("drop", (event) => { event.preventDefault(); palette.classList.remove("is-remove-target"); if (dragged?.source !== "placed") return; saveHistory(); dragged.item.remove(); dragged = null; refreshAssembly(); }); }
 function updateAssemblySymbols() { const hasInputBlock = currentProblem.hideAssemblyInputSymbol || blocks().some((block) => definition(block.dataset.blockId)?.type === "input"); [$("#assembly-input-symbol"), $("#assembly-after-input-arrow")].forEach((element) => { element.hidden = hasInputBlock; }); $("#assembly-input-arrow").hidden = false; }
 function refreshAssembly() { [assemblyList, ...assemblyList.querySelectorAll(".loop-body, .branch-body")].forEach(updateZoneDropSpace); updateAssemblySymbols(); updatePalette(); clearFeedback(); clearResults(); }
@@ -192,9 +213,9 @@ function saveHistory() { history.push(snapshot()); }
 function restoreBlock(entry, zone) { const saved = typeof entry === "string" ? { id: entry } : entry; const block = createBlock(saved.id); zone.querySelector(":scope > [data-empty]")?.remove(); zone.append(block); const loopBody = block.querySelector(":scope > .loop-body"); (saved.children || []).forEach((child) => restoreBlock(child, loopBody)); Object.entries(saved.branches || {}).forEach(([name, children]) => { const branch = block.querySelector(`:scope > .branch-bodies > .branch-body[data-branch="${name}"]`); children.forEach((child) => restoreBlock(child, branch)); }); }
 function restore(snap) { assemblyList.replaceChildren(); snap.forEach((entry) => restoreBlock(entry, assemblyList)); refreshAssembly(); }
 function resetWorkspace(withHistory = true) { if (withHistory && blocks().length) saveHistory(); assemblyList.replaceChildren(); createEmpty(assemblyList); updateAssemblySymbols(); renderPalette(); clearFeedback(); clearResults(); }
-function matchesSolution(expected) { const root = directIds(assemblyList), all = blocks().map((x) => x.dataset.blockId), expectedIdsForSolution = expectedIdsFor(expected); if (all.length !== expectedIdsForSolution.length || all.some((id) => !expectedIdsForSolution.includes(id))) return false; const isPreparation = (id) => ["input", "declaration"].includes(definition(id)?.type); const preparationIds = expected.root.filter(isPreparation), expectedFlow = expected.root.filter((id) => !isPreparation(id)), placedPreparation = root.slice(0, preparationIds.length); const rootMatches = placedPreparation.length === preparationIds.length && placedPreparation.every(isPreparation) && preparationIds.every((id) => placedPreparation.includes(id)) && JSON.stringify(root.slice(preparationIds.length)) === JSON.stringify(expectedFlow); if (!rootMatches) return false; const nestedMatches = Object.entries(expected.nested || {}).every(([parent, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .loop-body`) || document.createElement("div"))) === JSON.stringify(ids)); const branchMatches = Object.entries(expected.branches || {}).every(([parent, branchMap]) => Object.entries(branchMap).every(([name, ids]) => JSON.stringify(directIds(assemblyList.querySelector(`[data-block-id="${parent}"] .branch-body[data-branch="${name}"]`) || document.createElement("div"))) === JSON.stringify(ids))); return nestedMatches && branchMatches; }
-function validateAssembly() { return matchesSolution(currentProblem.expected); }
-function feedbackText() { const all = blocks().map((x) => x.dataset.blockId); return all.some((id) => !expectedIds().includes(id)) ? "この問題では使わないブロックが含まれています。問題文に必要な処理だけを選びましょう。" : "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。"; }
+function assemblyAssessment() { return window.AlgoEngine.assess(currentProblem, snapshot()); }
+function validateAssembly() { return assemblyAssessment().ok; }
+function feedbackText() { const messages = { missing: "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。", extra: "目的に合わない処理、または余分なブロックが含まれています。処理の役割を見直しましょう。", structure: "ブロックは揃っています。実行順序や、繰り返し・分岐の内側の配置を確認しましょう。" }; return messages[assemblyAssessment().reason] || "組み立てを確認しましょう。"; }
 function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = currentProblem.hints || problemHints[currentProblem.id] || currentProblem.correct.map((block) => ({ simple: `「${block.hint}」という役割の処理が必要か考えてみましょう。`, concrete: `文章ブロック「${block.label}」を確認しましょう。` })); shownHints = 0; concreteHintVisible = false; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
 function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; concreteHintVisible = false; }
 function clearResults() { resultContent.hidden = true; resultPanel.hidden = true; resultDrawerTab.hidden = true; workspace.classList.remove("is-result-open"); clearCorrespondence(); }
@@ -224,10 +245,11 @@ function flowClass(block) {
   return "";
 }
 
-function appendFlowBlock(container, id) {
+function appendFlowBlock(container, entry) {
+  const id = entry.id;
   const block = definition(id);
-  const nestedIds = currentProblem.expected.nested?.[id] || [];
-  const branches = currentProblem.expected.branches?.[id];
+  const nestedIds = entry.children || [];
+  const branches = Object.keys(entry.branches || {}).length ? entry.branches : null;
   if (branches) {
     container.append(createFlowNode(id, block.label, flowClass(block)));
     appendFlowArrow(container);
@@ -254,6 +276,7 @@ function appendFlowBlock(container, id) {
   }
   if (!nestedIds.length) {
     container.append(createFlowNode(id, block.label, flowClass(block)));
+    if (id === "breakEligibleLoop") { const exit = document.createElement("a"); exit.className = "flow-break-exit"; exit.href = "#flow-exit-loopAges"; exit.textContent = "↘ このループを抜け、ループ外の出力へ"; container.append(exit); }
     return;
   }
 
@@ -266,13 +289,23 @@ function appendFlowBlock(container, id) {
   });
   const back = document.createElement("div");
   back.className = "loop-back";
-  back.textContent = "条件を確認して繰り返す ↺";
+  back.textContent = window.AlgoEngine.flatten(nestedIds).some((node) => node.id === "breakEligibleLoop") ? "breakしなかった場合だけ、次の要素へ ↺" : "条件を確認して繰り返す ↺";
   loop.append(back);
-  loop.append(createFlowNode(id, "繰り返し終了", "loop-end-node"));
+  const end = createFlowNode(id, "繰り返し終了 → ループ外へ", "loop-end-node"); end.id = "flow-exit-" + id; loop.append(end);
   container.append(loop);
 }
 
+function learningAssembly() {
+  const current = snapshot();
+  if (window.AlgoEngine.assess(currentProblem, current).ok) return { nodes: current, label: "あなたの組み立て・現在の入力値に対応" };
+  const saved = completedProblems[currentProblem.id]?.assembly;
+  if (saved && window.AlgoEngine.assess(currentProblem, saved).ok) return { nodes: saved, label: "保存した正解の組み立て・現在の入力値に対応" };
+  return { nodes: window.AlgoEngine.tree(currentProblem.expected), label: "正しい組み立ての一例・現在の入力値に対応" };
+}
 function renderLearningSupport() {
+  const learning = learningAssembly();
+  $("#learning-layout-note").textContent = learning.label;
+  clearCorrespondence();
   const reasons = $("#reason-list");
   reasons.replaceChildren();
   currentProblem.explanation.forEach(([title, text]) => {
@@ -284,7 +317,7 @@ function renderLearningSupport() {
   const flow = $("#flowchart");
   flow.replaceChildren();
   flow.append(createFlowNode("", "開始", "terminal"));
-  currentProblem.expected.root.forEach((id) => {
+  learning.nodes.forEach((id) => {
     appendFlowArrow(flow);
     appendFlowBlock(flow, id);
   });
@@ -293,7 +326,8 @@ function renderLearningSupport() {
 
   const code = $("#java-code");
   code.replaceChildren();
-  currentProblem.code.forEach(([id, line, title, description], index) => {
+  if (!isValid(values())) { code.textContent = "入力値を確認すると、対応するJavaコードを表示します。"; return; }
+  window.AlgoEngine.javaRows(currentProblem, learning.nodes, values()).forEach(([id, line, title, description], index) => {
     const button = document.createElement("button");
     button.className = "code-line";
     button.type = "button";
@@ -306,27 +340,45 @@ function renderLearningSupport() {
     code.append(button);
   });
 }
-function highlight(line) { return escapeHtml(line).replace(/\b(int|double|String|if|else|for|switch|case|break)\b/g, '<span class="syntax-keyword">$1</span>').replace(/(\b\d+\b)/g, '<span class="syntax-number">$1</span>').replace(/(System|out|println)/g, '<span class="syntax-method">$1</span>'); }
-function renderResult(v, mode = "learner") { const result = currentProblem.execute(v); $("#output-value").textContent = `出力結果：${result.output}`; $("#trace-caption").textContent = currentProblem.inputs.map((x) => `${x.label} = ${v[x.id]}`).join(" / "); $("#trace-head").innerHTML = `<tr>${result.traceColumns.map((x) => `<th>${escapeHtml(x)}</th>`).join("")}</tr>`; const tbody = $("#trace-body"); tbody.replaceChildren(); result.trace.forEach((row) => { const tr = document.createElement("tr"); tr.innerHTML = row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join(""); tbody.append(tr); }); $("#success-badge").textContent = mode === "instructor" ? "講師用・正解例" : mode === "completed" ? "正解済み" : "実行成功"; resultContent.hidden = false; if (mode !== "learner") { $("#success-modal").hidden = true; openResult(); return; } $("#success-kicker").textContent = "COMPLETED!"; $("#success-modal-title").textContent = "正解です！"; $("#success-modal-message").textContent = "処理の順番と配置が、正しく組み立てられています。"; $("#success-confirm-button").textContent = "結果を確認する"; $("#success-modal").hidden = false; resultDetails.open = false; }
-function run() { const v = values(); clearFeedback(); if (!isValid(v)) { showFeedback("入力値の範囲や形式を確認してください。"); return; } if (isInstructorMode) { renderResult(v, "instructor"); return; } if (!validateAssembly()) { showFeedback(feedbackText()); return; } saveCompletion(v); renderResult(v); }
+function highlight(line) { return escapeHtml(line).replace(/\b(int|double|String|boolean|true|false|if|else|for|switch|case|default|break)\b/g, '<span class="syntax-keyword">$1</span>').replace(/(\b\d+\b)/g, '<span class="syntax-number">$1</span>').replace(/(System|out|println)/g, '<span class="syntax-method">$1</span>'); }
+function renderResult(v, mode = "learner") { renderLearningSupport(); const result = window.AlgoEngine.execute(currentProblem, v, learningAssembly().nodes); $("#output-value").textContent = `出力結果：${result.output}`; $("#trace-caption").textContent = currentProblem.inputs.map((x) => `${x.label} = ${v[x.id]}`).join(" / "); $("#trace-head").innerHTML = `<tr>${result.traceColumns.map((x) => `<th>${escapeHtml(x)}</th>`).join("")}</tr>`; const tbody = $("#trace-body"); tbody.replaceChildren(); result.trace.forEach((row) => { const tr = document.createElement("tr"); tr.innerHTML = row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join(""); tbody.append(tr); }); $("#success-badge").textContent = mode === "instructor" ? "講師用・正解例" : mode === "completed" ? "正解済み" : "実行成功"; resultContent.hidden = false; if (mode !== "learner") { $("#success-modal").hidden = true; openResult(); return; } $("#success-kicker").textContent = "COMPLETED!"; $("#success-modal-title").textContent = "正解です！"; $("#success-modal-message").textContent = "処理の順番と配置が、正しく組み立てられています。"; $("#success-confirm-button").textContent = "結果を確認する"; $("#success-modal").hidden = false; resultDetails.open = false; }
+function run() { const v = values(); clearFeedback(); if (!isValid(v)) { showFeedback(window.AlgoEngine.inputError(currentProblem, v)); return; } if (isInstructorMode) { renderResult(v, "instructor"); return; } if (!validateAssembly()) { showFeedback(feedbackText()); return; } saveCompletion(v); renderResult(v); }
 function openResult() { resultPanel.hidden = false; resultDrawerTab.hidden = true; workspace.classList.add("is-result-open"); resultDetails.open = true; }
 function closeResult() { resultPanel.hidden = true; resultDrawerTab.hidden = false; workspace.classList.remove("is-result-open"); }
-function syntaxNotes(code) {
+function syntaxNotes(code, blockId = "") {
+  const expression = code.replace(/"(?:\\.|[^"\\])*"/g, "");
+  const arrayLiteral = /\[\]\s+\w+\s*=\s*{/.test(expression);
   const notes = [];
   const add = (term, text) => notes.push(`<li><code>${escapeHtml(term)}</code>：${escapeHtml(text)}</li>`);
   if (/\bint\b/.test(code)) add("int", "整数を入れるための型です。小数や文字は入れません。");
   if (/\bdouble\b/.test(code)) add("double", "小数を含む数を入れるための型です。面積のように小数になることがある値に使います。");
   if (/\bString\b/.test(code)) add("String", "文字や文章を入れるための型です。氏名・曜日・挨拶などを保存できます。");
   if (/\/\//.test(code)) add("//", "ここから右はメモ（コメント）です。プログラムの動きには影響しません。");
-  if (/\bfor\b/.test(code)) add("for (最初; 条件; 更新)", "最初は1回だけ実行、条件が成り立つ間は繰り返し、1周終わるたびに更新します。");
+  if (/\bfor\b/.test(code) && !/:/.test(expression)) add("for (最初; 条件; 更新)", "最初は1回だけ実行、条件が成り立つ間は繰り返し、1周終わるたびに更新します。");
   if (/\bi\+\+/.test(code)) add("i++", "ループカウンタ変数 i を 1 増やす短い書き方です。");
+  if (/\+\+/.test(expression) && !/\bi\+\+/.test(expression)) add("++", "直前の変数の値を1増やします。件数や繰り返し回数を進めるときに使います。");
+  if (/--/.test(expression)) add("--", "直前の変数の値を1減らします。配列を後ろから調べるときなどに使います。");
+  if (/\+=/.test(expression)) add("+=", "右側の値を左の変数へ加えます。i += 2なら、ループカウンタ変数 i が2ずつ進みます。");
+  if (/for\s*\([^;]+:/.test(expression)) add("for (型 変数 : 配列)", "拡張for文です。配列から要素を先頭から1つずつ取り出し、左側の変数に入れて処理します。添字の更新を書く必要はありません。");
+  if (/\bboolean\b/.test(expression)) add("boolean", "true（真）かfalse（偽）を入れる型です。見つかったかどうかを記録できます。");
+  if (/\.equals\(/.test(expression)) add(".equals(...)", "文字列の内容が同じかを比べ、真か偽を返します。");
+  if (/String\.valueOf/.test(expression)) add("String.valueOf(...)", "数値などを文字列へ変換します。例：18を文字列の「18」にします。");
+  if (/\[\]/.test(expression)) add("[]", "同じ型の値を複数まとめる配列を表します。int[]なら整数の配列です。");
+  if (/\w+\[[^\]]+\]/.test(expression)) add("配列[添字]", "配列の指定位置の要素を読み書きします。最初の位置は0です。");
+  if (/\.length/.test(expression)) add(".length", "配列に入っている要素の個数です。最後の添字はlength - 1です。");
+  if (/\(double\)/.test(expression)) add("(double)", "小数の計算として扱うための型変換です。整数の割り算で小数部分が消えるのを防ぎます。");
+  if (/\?/.test(expression)) add("条件 ? 真の値 : 偽の値", "条件に応じて使う値を1つ選ぶ書き方です。");
+  if (/Arrays\.toString/.test(expression)) add("Arrays.toString(...)", "配列の全要素を[値, 値]の形式の文字列にします。java.util.Arraysをimportして使います。");
+  if (/Math\.round/.test(expression)) add("Math.round(値 * 10) / 10.0", "10倍した値を四捨五入して整数にし、10で割って小数第1位までの値に戻します。");
+  if (/\.printf/.test(expression)) add('printfと"%.1f%n"', "%.1fは小数第1位まで表示、%nは改行です。Locale.ROOTで小数点をピリオドにそろえます。");
   if (/\bif\b/.test(code) && !/else if/.test(code)) add("if", "かっこの中の条件が成り立つときだけ、波かっこの中を実行します。");
   if (/else if/.test(code)) add("else if", "それまでの条件に当てはまらなかったときに、次の条件を調べます。");
   if (/\belse\b/.test(code) && !/else if/.test(code)) add("else", "前の条件が成り立たなかった場合に実行する処理です。");
   if (/\bswitch\b/.test(code)) add("switch", "1つの値を見て、対応する case の処理を選ぶ構文です。");
-  if (/\bcase\b/.test(code)) add("case 0:", "switch の値が 0 と等しいときの処理を表します。コロンの後に実行する内容を書きます。");
-  if (/\bbreak\b/.test(code)) add("break", "switch の処理をここで終える指示です。次の case まで続けて実行されるのを防ぎます。");
-  if (/%/.test(code)) add("%", "割り算の余りを求める記号です。例：8 % 2 の結果は 0 です。");
+  if (/\bdefault\b/.test(expression)) add("default", "どのcaseの値とも一致しないときに実行する経路です。");
+  const caseValue = code.match(/case\s+(.+):/); if (caseValue) add(`case ${caseValue[1]}:`, `switchの値が ${caseValue[1]} と等しいときの処理です。コロンの後の命令を実行します。`);
+  if (/\bbreak\b/.test(expression)) add("break", blockId === "breakEligibleLoop" ? "最も内側の繰り返しをここで終了します。次の年齢は調べず、ループ外の出力へ進みます。" : "switchをここで終了し、次のcaseへ続けて進むのを防ぎます。");
+  if (/%/.test(expression)) add("%", "割り算の余りを求める記号です。例：8 % 2 の結果は 0 です。");
   if (/==/.test(code)) add("==", "左右の値が等しいかを比べる記号です。値を入れる = とは役割が違います。");
   if (/>=/.test(code)) add(">=", "左の値が右の値より大きい、または同じときに成り立ちます。");
   if (/<=/.test(code)) add("<=", "左の値が右の値より小さい、または同じときに成り立ちます。");
@@ -337,13 +389,13 @@ function syntaxNotes(code) {
   if (/\//.test(code) && !/\/\//.test(code)) add("/", "割り算を表す記号です。");
   if (/\s=\s/.test(code) && !/==/.test(code)) add("=", "右側で求めた値を、左側の変数に入れる記号です。");
   if (/\"/.test(code)) add('"..."', "ダブルクォーテーションで囲まれた部分は、そのままの文字として扱います。");
-  if (/{/.test(code)) add("{", "ここから、その条件または繰り返しで実行する処理のまとまりが始まります。");
-  if (/}/.test(code)) add("}", "ここで処理のまとまりが終わります。");
+  if (/{/.test(expression)) add("{", arrayLiteral ? "配列に最初に入れる要素を、ここからカンマで区切って書きます。" : "ここから、その条件または繰り返しで実行する処理のまとまりが始まります。");
+  if (/}/.test(expression)) add("}", arrayLiteral ? "配列の初期値の一覧はここまでです。" : "ここで処理のまとまりが終わります。");
   if (/;/.test(code)) add(";", "Javaでは、ここで1つの命令が終わることを表します。");
   return notes.length ? `<div class="syntax-notes"><p>単語・記号の見方</p><ul>${notes.join("")}</ul></div>` : "";
 }
 function clearCorrespondence() { document.querySelectorAll(".is-corresponding,.is-selected").forEach((x) => x.classList.remove("is-corresponding", "is-selected")); codeCorrespondence.textContent = "コードの行をクリックしてください"; }
-function showCorrespondence(id, line) { clearCorrespondence(); document.querySelectorAll(`[data-block-id="${id}"],[data-flow-block="${id}"]`).forEach((x) => x.classList.add("is-corresponding")); line.classList.add("is-selected"); codeCorrespondence.innerHTML = `<strong>${escapeHtml(line.dataset.codeTitle)}</strong><p class="code-correspondence-description">${escapeHtml(line.dataset.codeDescription)}</p>${syntaxNotes(line.dataset.codeLine)}`; const block = assemblyList.querySelector(`[data-block-id="${id}"]`); if (block) { block.scrollIntoView({ behavior: "smooth", block: "center" }); block.focus({ preventScroll: true }); } }
+function showCorrespondence(id, line) { clearCorrespondence(); document.querySelectorAll(`[data-block-id="${id}"],[data-flow-block="${id}"]`).forEach((x) => x.classList.add("is-corresponding")); line.classList.add("is-selected"); codeCorrespondence.innerHTML = `<strong>${escapeHtml(line.dataset.codeTitle)}</strong><p class="code-correspondence-description">${escapeHtml(line.dataset.codeDescription)}</p>${syntaxNotes(line.dataset.codeLine, id)}`; const block = assemblyList.querySelector(`[data-block-id="${id}"]`); if (block) { block.scrollIntoView({ behavior: "smooth", block: "center" }); block.focus({ preventScroll: true }); } }
 async function instructorLogin(event) { event.preventDefault(); const value = $("#instructor-password").value; const encoded = new TextEncoder().encode(value); const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", encoded))).map((b) => b.toString(16).padStart(2, "0")).join(""); if (hash !== passwordHash) { $("#instructor-login-error").textContent = "パスワードが違います。"; $("#instructor-login-error").hidden = false; return; } isInstructorMode = true; localStorage.setItem("algobridge-instructor-mode", "true"); $("#instructor-modal").hidden = true; updateInstructor(); }
 function updateInstructor() { document.body.classList.toggle("is-instructor-mode", isInstructorMode); $("#instructor-mode-button").textContent = isInstructorMode ? "受講者モードに戻る" : "講師用"; }
 

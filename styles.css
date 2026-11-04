@@ -1895,7 +1895,7 @@ tbody tr:last-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .flow-node {
@@ -1942,7 +1942,7 @@ tbody tr:last-child {
   min-height: 112px;
   display: grid;
   place-items: center;
-  padding: 28px 68px;
+  padding: 32px 50px;
   border: 0;
   background: #eaf0fb;
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
@@ -1962,7 +1962,7 @@ tbody tr:last-child {
 .flow-decision-branches {
   width: min(360px, 100%);
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -1983,7 +1983,7 @@ tbody tr:last-child {
 
 .flow-decision-branch > strong {
   color: #466782;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .flow-decision-branch .flow-arrow {
@@ -1994,7 +1994,30 @@ tbody tr:last-child {
   width: 100%;
   min-width: 0;
   padding: 7px 6px;
-  font-size: 9px;
+  font-size: 13px;
+}
+
+.flow-decision-branch .decision-node {
+  padding: 32px 40px;
+}
+
+.flow-break-exit {
+  display: block;
+  margin: 8px 0;
+  color: #9b4800;
+  font-weight: 700;
+  text-align: center;
+}
+
+#output-value, #expected-output-value {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.section-note {
+  color: #526478;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .flow-arrow {
@@ -2065,7 +2088,7 @@ tbody tr:last-child {
   padding-right: 4px;
   color: #96681b;
   text-align: right;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .code-guide {
