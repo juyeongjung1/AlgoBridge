@@ -9,13 +9,15 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
 (async () => {
   const browser = await chromium.launch({ channel:"msedge", headless:true });
   const context = await browser.newContext({viewport:{width:1600,height:1000}});
+  // 機能検証を外部ロゴ配信の応答時間に依存させない。
+  await context.route("https://www.trainocate.co.jp/top_common/images/trainocate_logo.png", route=>route.abort());
   const page = await context.newPage();
   const preview = await context.newPage();
   await preview.addStyleTag({path:path.join(repo,"styles.css")});
   await preview.addStyleTag({content:"body {min-width:0; height:auto; overflow:visible; margin:0; padding:0; background:white;} .flowchart {background:white;}"});
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(pathToFileURL(path.join(repo, "index.html")).href);
-  assert.deepEqual(await page.evaluate(() => problems.slice(0,6).map(p=>p.id)), ["name","triangle","billing","policyFormat","bmi","evenOdd"]);
+  assert.deepEqual(await page.evaluate(() => problems.slice(0,9).map(p=>p.id)), ["name","triangle","billing","policyFormat","bmi","max","eligibility","contractStatus","evenOdd"]);
   for (let index = 0; index < 30; index++) {
     const result = await page.evaluate((index) => {
       selectProblem(index); restore(window.AlgoEngine.tree(currentProblem.expected));
@@ -30,10 +32,12 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
       const description = $("#problem-description");
       const descriptionOverflow = description.scrollWidth > description.clientWidth + 1;
       const headingMatches = $("#problem-heading").textContent === `問題 ${problemNumber(index)}：${currentProblem.title}`;
-      return { index:index+1, id:currentProblem.id, valid, popup, open:!resultPanel.hidden, missing, codeMissing, descriptionOverflow, headingMatches, narrowest:widths.length ? Math.min(...widths) : null, output:$("#output-value").textContent };
+      const paletteMatches = palette.querySelectorAll(".source-block").length === currentProblem.paletteBlocks.length;
+      const brokenDecisions = currentProblem.paletteBlocks.filter(b=>b.type === "decision" && b.id.includes("ExtraChoice")).filter(b=>createBlock(b.id).querySelectorAll(":scope > .branch-bodies > .branch-body").length !== (b.branches?.length || 2)).map(b=>b.id);
+      return { index:index+1, id:currentProblem.id, valid, popup, open:!resultPanel.hidden, missing, codeMissing, descriptionOverflow, headingMatches, paletteMatches, brokenDecisions, narrowest:widths.length ? Math.min(...widths) : null, output:$("#output-value").textContent };
     }, index);
     results.push(result);
-    if (!result.valid || !result.popup || !result.open || result.missing.length || result.codeMissing.length || result.descriptionOverflow || !result.headingMatches || (result.narrowest !== null && result.narrowest < 180)) errors.push(JSON.stringify(result));
+    if (!result.valid || !result.popup || !result.open || result.missing.length || result.codeMissing.length || result.descriptionOverflow || !result.headingMatches || !result.paletteMatches || result.brokenDecisions.length || (result.narrowest !== null && result.narrowest < 180)) errors.push(JSON.stringify(result));
     if ([9,14,22,27,28,29].includes(index)) {
       // 実画面と同じDOM・幅・CSSを、スクロールで切れない検証用ページに複製する。
       const diagram = await page.locator("#flowchart").evaluate(node => ({html:node.outerHTML,width:node.getBoundingClientRect().width}));

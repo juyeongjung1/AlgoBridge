@@ -8,16 +8,32 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const defaults = (p) => Object.fromEntries(p.inputs.map((i) => [i.id, String(i.value)]));
 const errors = [], totals = { 問題数: 0, 配置判定: 0, 入力検証: 0, 出力比較: 0, Java比較: 0, トレース検証: 0 };
 function check(label, fn) { try { fn(); } catch (error) { errors.push(`${label}: ${error.message}`); } }
-check("序盤6問の順序", () => assert.deepEqual(Array.from(problems.slice(0, 6), (p) => p.id), ["name", "triangle", "billing", "policyFormat", "bmi", "evenOdd"]));
+check("序盤9問の順序", () => assert.deepEqual(Array.from(problems.slice(0, 9), (p) => p.id), ["name", "triangle", "billing", "policyFormat", "bmi", "max", "eligibility", "contractStatus", "evenOdd"]));
 function layout(p, nodes, expected, label) { totals.配置判定++; check(`${p.id}/${label}`, () => assert.equal(engine.assess(p, nodes).ok, expected)); }
 function same(actual, expected) { if (typeof expected === "number") assert.ok(Number.isFinite(Number(actual)) && Math.abs(Number(actual) - expected) < 1e-8, `${actual} != ${expected}`); else assert.equal(String(actual).replace(/\r\n/g, "\n"), expected); }
 const javaCases = [];
+const previousBranchCounts = { max:14, eligibility:11, contractStatus:11, evenOdd:13, greeting:19, weekday:21, accidentCategory:15, evenSum:15, fizzBuzz:16, leap:18, premiumMax:14, thresholdCount:15, policySearch:15, firstEligible:16, paymentStatusCount:14, premiumStats:18, bubblePass:12, bubbleSort:13, claimReception:17, coverageDecision:14 };
 const rejectedBoundaryCases = new Set(["arraySum/4", "arraySum/5", "premiumMax/4", "firstEligible/5", "swapPremium/3", "bubblePass/5", "bubbleSort/5"]);
 function javaCase(p, nodes, values, label) { javaCases.push({ label: `${p.id}/${label}`, code: engine.javaRows(p, nodes, values).map((r) => r[1]).join("\n"), expected: reference(p.id, values) }); }
 function permutations(items) { return items.length ? items.flatMap((x, i) => permutations(items.filter((_, j) => j !== i)).map((rest) => [x, ...rest])) : [[]]; }
 for (const p of problems) {
   totals.問題数++;
   const base = engine.tree(p.expected), values = defaults(p);
+  if (p.correct.some(b=>b.type === "decision")) {
+    check(`${p.id}/候補総数1.5倍`, () => assert.equal(p.paletteBlocks.length, Math.ceil(previousBranchCounts[p.id] * 1.5)));
+    const additional = p.paletteBlocks.filter(b=>b.id.includes("ExtraChoice"));
+    check(`${p.id}/追加候補の数と重複`, () => {
+      assert.equal(additional.length, Math.ceil(previousBranchCounts[p.id] / 2));
+      assert.equal(new Set(additional.map(b=>b.label)).size, additional.length);
+      additional.forEach(b=>assert.equal(p.aliases[b.id], undefined));
+    });
+    for (const b of additional) {
+      layout(p, [...base, {id:b.id}], false, `追加候補${b.id}は余分な処理`);
+      const replaced = clone(base);
+      const target = engine.flatten(replaced).find(n=>p.blockMap.get(n.id).type === b.type);
+      if (target) { target.id=b.id; layout(p, replaced, false, `追加候補${b.id}との置換`); }
+    }
+  }
   layout(p, base, true, "模範配置");
   check(`${p.id}/初期入力`, () => assert.equal(engine.inputError(p, values), ""));
   const prep = base.filter((node) => ["input", "declaration"].includes(p.blockMap.get(node.id).type));
