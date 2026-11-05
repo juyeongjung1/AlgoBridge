@@ -212,7 +212,7 @@ function renderProblem() {
   problemInputs.replaceChildren();
   const savedValues = savedInputValues();
   currentProblem.inputs.forEach((input) => { const label = document.createElement("label"); label.className = "number-input"; const inputValue = savedValues[input.id] ?? input.value; label.innerHTML = `<span>${escapeHtml(input.label)}</span><input id="input-${input.id}" type="${input.type}" step="${input.step || "any"}" value="${escapeHtml(inputValue)}" ${input.min !== undefined ? `min="${input.min}"` : ""} ${input.max !== undefined ? `max="${input.max}"` : ""}>`; problemInputs.append(label); });
-  problemInputs.querySelectorAll("input").forEach((input) => input.addEventListener("input", () => { clearResults(); updateExpectedOutput(); renderLearningSupport(); }));
+  problemInputs.querySelectorAll("input").forEach((input) => input.addEventListener("input", () => { clearFeedback(); clearResults(); updateExpectedOutput(); renderLearningSupport(); }));
   $("#previous-problem-button").disabled = problemIndex === 0; $("#next-problem-button").disabled = problemIndex === problems.length - 1;
   $("#block-count").textContent = `全${currentProblem.paletteBlocks.length}個（必要な処理を選択）`;
   $("#problem-list-summary").textContent = `全${problems.length}問`;
@@ -264,9 +264,64 @@ function restore(snap) { assemblyList.replaceChildren(); snap.forEach((entry) =>
 function resetWorkspace(withHistory = true) { if (withHistory && blocks().length) saveHistory(); assemblyList.replaceChildren(); createEmpty(assemblyList); updateAssemblySymbols(); renderPalette(); clearFeedback(); clearResults(); }
 function assemblyAssessment() { return window.AlgoEngine.assess(currentProblem, snapshot()); }
 function validateAssembly() { return assemblyAssessment().ok; }
-function feedbackText() { const messages = { missing: "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。", extra: "目的に合わない処理、または余分なブロックが含まれています。処理の役割を見直しましょう。", structure: "ブロックは揃っています。実行順序や、繰り返し・分岐の内側の配置を確認しましょう。" }; return messages[assemblyAssessment().reason] || "組み立てを確認しましょう。"; }
+function feedbackText(assessment = assemblyAssessment()) { const messages = { missing: "必要な処理ブロックがまだ揃っていません。問題文を見直して、残りの処理を追加しましょう。", extra: "目的に合わない処理、または余分なブロックが含まれています。処理の役割を見直しましょう。", structure: "ブロックは揃っています。実行順序や、繰り返し・分岐の内側の配置を確認しましょう。" }; return messages[assessment.reason] || "組み立てを確認しましょう。"; }
 function showFeedback(text) { feedback.innerHTML = `<strong>もう一度、組み立てを確認しましょう</strong><ul><li>${escapeHtml(text)}</li></ul>`; feedback.hidden = false; hints = currentProblem.hints || problemHints[currentProblem.id] || currentProblem.correct.map((block) => ({ simple: `「${block.hint}」という役割の処理が必要か考えてみましょう。`, concrete: `文章ブロック「${block.label}」を確認しましょう。` })); shownHints = 0; concreteHintVisible = false; hintArea.hidden = false; hintButton.hidden = false; hintPanel.hidden = true; }
-function clearFeedback() { feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; concreteHintVisible = false; }
+function clearFeedback() { clearDiagnostics(); feedback.hidden = true; hintArea.hidden = true; hintPanel.hidden = true; hintButton.hidden = false; concreteHintVisible = false; }
+function clearDiagnostics() {
+  assemblyList.querySelectorAll(".is-diagnostic").forEach((block) => { block.classList.remove("is-diagnostic"); block.removeAttribute("aria-describedby"); });
+  assemblyList.querySelectorAll(".block-diagnostic-frame,.block-diagnostic-message,.diagnostic-region-note,[data-diagnostic-created]").forEach((node) => node.remove());
+  assemblyList.querySelectorAll(".diagnostic-gap").forEach((node) => node.classList.remove("diagnostic-gap"));
+  $("#diagnostic-summary").hidden = true;
+  $("#diagnostic-summary").replaceChildren();
+}
+function showDiagnostics(diagnostic) {
+  clearDiagnostics();
+  diagnostic.issues.forEach((issue) => {
+    const block = blocks().find((node) => node.dataset.blockId === issue.id);
+    if (!block) return;
+    block.classList.add("is-diagnostic");
+    const frame = document.createElement("div");
+    frame.className = "block-diagnostic-frame";
+    frame.setAttribute("aria-hidden", "true");
+    const message = document.createElement("div");
+    message.id = `diagnostic-${issue.id}`;
+    message.className = "block-diagnostic-message diagnostic-target";
+    message.tabIndex = -1;
+    message.innerHTML = `<strong class="diagnostic-number"></strong>${issue.messages.map((text) => `<p>${escapeHtml(text)}</p>`).join("")}`;
+    block.setAttribute("aria-describedby", message.id);
+    block.querySelector(":scope > .placed-copy").after(frame, message);
+  });
+  diagnostic.regions.forEach(({ parentId, region, message }) => {
+    const parent = parentId ? blocks().find((node) => node.dataset.blockId === parentId) : null;
+    const zone = !parentId ? assemblyList : region === "children" ? parent?.querySelector(":scope > .loop-body") : parent?.querySelector(`:scope > .branch-bodies > .branch-body[data-branch="${region}"]`);
+    if (!zone) return;
+    let gap = zone.querySelector(":scope > .drop-space, :scope > [data-empty]");
+    if (!gap) { gap = document.createElement("div"); gap.dataset.diagnosticCreated = "true"; zone.append(gap); }
+    gap.classList.add("diagnostic-gap");
+    const note = document.createElement("div");
+    note.className = "diagnostic-region-note diagnostic-target";
+    note.tabIndex = -1;
+    note.innerHTML = `<strong class="diagnostic-number"></strong><p>${escapeHtml(message)}</p>`;
+    gap.append(note);
+  });
+  const targets = [...assemblyList.querySelectorAll(".diagnostic-target")];
+  if (!targets.length) return;
+  const summary = $("#diagnostic-summary");
+  summary.hidden = false;
+  summary.innerHTML = '<span>赤枠は見直す箇所の目安です。ブロック自体が誤りとは限りません。</span><strong class="diagnostic-position"></strong><button type="button" class="diagnostic-next">次の確認箇所へ ↓</button>';
+  targets.forEach((target, index) => { target.querySelector(".diagnostic-number").textContent = `要確認 ${index + 1}`; });
+  let position = 0;
+  const focus = () => {
+    summary.querySelector(".diagnostic-position").textContent = `${position + 1} / ${targets.length}箇所`;
+    const target = targets[position];
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  };
+  const next = summary.querySelector(".diagnostic-next");
+  next.hidden = targets.length < 2;
+  next.addEventListener("click", () => { position = (position + 1) % targets.length; focus(); });
+  focus();
+}
 function clearResults() { resultContent.hidden = true; resultPanel.hidden = true; resultDrawerTab.hidden = true; workspace.classList.remove("is-result-open"); clearCorrespondence(); }
 function createFlowNode(id, label, className = "") {
   const node = document.createElement("div");
@@ -391,7 +446,7 @@ function renderLearningSupport() {
 }
 function highlight(line) { return escapeHtml(line).replace(/\b(int|double|String|boolean|true|false|if|else|for|switch|case|default|break)\b/g, '<span class="syntax-keyword">$1</span>').replace(/(\b\d+\b)/g, '<span class="syntax-number">$1</span>').replace(/(System|out|println)/g, '<span class="syntax-method">$1</span>'); }
 function renderResult(v, mode = "learner") { renderLearningSupport(); const result = window.AlgoEngine.execute(currentProblem, v, learningAssembly().nodes); $("#output-value").textContent = `出力結果：${result.output}`; $("#trace-caption").textContent = currentProblem.inputs.map((x) => `${x.label} = ${v[x.id]}`).join(" / "); $("#trace-head").innerHTML = `<tr>${result.traceColumns.map((x) => `<th>${escapeHtml(x)}</th>`).join("")}</tr>`; const tbody = $("#trace-body"); tbody.replaceChildren(); result.trace.forEach((row) => { const tr = document.createElement("tr"); tr.innerHTML = row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join(""); tbody.append(tr); }); $("#success-badge").textContent = mode === "instructor" ? "講師用・正解例" : mode === "completed" ? "正解済み" : "実行成功"; resultContent.hidden = false; if (mode !== "learner") { $("#success-modal").hidden = true; openResult(); return; } $("#success-kicker").textContent = "COMPLETED!"; $("#success-modal-title").textContent = "正解です！"; $("#success-modal-message").textContent = "処理の順番と配置が、正しく組み立てられています。"; $("#success-confirm-button").textContent = "結果を確認する"; $("#success-modal").hidden = false; resultDetails.open = false; }
-function run() { const v = values(); clearFeedback(); if (!isValid(v)) { showFeedback(window.AlgoEngine.inputError(currentProblem, v)); return; } if (isInstructorMode) { renderResult(v, "instructor"); return; } if (!validateAssembly()) { showFeedback(feedbackText()); return; } saveCompletion(v); renderResult(v); }
+function run() { const v = values(); clearFeedback(); clearResults(); if (!isValid(v)) { showFeedback(window.AlgoEngine.inputError(currentProblem, v)); return; } if (isInstructorMode) { renderResult(v, "instructor"); return; } const assessment = assemblyAssessment(); if (!assessment.ok) { showFeedback(feedbackText(assessment)); showDiagnostics(window.AlgoEngine.diagnose(currentProblem, snapshot())); return; } saveCompletion(v); renderResult(v); }
 function openResult() { resultPanel.hidden = false; resultDrawerTab.hidden = true; workspace.classList.add("is-result-open"); resultDetails.open = true; }
 function closeResult() { resultPanel.hidden = true; resultDrawerTab.hidden = false; workspace.classList.remove("is-result-open"); }
 function syntaxNotes(code, blockId = "") {

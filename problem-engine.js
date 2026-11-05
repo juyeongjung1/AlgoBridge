@@ -63,6 +63,105 @@ window.AlgoEngine = (() => {
     return { ok: false, reason: subset ? "missing" : "extra" };
   }
 
+  // 採点は変えず、最も近い許容解との相違を「確認箇所」として返す。
+  // 親ではなく各ブロックの直近の所属領域を比べ、深い入れ子も個別に診断する。
+  function diagnose(problem, nodes) {
+    if (assess(problem, nodes).ok) return { issues: [], regions: [] };
+    const entries = (sequence, parent = null, region = "root") => sequence.flatMap((node, index) => {
+      const entry = { node, parent, region, index };
+      return [entry, ...entries(node.children || [], entry, "children"), ...Object.entries(node.branches || {}).flatMap(([name, branch]) => entries(branch, entry, name))];
+    });
+    const actual = entries(nodes);
+    const key = (entry) => canonical(problem, entry.node.id);
+    const type = (entry) => problem.blockMap.get(entry.node.id)?.type;
+    const candidates = problem.solutions.map((layout) => {
+      const expected = entries(tree(layout)), matched = new Map(), used = new Set();
+      const sameRegion = (a, e) => a.region === e.region && (!a.parent ? !e.parent : Boolean(e.parent) && (matched.get(a.parent) === e.parent || key(a.parent) === key(e.parent)));
+      const match = (a, e) => { matched.set(a, e); used.add(e); };
+      // 同文のブロックが複数ある場合、まず配置場所が合うものを対応付ける。
+      actual.forEach((a) => {
+        const e = expected.find((e) => !used.has(e) && key(a) === key(e) && sameRegion(a, e));
+        if (e) match(a, e);
+      });
+      actual.filter((a) => !matched.has(a)).forEach((a) => {
+        const available = expected.filter((e) => !used.has(e) && key(a) === key(e));
+        const e = available.find((e) => e.node.id === a.node.id) || available[0];
+        if (e) match(a, e);
+      });
+      // 誤った条件を選んでも、中の処理まで一律に誤りとはしない。
+      // 同じ領域・種類と子の共通処理から親を対応付け、内側の真偽も比較する。
+      actual.filter((a) => !matched.has(a)).forEach((a) => {
+        const descendants = new Set(flatten([a.node]).map((node) => canonical(problem, node.id)));
+        const ranked = expected.filter((e) => !used.has(e) && type(a) === type(e)).map((e) => ({ e, score: (sameRegion(a, e) ? 2 : 0) + flatten([e.node]).filter((node) => descendants.has(canonical(problem, node.id))).length * 10 })).sort((a, b) => b.score - a.score);
+        if (ranked[0]?.score > 0 && ranked[0].score !== ranked[1]?.score) match(a, ranked[0].e);
+      });
+      const reverse = new Map([...matched].map(([a, e]) => [e, a]));
+      const issues = new Map(), regions = new Map();
+      const add = (a, kind, message) => {
+        const issue = issues.get(a.node.id) || { id: a.node.id, kinds: [], messages: [] };
+        if (!issue.kinds.includes(kind)) issue.kinds.push(kind);
+        if (!issue.messages.includes(message)) issue.messages.push(message);
+        issues.set(a.node.id, issue);
+      };
+      actual.forEach((a) => {
+        const e = matched.get(a);
+        if (!e || key(a) !== key(e)) {
+          const advice = {
+            decision: "条件の比較対象・比較方法・境界の値が、問題文に合っているかを確認しましょう。",
+            output: "出力する値・文字列・表示形式が、問題文に合っているかを確認しましょう。",
+            calculation: "計算式・使う値・結果を入れる変数が、問題文に合っているかを確認しましょう。",
+            assignment: "設定する値と、値を入れる変数が適切かを確認しましょう。",
+            input: "受け取る情報と、入力値を入れる変数が問題文に合っているかを確認しましょう。"
+          };
+          add(a, "selection", `処理の選択を確認しましょう。${advice[type(a)] || "この処理が必要か、同じ役割の処理が重複していないかを確認しましょう。"}ほかのブロックとの組み合わせも見直してください。`);
+        } else if ((!a.parent || matched.has(a.parent)) && !sameRegion(a, e)) {
+          add(a, "placement", "この処理の配置場所を確認しましょう。繰り返しの内側・外側や、条件が真・偽の経路が適切かを見直してください。");
+        }
+      });
+      const expectedRegions = expected.filter((e, i) => expected.findIndex((other) => other.parent === e.parent && other.region === e.region) === i);
+      expectedRegions.forEach((owner) => {
+        const flow = expected.filter((e) => e.parent === owner.parent && e.region === owner.region && !preparation(problem, e.node.id));
+        for (let i = 0; i < flow.length; i += 1) {
+          for (let j = i + 1; j < flow.length; j += 1) {
+            const a = reverse.get(flow[i]), b = reverse.get(flow[j]);
+            const independent = (problem.independent || []).some((group) => group.includes(key(flow[i])) && group.includes(key(flow[j])));
+            if (!independent && a && b && sameRegion(a, flow[i]) && sameRegion(b, flow[j]) && a.index > b.index) {
+              [a, b].forEach((entry) => add(entry, "order", "赤枠の処理どうしの前後関係を確認しましょう。値を準備する処理・更新する処理・出力する処理の実行順を見直してください。"));
+            }
+          }
+        }
+      });
+      // 変数を使う直接のブロックを示す。親に含まれるという理由だけでは囲まない。
+      expected.filter((e) => preparation(problem, e.node.id)).forEach((e) => {
+        const name = variable(problem, e.node.id);
+        if (!name) return;
+        const declaration = reverse.get(e);
+        const available = declaration && key(declaration) === key(e);
+        actual.filter((a) => key(a) !== key(e) && mentions(problem, { id: a.node.id }, name)).forEach((a) => {
+          let preceding = a;
+          if (available) {
+            while (preceding && (preceding.parent !== declaration.parent || preceding.region !== declaration.region)) preceding = preceding.parent;
+            if (preceding && preceding.index > declaration.index) return;
+          }
+          const message = `変数 ${name} を使う前に、この経路で入力・宣言ができているか確認してください。値を読み出す計算や出力の前には、値の設定も必要です。`;
+          add(a, "preparation", message);
+          if (available) add(declaration, "preparation", `変数 ${name} の入力・宣言の位置を確認しましょう。この変数を使う処理より前で、この経路から利用できる必要があります。`);
+        });
+      });
+      expected.filter((e) => !used.has(e)).forEach((e) => {
+        const parent = e.parent ? reverse.get(e.parent) : null;
+        if (e.parent && !parent) return;
+        const id = parent?.node.id || null, region = e.region;
+        regions.set(`${id || "root"}:${region}`, { parentId: id, region, message: "この領域に必要な処理がまだ不足しています。問題文を見直して、残りの処理を追加しましょう。" });
+      });
+      const distance = actual.filter((a) => !matched.has(a) || key(a) !== key(matched.get(a))).length + expected.filter((e) => !used.has(e) || key(reverse.get(e)) !== key(e)).length;
+      return { issues: [...issues.values()], regions: [...regions.values()], score: distance * 10 + issues.size };
+    });
+    candidates.sort((a, b) => a.score - b.score);
+    const best = candidates[0];
+    return { issues: best.issues, regions: best.regions };
+  }
+
   function inputError(problem, values) {
     for (const input of problem.inputs) {
       const raw = String(values[input.id] ?? "").trim();
@@ -236,5 +335,5 @@ window.AlgoEngine = (() => {
     return problem.execute(values);
   }
 
-  return { configure, tree, flatten, assess, javaRows, inputError, execute, list };
+  return { configure, tree, flatten, assess, diagnose, javaRows, inputError, execute, list };
 })();
