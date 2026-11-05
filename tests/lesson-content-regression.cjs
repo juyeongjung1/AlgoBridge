@@ -36,6 +36,14 @@ const required = {
 assert.equal(problems.length, 30);
 assert.equal(problems[4].id, "bmi");
 assert.equal(problems[5].id, "evenOdd");
+const bmiHints = problems[4].hints;
+assert.equal(bmiHints.length, 4);
+assert.ok(bmiHints[0].concrete.includes("変数を使う前に宣言が必要"));
+assert.ok(bmiHints[0].concrete.includes("宣言しただけでは値は入らない"));
+assert.ok(bmiHints[1].concrete.includes("100で割ってmに換算"));
+const parityCandidates = problems[5].paletteBlocks;
+assert.ok(parityCandidates.some(b=>b.id === "checkMultipleOfThree" && b.type === "decision" && b.label === "変数 number を 3 で割った余りが 0 か判定する"));
+assert.ok(!parityCandidates.some(b=>b.id === "checkDivideTwo" || (b.type === "decision" && b.label.includes("入力値を 2 で割った結果"))));
 let literalChecks = 0;
 for (const p of problems) {
   assert.ok(required[p.id], p.id);
