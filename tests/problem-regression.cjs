@@ -8,7 +8,7 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const defaults = (p) => Object.fromEntries(p.inputs.map((i) => [i.id, String(i.value)]));
 const errors = [], totals = { 問題数: 0, 配置判定: 0, 入力検証: 0, 出力比較: 0, Java比較: 0, トレース検証: 0 };
 function check(label, fn) { try { fn(); } catch (error) { errors.push(`${label}: ${error.message}`); } }
-check("序盤6問の順序", () => assert.deepEqual(Array.from(problems.slice(0, 6), (p) => p.id), ["name", "triangle", "billing", "policyFormat", "evenOdd", "bmi"]));
+check("序盤6問の順序", () => assert.deepEqual(Array.from(problems.slice(0, 6), (p) => p.id), ["name", "triangle", "billing", "policyFormat", "bmi", "evenOdd"]));
 function layout(p, nodes, expected, label) { totals.配置判定++; check(`${p.id}/${label}`, () => assert.equal(engine.assess(p, nodes).ok, expected)); }
 function same(actual, expected) { if (typeof expected === "number") assert.ok(Number.isFinite(Number(actual)) && Math.abs(Number(actual) - expected) < 1e-8, `${actual} != ${expected}`); else assert.equal(String(actual).replace(/\r\n/g, "\n"), expected); }
 const javaCases = [];

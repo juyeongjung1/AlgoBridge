@@ -4,6 +4,12 @@
 
 ## 判定・入力・出力・Javaの検証
 
+問題文の公式・ルール・出力文字列と掲載例は、Node.jsだけで確認できます。
+
+```powershell
+node tests/lesson-content-regression.cjs
+```
+
 Node.jsとJDK 17以上が必要です。`java`と`javac`にPATHを通してください。
 
 ```powershell

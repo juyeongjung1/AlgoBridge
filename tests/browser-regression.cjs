@@ -15,7 +15,7 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
   await preview.addStyleTag({content:"body {min-width:0; height:auto; overflow:visible; margin:0; padding:0; background:white;} .flowchart {background:white;}"});
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(pathToFileURL(path.join(repo, "index.html")).href);
-  assert.deepEqual(await page.evaluate(() => problems.slice(0,6).map(p=>p.id)), ["name","triangle","billing","policyFormat","evenOdd","bmi"]);
+  assert.deepEqual(await page.evaluate(() => problems.slice(0,6).map(p=>p.id)), ["name","triangle","billing","policyFormat","bmi","evenOdd"]);
   for (let index = 0; index < 30; index++) {
     const result = await page.evaluate((index) => {
       selectProblem(index); restore(window.AlgoEngine.tree(currentProblem.expected));
@@ -27,10 +27,13 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
       const widths = [...document.querySelectorAll(".flow-decision-branch .flow-node")].map(n => n.getBoundingClientRect().width);
       const codeIds = [...document.querySelectorAll("[data-code-block]")].map(n => n.dataset.codeBlock);
       const codeMissing = expectedIds().filter(id => !codeIds.includes(id));
-      return { index:index+1, id:currentProblem.id, valid, popup, open:!resultPanel.hidden, missing, codeMissing, narrowest:widths.length ? Math.min(...widths) : null, output:$("#output-value").textContent };
+      const description = $("#problem-description");
+      const descriptionOverflow = description.scrollWidth > description.clientWidth + 1;
+      const headingMatches = $("#problem-heading").textContent === `問題 ${problemNumber(index)}：${currentProblem.title}`;
+      return { index:index+1, id:currentProblem.id, valid, popup, open:!resultPanel.hidden, missing, codeMissing, descriptionOverflow, headingMatches, narrowest:widths.length ? Math.min(...widths) : null, output:$("#output-value").textContent };
     }, index);
     results.push(result);
-    if (!result.valid || !result.popup || !result.open || result.missing.length || result.codeMissing.length || (result.narrowest !== null && result.narrowest < 180)) errors.push(JSON.stringify(result));
+    if (!result.valid || !result.popup || !result.open || result.missing.length || result.codeMissing.length || result.descriptionOverflow || !result.headingMatches || (result.narrowest !== null && result.narrowest < 180)) errors.push(JSON.stringify(result));
     if ([9,14,22,27,28,29].includes(index)) {
       // 実画面と同じDOM・幅・CSSを、スクロールで切れない検証用ページに複製する。
       const diagram = await page.locator("#flowchart").evaluate(node => ({html:node.outerHTML,width:node.getBoundingClientRect().width}));
