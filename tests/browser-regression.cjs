@@ -15,6 +15,7 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
   await preview.addStyleTag({content:"body {min-width:0; height:auto; overflow:visible; margin:0; padding:0; background:white;} .flowchart {background:white;}"});
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(pathToFileURL(path.join(repo, "index.html")).href);
+  assert.deepEqual(await page.evaluate(() => problems.slice(0,6).map(p=>p.id)), ["name","triangle","billing","policyFormat","evenOdd","bmi"]);
   for (let index = 0; index < 30; index++) {
     const result = await page.evaluate((index) => {
       selectProblem(index); restore(window.AlgoEngine.tree(currentProblem.expected));
@@ -45,7 +46,7 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
     assert.ok(sizes.hidden && sizes.wide >= sizes.small);
   });
   await test("入力変更がJavaに反映され、古い結果を消す", async () => {
-    await page.evaluate(() => selectProblem(2));
+    await page.evaluate(() => selectProblem(problems.findIndex(p=>p.id === "bmi")));
     await page.locator("#input-weightKg").fill("80");
     const state = await page.evaluate(() => ({expected:expectedOutputValue.textContent, code:$("#java-code").textContent, hidden:resultPanel.hidden}));
     assert.equal(state.expected, "27.7"); assert.ok(state.code.includes("double weightKg = 80;")); assert.ok(state.hidden);

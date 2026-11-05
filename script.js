@@ -129,7 +129,7 @@ greetingProblem.code.find(([id]) => id === "elseGreeting")[0] = "setHourGuide";
 const leapProblem = problems.find((problem) => problem.id === "leap");
 leapProblem.code.find(([id]) => id === "elseCommonYear")[0] = "setCommonByDefault";
 problems.push(...window.createAdditionalProblems({ B, I, makeProblem, commonDummies }));
-const lessonOrder = ["name", "triangle", "bmi", "billing", "policyFormat", "evenOdd", "max", "eligibility", "contractStatus", "greeting", "weekday", "accidentCategory", "sum", "evenSum", "fizzBuzz", "annualPremium", "leap", "arraySum", "arrayAverage", "premiumMax", "thresholdCount", "policySearch", "firstEligible", "paymentStatusCount", "premiumStats", "swapPremium", "bubblePass", "bubbleSort", "claimReception", "coverageDecision"];
+const lessonOrder = ["name", "triangle", "billing", "policyFormat", "evenOdd", "bmi", "max", "eligibility", "contractStatus", "greeting", "weekday", "accidentCategory", "sum", "evenSum", "fizzBuzz", "annualPremium", "leap", "arraySum", "arrayAverage", "premiumMax", "thresholdCount", "policySearch", "firstEligible", "paymentStatusCount", "premiumStats", "swapPremium", "bubblePass", "bubbleSort", "claimReception", "coverageDecision"];
 problems.sort((left, right) => lessonOrder.indexOf(left.id) - lessonOrder.indexOf(right.id));
 problems.forEach(window.AlgoEngine.configure);
 
