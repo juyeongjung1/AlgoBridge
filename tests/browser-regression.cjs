@@ -69,7 +69,7 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
     assert.ok(messages.missing.includes("まだ揃って")); assert.ok(messages.extra.includes("余分")); assert.ok(messages.order.includes("実行順序"));
   });
   await test("パレットから実際にドラッグ追加→取り消し", async () => {
-    await page.evaluate(() => { selectProblem(12); history = []; resetWorkspace(false); completedProblems = {}; document.querySelector(".source-panel").scrollTop = 0; });
+    await page.evaluate(() => { selectProblem(12); history = []; resetWorkspace(false); completedProblems = {}; $("#source-scroll").scrollTop = 0; });
     await page.locator('.source-block[data-block-id="inputN"]').dragTo(page.locator("#assembly-list"), {targetPosition:{x:80,y:60}});
     assert.equal(await page.locator('#assembly-list > [data-block-id="inputN"]').count(), 1);
     assert.equal(await page.locator("#undo-button").isEnabled(), true);
@@ -110,6 +110,28 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
       $("#undo-button").click(); return {moved,count,valid:validateAssembly()};
     }); assert.ok(state.moved && state.valid); assert.equal(state.count,1);
   });
+  await test("候補クリックは案内のみ、分岐内へ実際にドロップできる", async () => {
+    const id = await page.evaluate(() => {
+      selectProblem(6);
+      const nodes = window.AlgoEngine.tree(currentProblem.expected);
+      const decision = nodes.find(node => node.branches?.true?.length);
+      const [child] = decision.branches.true.splice(0);
+      restore(nodes);
+      return child.id;
+    });
+    try {
+      const candidate = page.locator(`.source-block[data-block-id="${id}"]`);
+      await candidate.click();
+      assert.equal(await page.locator(`#assembly-list [data-block-id="${id}"]`).count(), 0);
+      assert.equal(await page.locator("#drag-guide").isVisible(), true);
+      assert.match(await page.locator("#drag-guide").innerText(), /ドラッグ.*内側の点線枠/);
+      const branch = page.locator("#assembly-list .branch-body[data-branch=true]");
+      await candidate.dragTo(branch, {timeout:8000});
+      assert.equal(await branch.locator(`:scope > [data-block-id="${id}"]`).count(), 1);
+      assert.equal(await page.locator("#drag-guide").isVisible(), false);
+      assert.equal(await page.evaluate(() => validateAssembly()), true);
+    } finally { await page.evaluate(() => selectProblem(12)); }
+  });
   await test("別解と保存済みのJava・トレースが対応", async () => {
     const state = await page.evaluate(() => {
       restore(window.AlgoEngine.tree(currentProblem.solutions[1])); run(); $("#success-confirm-button").click();
@@ -148,6 +170,84 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), "algobridge-browser-"));
       selectProblem(17);
       return {hidden:resultPanel.hidden, expected:expectedOutputValue.textContent, error:window.AlgoEngine.inputError(currentProblem, values())};
     }); assert.ok(state.hidden && state.error); assert.equal(state.expected,"-");
+  });
+  await test("問題文と次の問題ボタンは候補をスクロールしても固定", async () => {
+    const initialViewport = page.viewportSize();
+    try {
+      await page.setViewportSize({width:1280,height:800});
+      const state = await page.evaluate(() => {
+        selectProblem(29);
+        const top = (selector) => $(selector).getBoundingClientRect().top;
+        const before = [top("#problem-description"), top("#next-problem-button"), top(".source-block")];
+        const scroll = $("#source-scroll");
+        scroll.scrollTop = scroll.scrollHeight;
+        const after = [top("#problem-description"), top("#next-problem-button"), top(".source-block")];
+        const statement = $(".problem-statement");
+        const withinPanel = statement.getBoundingClientRect().bottom <= scroll.getBoundingClientRect().top;
+        return {before,after,scrolled:scroll.scrollTop > 0,withinPanel};
+      });
+      assert.ok(state.scrolled && state.withinPanel);
+      assert.deepEqual(state.before.slice(0, 2), state.after.slice(0, 2));
+      assert.ok(state.after[2] < state.before[2]);
+    } finally { await page.setViewportSize(initialViewport); }
+  });
+  await test("正解後の次ボタン強調・正解済みの問題リスト表示", async () => {
+    await page.evaluate(() => {
+      isInstructorMode = false; completedProblems = {}; renderProblem();
+      selectProblem(2);
+    });
+    const next = page.locator("#next-problem-button");
+    const item = page.locator("#problem-list-items .problem-list-item").nth(2);
+    assert.equal(await next.evaluate(n => n.classList.contains("is-next-recommended")), false);
+    await page.evaluate(() => { restore(window.AlgoEngine.tree(currentProblem.expected)); run(); });
+    assert.match(await page.locator("#success-navigation-note").innerText(), /次の問題/);
+    await page.locator("#success-confirm-button").click();
+    assert.equal(await next.evaluate(n => n.classList.contains("is-next-recommended")), true);
+    assert.equal(await page.locator("#next-problem-guide").isVisible(), true);
+    await page.locator("#problem-list-items").evaluate(n => { n.scrollTop = n.scrollHeight; });
+    await page.locator("#problem-drawer-tab").click();
+    assert.ok(await item.evaluate(n => n.classList.contains("is-completed")));
+    assert.match(await item.innerText(), /正解済み/);
+    assert.ok(await item.evaluate(n => {
+      const itemBounds = n.getBoundingClientRect(), listBounds = n.parentElement.getBoundingClientRect();
+      return itemBounds.top >= listBounds.top && itemBounds.bottom <= listBounds.bottom;
+    }));
+    await page.locator("#problem-drawer-close").click();
+    await next.click();
+    assert.match(await page.locator("#problem-heading").innerText(), /証券番号/);
+    assert.equal(await next.evaluate(n => n.classList.contains("is-next-recommended")), false);
+    await page.reload();
+    assert.ok(await item.evaluate(n => n.classList.contains("is-completed")));
+    await page.locator("#reset-completion-button").click();
+    await page.locator("#completion-reset-confirm-button").click();
+    assert.equal(await item.evaluate(n => n.classList.contains("is-completed")), false);
+    await page.evaluate(() => { selectProblem(29); restore(window.AlgoEngine.tree(currentProblem.expected)); run(); });
+    assert.equal(await next.isEnabled(), false);
+    assert.match(await page.locator("#success-navigation-note").innerText(), /問題リスト/);
+    await page.locator("#success-confirm-button").click();
+  });
+  await test("変数名の和訳と手操作入力の形が候補・配置・流れ図で一致", async () => {
+    const state = await page.evaluate(() => {
+      selectProblem(19);
+      restore(window.AlgoEngine.tree(currentProblem.expected)); run();
+      const input = '[data-block-id="inputMaxPremiums"]';
+      const id = "loopMaxPremiums";
+      return {
+        labels: [`.source-block[data-block-id="${id}"] strong`, `.placed-block[data-block-id="${id}"] strong`, `[data-flow-block="${id}"].loop-start-node`].map(selector => $(selector).textContent),
+        shapes: [
+          getComputedStyle($(".source-block" + input)).clipPath,
+          getComputedStyle($(".placed-block" + input + " > .placed-copy"), "::before").clipPath,
+          getComputedStyle($('[data-flow-block="inputMaxPremiums"]')).clipPath,
+        ],
+        existingNote: formatLabel("i（添字）"),
+        unchangedWord: formatLabel("premiumTotal"),
+      };
+    });
+    assert.ok(state.labels.every(label => label.includes("premiums（保険料一覧）") && label.includes("premium（1件分の保険料）")));
+    assert.equal(new Set(state.shapes).size, 1);
+    assert.match(state.shapes[0], /^polygon\(0(?:px|%) 12px, 100% 0(?:px|%), 100% 100%, 0(?:px|%) 100%\)$/);
+    assert.match(state.existingNote, />i<\/span>（添字）$/);
+    assert.equal(state.unchangedWord, "premiumTotal");
   });
   await browser.close();
   console.log(JSON.stringify({問題数:results.length,操作検証:checks.length,結果:results,errors,画面検証画像:temp},null,2));

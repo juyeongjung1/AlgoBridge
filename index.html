@@ -52,14 +52,28 @@
         </div>
       </div>
 
-      <div class="problem-card">
+      <div class="problem-statement" role="region" aria-label="問題文" tabindex="0">
         <p id="problem-description"></p>
-        <div class="expected-output" aria-live="polite">
-          <span>期待する出力結果</span>
-          <strong id="expected-output-value">-</strong>
+      </div>
+
+      <div id="source-scroll" class="source-scroll" role="region" aria-label="入力とブロック候補" tabindex="0">
+        <div class="problem-card">
+          <div class="expected-output" aria-live="polite">
+            <span>期待する出力結果</span>
+            <strong id="expected-output-value">-</strong>
+          </div>
+          <div id="problem-inputs" class="problem-inputs"></div>
+          <p id="input-note" class="input-note"></p>
         </div>
-        <div id="problem-inputs" class="problem-inputs"></div>
-        <p id="input-note" class="input-note"></p>
+
+        <div class="block-list-heading">
+          <h3>処理の文章ブロック</h3>
+          <span id="block-count"></span>
+        </div>
+        <p class="operation-guide">
+          必要なブロックだけを選び、組立てエリアにドラッグ＆ドロップしてください。使わないブロックも含まれています。
+        </p>
+        <div id="block-palette" class="block-palette" aria-label="使用できる文章ブロック"></div>
       </div>
 
       <div class="problem-navigation" aria-label="問題の切り替え">
@@ -68,14 +82,7 @@
         <button id="next-problem-button" class="button button-secondary" type="button">次の問題 →</button>
       </div>
 
-      <div class="block-list-heading">
-        <h3>処理の文章ブロック</h3>
-        <span id="block-count"></span>
-      </div>
-      <p class="operation-guide">
-        正解に必要なブロックだけを選び、上から実行される順に並べましょう。使わないブロックも含まれています。
-      </p>
-      <div id="block-palette" class="block-palette" aria-label="使用できる文章ブロック"></div>
+      <p id="next-problem-guide" class="next-problem-guide" hidden></p>
     </section>
 
     <div id="source-resizer" class="source-resizer" role="separator" aria-label="問題エリアの幅を調整" aria-orientation="vertical" tabindex="0"></div>
@@ -91,7 +98,7 @@
 
       <div class="build-instructions">
         <span aria-hidden="true">↕</span>
-        <p>上から実行される順に並べます。繰り返す処理は、ブロック内の点線枠へ入れてください。</p>
+        <p>上から実行される順に並べます。分岐や繰り返しに入れる処理は、内側の点線枠へドロップしてください。</p>
       </div>
 
       <div id="diagnostic-summary" class="diagnostic-summary" role="status" aria-live="polite" hidden></div>
@@ -230,6 +237,8 @@
     <small>Developed by John14</small>
   </footer>
 
+  <p id="drag-guide" class="drag-guide" role="status" hidden>候補をドラッグして、点線枠に置いてください。分岐や繰り返しには、内側の点線枠へドロップします。</p>
+
   <div id="success-modal" class="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-modal-title" hidden>
     <div class="success-modal-dialog">
       <div class="success-confetti" aria-hidden="true">
@@ -239,6 +248,7 @@
       <p id="success-kicker" class="success-kicker">COMPLETED!</p>
       <h2 id="success-modal-title">正解です！</h2>
       <p id="success-modal-message">処理の順番と繰り返しの配置が、正しく組み立てられています。</p>
+      <p id="success-navigation-note"></p>
       <div class="success-modal-actions">
         <button id="success-confirm-button" class="button button-primary" type="button">結果を確認する</button>
       </div>

@@ -4,7 +4,7 @@ const B = (id, type, label, hint = "処理の役割を考える", acceptsChildre
 const I = (id, label, value, type = "number", options = {}) => ({ id, label, value, type, ...options });
 const commonDummies = [
   B("dummyInput", "input", "計算結果を入力する", "入力する情報を考える"),
-  B("dummyOutput", "output", "入力された値をそのまま出力する", "表示する情報を考える")
+  B("dummyOutput", "output", "処理の終了を知らせる文字列「完了」を出力する", "表示する情報を考える")
 ];
 
 function makeProblem(config) {
@@ -189,9 +189,39 @@ function loadCompletions() { try { const saved = JSON.parse(localStorage.getItem
 let problemIndex = 0, currentProblem = problems[0], dragged = null, history = [], hints = [], shownHints = 0, concreteHintVisible = false, isInstructorMode = localStorage.getItem("algobridge-instructor-mode") === "true", completedProblems = loadCompletions();
 const passwordHash = "02006319c292b2880b56de90a7e8a1751713baae6cf9762a1ac8b216a50192e7";
 const sourceResizer = $("#source-resizer");
+const sourceScroll = $("#source-scroll"), dragGuide = $("#drag-guide");
+let dragGuideTimer;
+
+const variableMeanings = {
+  lastName: "氏", firstName: "名", lastKana: "氏のかな", firstKana: "名のかな", fullName: "表示用の氏名",
+  base: "底辺", height: "高さ", area: "面積", basePremium: "基本保険料", discount: "割引額", invoice: "請求額",
+  customerName: "契約者名", policyNumber: "証券番号", policyLabel: "表示用の契約情報",
+  heightCm: "身長・cm", weightKg: "体重・kg", heightM: "身長・m", bmi: "体格指数",
+  a: "1つ目の値", b: "2つ目の値", age: "年齢", contractStatus: "契約状態", number: "入力された整数",
+  hour: "時刻", greeting: "挨拶", day: "曜日の番号", weekday: "曜日名", accidentCode: "事故区分コード", reception: "受付区分",
+  n: "繰り返しの上限", i: "繰り返しの現在値", sum: "合計", max: "最大値", result: "処理の結果",
+  monthlyPremium: "月額保険料", months: "月数", totalPremium: "保険料の合計", month: "現在の月の番号",
+  year: "年", leapYear: "うるう年かどうか", premiums: "保険料一覧", premium: "1件分の保険料",
+  average: "平均", maxPremium: "最大保険料", threshold: "基準額", count: "件数", policyNumbers: "証券番号一覧",
+  policy: "1件分の証券番号", target: "探す証券番号", found: "見つかったかどうか",
+  ages: "年齢一覧", eligibleAge: "最初の申込可能年齢", statuses: "支払状態一覧", status: "1件分の支払状態", unpaidCount: "未払件数",
+  first: "1つ目の値", second: "2つ目の値", temporary: "一時保管用の値", pass: "並べ替えの周回番号",
+  paidMonths: "支払済みの月数", policyYears: "契約年数", accidentType: "事故区分"
+};
+const variablePattern = new RegExp(`\\b(?:${Object.keys(variableMeanings).join("|")})\\b`, "g");
 
 function escapeHtml(text) { return String(text).replace(/[&<>\"]/g, (x) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x])); }
-function formatLabel(text) { return escapeHtml(text).replace(/\b(sum|max|area|fullName|weekday|greeting|leapYear|lastName|firstName|lastKana|firstKana|base|height|heightCm|weightKg|heightM|bmi|number|year|hour|day|basePremium|discount|invoice|customerName|policyNumber|policyLabel|age|contractStatus|accidentCode|reception|monthlyPremium|months|totalPremium|premiums|average|maxPremium|threshold|count|policyNumbers|target|found|ages|eligibleAge|statuses|unpaidCount|first|second|temporary|paidMonths|policyYears|accidentType|a|b|n|i)\b/g, '<span class="token-variable">$1</span>').replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>').replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>'); }
+function annotateVariables(text, format = (name, note) => name + note) {
+  return text.replace(variablePattern, (name, index, label) => {
+    const hasNote = /^\s*[（(]/.test(label.slice(index + name.length));
+    return format(name, hasNote ? "" : `（${variableMeanings[name]}）`);
+  });
+}
+function formatLabel(text) {
+  return annotateVariables(escapeHtml(text), (name, note) => `<span class="token-variable">${name}</span>${note ? `<span class="token-meaning">${note}</span>` : ""}`)
+    .replace(/(\b\d+\b)/g, '<span class="token-value">$1</span>')
+    .replace(/(受け取る|宣言する|設定する|出力する|結合する|加える|判定する|繰り返す|実行する)/g, '<span class="token-verb">$1</span>');
+}
 function blocks() { return [...assemblyList.querySelectorAll(".placed-block")]; }
 function directIds(zone) { return [...zone.querySelectorAll(":scope > .placed-block")].map((x) => x.dataset.blockId); }
 function definition(id) { return [...currentProblem.correct, ...currentProblem.dummies].find((b) => b.id === id); }
@@ -203,7 +233,25 @@ function selectProblem(index) { if (index < 0 || index >= problems.length || ind
 function isCompleted(problem = currentProblem) { return Boolean(completedProblems[problem.id]); }
 function savedInputValues(problem = currentProblem) { return completedProblems[problem.id]?.inputValues || {}; }
 function saveCompletion(inputValues) { completedProblems[currentProblem.id] = { inputValues, assembly: snapshot() }; localStorage.setItem(completionStorageKey, JSON.stringify(completedProblems)); updateCompletionProgress(); }
-function updateCompletionProgress() { const count = Object.keys(completedProblems).length; const completed = isCompleted(); $("#completed-count").textContent = count; $("#completed-total").textContent = problems.length; $("#current-completion-status").textContent = `問題${problemNumber(problemIndex)}：${completed ? "正解済み" : "未挑戦"}`; $(".completion-progress").classList.toggle("is-completed", completed); $("#reset-completion-button").disabled = count === 0; }
+function updateCompletionProgress() {
+  const count = Object.keys(completedProblems).length;
+  const completed = isCompleted(), hasNext = problemIndex < problems.length - 1;
+  $("#completed-count").textContent = count;
+  $("#completed-total").textContent = problems.length;
+  $("#current-completion-status").textContent = `問題${problemNumber(problemIndex)}：${completed ? "正解済み" : "未挑戦"}`;
+  $(".completion-progress").classList.toggle("is-completed", completed);
+  $("#reset-completion-button").disabled = count === 0;
+  $("#next-problem-button").classList.toggle("is-next-recommended", completed && hasNext);
+  const guide = $("#next-problem-guide");
+  guide.hidden = !completed;
+  guide.textContent = hasNext ? "次へ進むか、問題リスト（☰）から選べます。" : "ほかの問題は、問題リスト（☰）から選べます。";
+  $("#success-navigation-note").textContent = hasNext ? "結果を確認したら、左下の「次の問題」で進めます。" : guide.textContent;
+  document.querySelectorAll("#problem-list-items .problem-list-item").forEach((button, index) => {
+    const solved = isCompleted(problems[index]);
+    button.classList.toggle("is-completed", solved);
+    button.querySelector(".problem-list-status").hidden = !solved;
+  });
+}
 
 function renderProblem() {
   $("#lesson-position").textContent = `問題 ${problemIndex + 1} / ${problems.length}`;
@@ -217,20 +265,56 @@ function renderProblem() {
   $("#block-count").textContent = `全${currentProblem.paletteBlocks.length}個（必要な処理を選択）`;
   $("#problem-list-summary").textContent = `全${problems.length}問`;
   const list = $("#problem-list-items"); list.replaceChildren();
-  problems.forEach((problem, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "problem-list-item"; button.classList.toggle("is-current", index === problemIndex); button.innerHTML = `<span class="problem-list-number">${problemNumber(index)}</span><span><strong>問題 ${problemNumber(index)}</strong><small>${escapeHtml(problem.title)} <em>${escapeHtml(problem.category)}</em></small></span>`; button.addEventListener("click", () => selectProblem(index)); list.append(button); });
-  resetWorkspace(false); renderLearningSupport(); updateExpectedOutput(); updateCompletionProgress(); if (isCompleted() && isValid(values())) renderResult(values(), "completed");
+  problems.forEach((problem, index) => {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "problem-list-item";
+    if (index === problemIndex) { button.classList.add("is-current"); button.setAttribute("aria-current", "step"); }
+    button.innerHTML = `<span class="problem-list-number">${problemNumber(index)}</span><span><strong>問題 ${problemNumber(index)}<span class="problem-list-status" hidden>✓ 正解済み</span></strong><small>${escapeHtml(problem.title)} <em>${escapeHtml(problem.category)}</em></small></span>`;
+    button.addEventListener("click", () => selectProblem(index)); list.append(button);
+  });
+  resetWorkspace(false);
+  sourceScroll.scrollTop = 0;
+  $(".problem-statement").scrollTop = 0;
+  renderLearningSupport(); updateExpectedOutput(); updateCompletionProgress(); if (isCompleted() && isValid(values())) renderResult(values(), "completed");
 }
 
 function updateExpectedOutput() { const v = values(); expectedOutputValue.textContent = isValid(v) ? currentProblem.execute(v).output : "-"; }
 function isValid(v) { return !window.AlgoEngine.inputError(currentProblem, v); }
 function shuffle(list) { return [...list].sort(() => Math.random() - .5); }
-function renderPalette() { palette.replaceChildren(); const grouped = Object.values(currentProblem.paletteBlocks.reduce((groups, block) => { (groups[block.type] ||= []).push(block); return groups; }, {})); shuffle(grouped).forEach((group) => shuffle(group).forEach((block) => { const button = document.createElement("button"); button.type = "button"; button.className = `source-block block-${block.type}`; button.draggable = true; button.dataset.blockId = block.id; button.innerHTML = `<span class="block-handle">⠿</span><span class="block-copy"><strong>${formatLabel(block.label)}</strong><small>${escapeHtml(block.hint)}</small></span>`; button.addEventListener("dragstart", (event) => { dragged = { id: block.id, source: "palette" }; event.dataTransfer?.setData("text/plain", block.id); }); button.addEventListener("dragend", endDrag); button.addEventListener("click", () => addBlock(block.id, assemblyList)); palette.append(button); })); updatePalette(); }
+function hideDragGuide() { clearTimeout(dragGuideTimer); dragGuide.hidden = true; }
+function showDragGuide(button) {
+  hideDragGuide();
+  const bounds = button.getBoundingClientRect();
+  dragGuide.style.left = `${bounds.left + 9}px`;
+  dragGuide.style.top = `${Math.max(bounds.top, sourceScroll.getBoundingClientRect().top) - 7}px`;
+  dragGuide.hidden = false;
+  dragGuideTimer = setTimeout(hideDragGuide, 5200);
+}
+function renderPalette() {
+  hideDragGuide();
+  palette.replaceChildren();
+  const grouped = Object.values(currentProblem.paletteBlocks.reduce((groups, block) => { (groups[block.type] ||= []).push(block); return groups; }, {}));
+  shuffle(grouped).forEach((group) => shuffle(group).forEach((block) => {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = `source-block block-${block.type}`;
+    button.draggable = true; button.dataset.blockId = block.id;
+    button.innerHTML = `<span class="block-handle">⠿</span><span class="block-copy"><strong>${formatLabel(block.label)}</strong><small>${escapeHtml(block.hint)}</small></span>`;
+    button.addEventListener("dragstart", (event) => {
+      hideDragGuide();
+      dragged = { id: block.id, source: "palette" };
+      event.dataTransfer?.setData("text/plain", block.id);
+    });
+    button.addEventListener("dragend", endDrag);
+    button.addEventListener("click", () => showDragGuide(button));
+    palette.append(button);
+  }));
+  updatePalette();
+}
 function zoneMessage(zone, next = false) { if (zone.classList.contains("branch-body")) return next ? "必要な場合は次の処理をここに配置" : "必要な場合はここに処理を配置"; return next ? "次の繰り返し処理をここに配置" : "ここに繰り返しの中の処理を配置"; }
 function createEmpty(zone, nested = false) { const empty = document.createElement("div"); empty.className = nested ? "nested-empty" : "empty-state"; empty.dataset.empty = "true"; empty.innerHTML = nested ? zoneMessage(zone) : '<span class="empty-icon">＋</span><strong>ここに処理を配置</strong><p>左側の一覧からドラッグ＆ドロップ</p>'; zone.append(empty); }
 function createDropSpace(zone, nested = false) { const space = document.createElement("div"); space.className = "drop-space"; space.dataset.dropSpace = "true"; space.textContent = nested ? zoneMessage(zone, true) : "次の処理をここに配置"; zone.append(space); return space; }
 function updateZoneDropSpace(zone) { const nested = zone !== assemblyList; const placedBlocks = [...zone.querySelectorAll(":scope > .placed-block")]; const hasBlocks = placedBlocks.length > 0; const lastBlock = placedBlocks.at(-1); const endsWithNestedBranch = nested && lastBlock?.classList.contains("has-branch-body"); const empty = zone.querySelector(":scope > [data-empty]"); let space = zone.querySelector(":scope > .drop-space"); if (!hasBlocks || endsWithNestedBranch) { space?.remove(); if (!hasBlocks && !empty) createEmpty(zone, nested); return; } empty?.remove(); if (!space) space = createDropSpace(zone, nested); zone.append(space); }
 function createBlock(id) { const block = definition(id), item = document.createElement("article"); item.className = `placed-block block-${block.type}`; item.draggable = true; item.dataset.blockId = id; item.innerHTML = `<div class="placed-copy"><strong>${formatLabel(block.label)}</strong><span>${escapeHtml(block.hint)}</span><button class="remove-block" type="button" aria-label="削除">×</button></div>`; item.querySelector(".remove-block").addEventListener("click", () => { saveHistory(); item.remove(); refreshAssembly(); }); item.addEventListener("dragstart", (event) => { event.stopPropagation(); dragged = { id, source: "placed", item }; event.dataTransfer?.setData("text/plain", id); }); item.addEventListener("dragend", endDrag); if (block.type === "loop" && block.acceptsChildren) { const body = document.createElement("div"); body.className = "loop-body dropzone"; body.dataset.zone = id; body.innerHTML = '<span class="loop-body-label">繰り返しの中で実行する処理</span>'; createEmpty(body, true); addDropEvents(body); item.append(body); const end = document.createElement("div"); end.className = "loop-end-symbol"; end.innerHTML = "<span>繰り返し終了</span>"; item.append(end); } const branchDefinitions = block.branches || (block.type === "decision" ? [["true", "条件が真（はい）のとき"], ["false", "条件が偽（いいえ）のとき"]] : null); if (branchDefinitions) { item.classList.add("has-branch-body"); const branches = document.createElement("div"); branches.className = "branch-bodies"; branchDefinitions.forEach(([name, label]) => { const branch = document.createElement("div"); branch.className = `branch-body branch-body-${name} dropzone`; branch.dataset.zone = `${id}:${name}`; branch.dataset.branch = name; branch.innerHTML = `<span class="branch-body-label">${label}</span>`; createEmpty(branch, true); addDropEvents(branch); branches.append(branch); }); item.append(branches); } return item; }
-function addBlock(id, zone) { if (blocks().some((x) => x.dataset.blockId === id)) return; saveHistory(); zone.querySelector(":scope > [data-empty]")?.remove(); zone.insertBefore(createBlock(id), zone.querySelector(":scope > .drop-space")); refreshAssembly(); }
 function endDrag() { dragged = null; document.querySelectorAll(".is-drag-over,.is-remove-target").forEach((zone) => zone.classList.remove("is-drag-over", "is-remove-target")); }
 function addDropEvents(zone) {
   zone.addEventListener("dragover", (event) => { if (!dragged || dragged.item?.contains(zone)) return; event.preventDefault(); event.stopPropagation(); zone.classList.add("is-drag-over"); });
@@ -328,7 +412,7 @@ function createFlowNode(id, label, className = "") {
   node.className = `flow-node ${className}`.trim();
   if (id) node.dataset.flowBlock = id;
   const text = document.createElement("span");
-  text.textContent = label;
+  text.textContent = id ? annotateVariables(label) : label;
   node.append(text);
   return node;
 }
@@ -504,7 +588,15 @@ async function instructorLogin(event) { event.preventDefault(); const value = $(
 function updateInstructor() { document.body.classList.toggle("is-instructor-mode", isInstructorMode); $("#instructor-mode-button").textContent = isInstructorMode ? "受講者モードに戻る" : "講師用"; }
 
 addDropEvents(assemblyList); addPaletteDropEvents(); renderProblem(); updateInstructor();
-problemDrawerTab.addEventListener("click", () => workspace.classList.add("is-problem-list-open")); problemDrawerClose.addEventListener("click", () => workspace.classList.remove("is-problem-list-open"));
+sourceScroll.addEventListener("scroll", hideDragGuide);
+window.addEventListener("resize", hideDragGuide);
+window.addEventListener("scroll", hideDragGuide);
+problemDrawerTab.addEventListener("click", () => {
+  hideDragGuide();
+  workspace.classList.add("is-problem-list-open");
+  $(".problem-list-item.is-current")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+});
+problemDrawerClose.addEventListener("click", () => workspace.classList.remove("is-problem-list-open"));
 sourceResizer.addEventListener("pointerdown", (event) => { const bounds = workspace.getBoundingClientRect(); const startX = event.clientX; const startWidth = $(".source-panel").getBoundingClientRect().width; sourceResizer.setPointerCapture(event.pointerId); document.body.classList.add("is-resizing"); const resize = (moveEvent) => { const maxWidth = Math.min(560, bounds.width - (workspace.classList.contains("is-result-open") ? 820 : 520)); const width = Math.max(280, Math.min(maxWidth, startWidth + moveEvent.clientX - startX)); workspace.style.setProperty("--source-panel-width", `${width}px`); }; const stop = () => { document.body.classList.remove("is-resizing"); sourceResizer.removeEventListener("pointermove", resize); sourceResizer.removeEventListener("pointerup", stop); sourceResizer.removeEventListener("pointercancel", stop); }; sourceResizer.addEventListener("pointermove", resize); sourceResizer.addEventListener("pointerup", stop); sourceResizer.addEventListener("pointercancel", stop); });
 $("#run-button").addEventListener("click", run); $("#undo-button").addEventListener("click", () => { const snap = history.pop(); if (snap) restore(snap); });
 $("#previous-problem-button").addEventListener("click", () => selectProblem(problemIndex - 1));

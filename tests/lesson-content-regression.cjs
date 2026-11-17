@@ -45,9 +45,19 @@ const parityCandidates = problems.find(p=>p.id === "evenOdd").paletteBlocks;
 assert.ok(parityCandidates.some(b=>b.id === "checkMultipleOfThree" && b.type === "decision" && b.label === "変数 number を 3 で割った余りが 0 か判定する"));
 assert.ok(!parityCandidates.some(b=>b.id === "checkDivideTwo" || (b.type === "decision" && b.label.includes("入力値を 2 で割った結果"))));
 let literalChecks = 0;
+let enhancedLoops = 0;
 for (const p of problems) {
   assert.ok(required[p.id], p.id);
   for (const text of required[p.id]) assert.ok(p.description.includes(text), `${p.id}: ${text}`);
+  for (const block of p.correct.filter(b => b.type === "loop")) {
+    const loop = p.blockCode[block.id]?.line.match(/^for \(\w+ (\w+) : (\w+)\) \{/);
+    if (!loop) continue;
+    const [, element, array] = loop;
+    assert.ok(block.label.includes(`配列 ${array} の要素を先頭から1つずつ変数 ${element} に取り出`), `${p.id}: 拡張for文の取り出し先`);
+    enhancedLoops++;
+  }
+  const rawOutputs = p.paletteBlocks.filter(b => b.type === "output" && /^入力(?:された)?値をそのまま出力する$/.test(b.label));
+  assert.ok(rawOutputs.length <= 1, `${p.id}: 意味の同じ出力候補がある`);
   for (const block of p.correct.filter(b => ["assignment", "calculation", "output"].includes(b.type))) {
     const line = p.blockCode[block.id].line;
     if (line.includes("printf")) continue;
@@ -59,6 +69,7 @@ for (const p of problems) {
     }
   }
 }
+assert.equal(enhancedLoops, 8);
 const examples = [
   ["triangle", {base:6,height:4}, "12"],
   ["billing", {basePremium:12000,discount:1500}, "10500"],
